@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de ciclo de rental — Operación logística</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0EA;
+    --panel:#FFFFFF;
+    --ink:#1C2530;
+    --ink-soft:#4B5563;
+    --steel:#2F4858;
+    --steel-2:#46697D;
+    --amber:#E2962F;
+    --amber-soft:#F6E4C4;
+    --green:#4C7A5E;
+    --green-soft:#E1EBE3;
+    --flag:#B44B36;
+    --flag-soft:#F3E0DB;
+    --line:#D7D9CE;
+    --line-strong:#B9BCAF;
+    --lock:#9CA093;
+    --lock-soft:#E7E8E1;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    padding:32px 16px 64px;
+  }
+  .sheet{max-width:960px;margin:0 auto;}
+
+  header.top{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:24px;
+    border-bottom:3px solid var(--ink);padding-bottom:18px;margin-bottom:20px;flex-wrap:wrap;
+  }
+  .brandmark{display:flex;align-items:center;gap:12px;}
+  .brandmark .mark{
+    width:40px;height:40px;background:var(--steel);border-radius:3px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .brandmark .mark svg{width:22px;height:22px;}
+  .brandmark h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:28px;margin:0;line-height:1;}
+  .brandmark p{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
+
+  /* Section shell reused across the page */
+  .section-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:20px;}
+  .section-card h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600;margin:0 0 2px;}
+  .section-card .sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+
+  /* Tabs for ingest */
+  .tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--line);}
+  .tab-btn{
+    background:none;border:none;padding:9px 4px;margin-right:20px;
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+    cursor:pointer;border-bottom:2px solid transparent;
+  }
+  .tab-btn.active{color:var(--ink);border-bottom-color:var(--steel);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .form-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;}
+  @media (max-width:820px){.form-grid{grid-template-columns:repeat(2,1fr);}}
+  .form-grid .field{margin:0;}
+  .form-grid label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
+  .form-grid input{
+    width:100%;border:1px solid var(--line-strong);border-radius:3px;padding:9px 10px;
+    font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);
+  }
+  .form-grid input:focus{outline:none;border-color:var(--steel);}
+  .ingest-actions{margin-top:14px;display:flex;align-items:center;gap:12px;}
+  .ingest-msg{font-size:12.5px;color:var(--ink-soft);}
+  .ingest-msg.ok{color:var(--green);}
+  .ingest-msg.err{color:var(--flag);}
+
+  .staged-table{margin-top:16px;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+  .staged-row{
+    display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1.3fr auto;gap:10px;align-items:center;
+    padding:9px 12px;font-size:12.5px;border-top:1px solid var(--line);background:#FAFAF7;
+  }
+  .staged-row:first-child{border-top:none;}
+  .staged-row.head{
+    font-weight:600;color:var(--ink-soft);background:#F0F1EC;font-size:11px;
+  }
+  .staged-row .rm{
+    background:none;border:none;color:var(--flag);cursor:pointer;font-size:14px;font-weight:600;
+  }
+
+  .bulk-hint{
+    font-size:12px;color:var(--ink-soft);background:#FAFAF7;border:1px solid var(--line);
+    border-radius:3px;padding:10px 12px;margin-bottom:12px;font-family:ui-monospace,monospace;
+    overflow-x:auto;white-space:pre;
+  }
+  .bulk-row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+  .bulk-row input[type="file"]{font-size:13px;}
+  textarea#bulkText{
+    width:100%;min-height:140px;border:1px solid var(--line-strong);border-radius:3px;padding:10px;
+    font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);resize:vertical;
+  }
+  textarea#bulkText:focus{outline:none;border-color:var(--steel);}
+  .bulk-summary{margin-top:12px;font-size:13px;}
+  .bulk-summary .ok-line{color:var(--green);font-weight:600;}
+  .bulk-summary .err-list{color:var(--flag);margin-top:6px;font-size:12px;}
+
+  /* Resumen de pedidos */
+  .resumen-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:2px;}
+  .resumen-count{font-size:12.5px;color:var(--ink-soft);}
+  .resumen-count strong{color:var(--ink);}
+  .resumen-list{margin-top:14px;}
+  .view-toggle{display:flex;gap:6px;margin-top:14px;}
+  .view-btn{
+    font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:20px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink-soft);cursor:pointer;
+  }
+  .view-btn.active{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .table-wrap{margin-top:14px;overflow-x:auto;border:1px solid var(--line);border-radius:3px;}
+  .resumen-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
+  .resumen-table th{
+    text-align:left;padding:10px 12px;background:#F0F1EC;color:var(--ink-soft);
+    font-weight:600;font-size:11px;white-space:nowrap;border-bottom:1px solid var(--line);
+  }
+  .resumen-table td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle;cursor:pointer;}
+  .resumen-table tr:hover td{background:#FAFAF7;}
+  .resumen-table tr:last-child td{border-bottom:none;}
+  .table-badge{
+    display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;
+  }
+  .table-badge.done{background:var(--green-soft);color:var(--green);}
+  .table-badge.pending{background:var(--lock-soft);color:var(--lock);}
+  .table-badge.partial{background:var(--amber-soft);color:#8A5D14;}
+  .table-badge-time{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px;font-weight:500;}
+  .sku-count-cell{display:flex;align-items:center;gap:8px;}
+  .table-plus{
+    width:22px;height:22px;border-radius:4px;border:1px solid var(--line-strong);background:#fff;
+    color:var(--ink);font-size:14px;font-weight:700;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .table-plus:hover{border-color:var(--steel);color:var(--steel);}
+  .pedido-row td{font-weight:500;background:#F6F7F2;}
+  .sku-row td{background:#fff;}
+  .sku-row-indent{color:var(--ink-soft);width:20px;text-align:center;}
+  .resumen-empty{font-size:13px;color:var(--ink-soft);padding:6px 0;}
+  .sync-row{display:flex;align-items:center;gap:10px;margin-top:12px;}
+  .sync-status{font-size:12px;color:var(--ink-soft);}
+
+  .filter-bar{
+    display:flex;gap:12px;align-items:end;flex-wrap:wrap;
+    background:#FAFAF7;border:1px solid var(--line);border-radius:3px;padding:14px;margin-top:14px;
+  }
+  .filter-bar .field{margin:0;min-width:150px;flex:1;}
+  .filter-bar label{display:block;font-size:11.5px;color:var(--ink-soft);margin-bottom:5px;}
+  .filter-bar input{
+    width:100%;border:1px solid var(--line-strong);border-radius:3px;padding:8px 9px;
+    font-size:13.5px;font-family:'Inter',sans-serif;color:var(--ink);
+  }
+  .filter-bar input:focus{outline:none;border-color:var(--steel);}
+
+  .pedido-ticket{border:1px solid var(--line-strong);border-radius:3px;margin-bottom:14px;background:var(--panel);overflow:hidden;}
+  .pt-header{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:14px 16px;cursor:pointer;background:#F0F1EC;
+  }
+  .pt-header:hover{background:#E9EAE3;}
+  .pt-header .rt-pedido{font-size:17px;}
+  .pt-actions{display:flex;align-items:center;gap:14px;}
+  .pt-open-btn{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;
+    border:1px solid var(--steel);background:#fff;color:var(--steel);cursor:pointer;white-space:nowrap;
+  }
+  .pt-open-btn:hover{background:var(--steel);color:#fff;}
+  .pedido-ticket.expanded .rt-chevron{transform:rotate(180deg);}
+  .pt-skus{display:none;padding:14px;}
+  .pedido-ticket.expanded .pt-skus{display:block;}
+
+  .resumen-ticket{border:1px solid var(--line);border-radius:3px;margin-bottom:10px;background:#FAFAF7;overflow:hidden;}
+  .rt-header{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:13px 16px;cursor:pointer;
+  }
+  .rt-header:hover{background:#F3F4EE;}
+  .rt-chevron{color:var(--ink-soft);font-size:12px;transition:transform .15s;flex-shrink:0;}
+  .resumen-ticket.expanded .rt-chevron{transform:rotate(180deg);}
+  .rt-info .rt-pedido{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;}
+  .rt-info .rt-pedido .rt-sku{color:var(--ink-soft);font-weight:500;font-size:13px;font-family:'Inter',sans-serif;}
+  .rt-info .rt-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .rt-dates{font-size:11px;color:var(--ink-soft);margin-top:4px;display:flex;gap:14px;flex-wrap:wrap;}
+  .rt-dates span strong{color:var(--ink);font-weight:600;}
+  .rt-stages{display:flex;gap:6px;flex-wrap:wrap;}
+  .rt-stage{
+    font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:20px;
+    background:var(--lock-soft);color:var(--lock);white-space:nowrap;
+  }
+  .rt-stage.done{background:var(--green-soft);color:var(--green);}
+
+  .rt-detail{display:none;border-top:1px solid var(--line);padding:16px;background:#fff;}
+  .resumen-ticket.expanded .rt-detail{display:block;}
+  .rt-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;}
+  @media (max-width:720px){.rt-detail-grid{grid-template-columns:repeat(2,1fr);}}
+  .rt-stage-card{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#FAFAF7;}
+  .rt-stage-thumb{
+    aspect-ratio:1/1;background:var(--lock-soft);display:flex;align-items:center;justify-content:center;
+    color:var(--lock);font-size:11px;position:relative;
+  }
+  .rt-stage-thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+  .rt-photo-count{
+    position:absolute;bottom:3px;right:3px;background:rgba(28,37,48,0.8);color:#fff;
+    font-size:10px;font-weight:600;padding:1px 6px;border-radius:20px;
+  }
+  .rt-stage-meta{padding:8px 10px;}
+  .rt-stage-meta .rsm-label{font-weight:600;font-size:12.5px;display:block;}
+  .rt-stage-meta .rsm-time{font-size:11px;color:var(--ink-soft);}
+  .rt-stage-meta .rsm-summary{font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.4;}
+  .rt-open-btn{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:3px;
+    border:1px solid var(--steel);background:var(--steel);color:#fff;cursor:pointer;
+  }
+
+  .lookup{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 22px;margin-bottom:20px;display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+  }
+  .lookup .field{margin:0;flex:1;min-width:160px;}
+  .lookup label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
+  .lookup input{
+    width:100%;border:1px solid var(--line-strong);border-radius:3px;padding:9px 10px;
+    font-size:14px;font-family:'Inter',sans-serif;color:var(--ink);
+  }
+  .lookup input:focus{outline:none;border-color:var(--steel);}
+  .lookup-actions{display:flex;gap:8px;}
+  .status-line{width:100%;font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .status-line strong{color:var(--ink);}
+
+  .empty-state{
+    background:var(--panel);border:1px dashed var(--line-strong);border-radius:var(--radius);
+    padding:36px 24px;text-align:center;color:var(--ink-soft);font-size:13.5px;
+  }
+  .empty-state strong{color:var(--ink);display:block;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;margin-bottom:6px;}
+
+  #workarea{display:none;}
+
+  .sku-section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;flex-wrap:wrap;gap:8px;}
+  .sku-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .sku-card{
+    border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:pointer;
+    background:#FAFAF7;transition:border-color .12s;
+  }
+  .sku-card:hover{border-color:var(--steel-2);}
+  .sku-card .sku-code{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:18px;}
+  .sku-card .sku-desc{font-size:12px;color:var(--ink-soft);margin:2px 0 2px;min-height:15px;}
+  .sku-card .sku-client{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;}
+  .sku-progress-bar{height:5px;border-radius:3px;background:var(--lock-soft);overflow:hidden;margin-bottom:8px;}
+  .sku-progress-fill{height:100%;background:var(--steel);border-radius:3px;}
+  .sku-progress-fill.complete{background:var(--green);}
+  .sku-card .sku-status{font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+  .sku-empty{font-size:13px;color:var(--ink-soft);padding:8px 0;}
+
+  #skuWorkspace{display:none;}
+  .workspace-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+  .back-btn{
+    background:none;border:1px solid var(--line-strong);border-radius:3px;padding:7px 14px;
+    font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-soft);cursor:pointer;
+  }
+  .workspace-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:600;}
+  .workspace-title .muted{color:var(--ink-soft);font-weight:500;font-size:15px;font-family:'Inter',sans-serif;}
+
+  .historial{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;}
+  .historial h3{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;margin:0 0 2px;}
+  .historial .sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
+  .hist-row{
+    display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:14px;
+    padding:10px 0;border-top:1px solid var(--line);cursor:pointer;
+  }
+  .hist-row:first-of-type{border-top:none;}
+  .hist-row.locked{cursor:not-allowed;}
+  .hist-thumb{
+    width:40px;height:40px;border-radius:3px;overflow:hidden;background:var(--lock-soft);
+    display:flex;align-items:center;justify-content:center;color:var(--lock);font-size:14px;
+  }
+  .hist-thumb img{width:100%;height:100%;object-fit:cover;}
+  .hist-main .name{font-weight:600;font-size:14px;}
+  .hist-main .detail{font-size:12px;color:var(--ink-soft);}
+  .retry-btn{
+    margin-top:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;
+    border:1px solid var(--flag);background:var(--flag-soft);color:var(--flag);cursor:pointer;
+  }
+  .hist-status{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+  .hist-status.done{background:var(--green-soft);color:var(--green);}
+  .hist-status.active{background:#DDE6EC;color:var(--steel);}
+  .hist-status.locked{background:var(--lock-soft);color:var(--lock);}
+
+  .tracker{display:flex;align-items:center;margin-bottom:20px;}
+  .tracker .node{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    background:none;border:none;font-family:inherit;color:inherit;padding:0;cursor:pointer;
+  }
+  .tracker .node.locked{cursor:not-allowed;}
+  .tracker .dot{
+    width:34px;height:34px;border-radius:50%;border:2px solid var(--line-strong);background:var(--panel);
+    display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;
+    font-weight:600;font-size:15px;color:var(--ink-soft);transition:border-color .15s, background .15s, color .15s;
+  }
+  .tracker .node.active .dot{border-color:var(--steel);background:var(--steel);color:#fff;}
+  .tracker .node.done .dot{border-color:var(--green);background:var(--green-soft);color:var(--green);}
+  .tracker .node.locked .dot{border-color:var(--line);background:var(--lock-soft);color:var(--lock);}
+  .tracker .label{font-size:12.5px;color:var(--ink-soft);white-space:nowrap;}
+  .tracker .node.active .label{color:var(--ink);font-weight:600;}
+  .tracker .node.locked .label{color:var(--lock);}
+  .tracker .connector{flex:1;height:2px;background:var(--line-strong);margin:0 6px;position:relative;top:-15px;}
+  .tracker .connector.filled{background:var(--green);}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:20px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:600;margin:0;}
+  .panel-head .sub{font-size:12.5px;color:var(--ink-soft);}
+  .badge{font-size:11.5px;padding:3px 9px;border-radius:20px;font-weight:600;}
+  .badge.salida{background:var(--amber-soft);color:#8A5D14;}
+  .badge.entrega{background:#DDE6EC;color:var(--steel);}
+  .badge.retiro{background:#DDE6EC;color:var(--steel-2);}
+  .badge.cd{background:var(--green-soft);color:var(--green);}
+
+  .grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:32px;}
+  @media (max-width:720px){.grid{grid-template-columns:1fr;}}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%;border:1px solid var(--line-strong);border-radius:3px;padding:9px 10px;
+    font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:none;border-color:var(--steel);}
+  .field textarea{resize:vertical;min-height:64px;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:480px){.row-2{grid-template-columns:1fr;}}
+
+  .photobox{
+    border:1.5px dashed var(--line-strong);border-radius:var(--radius);min-height:120px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;
+    padding:12px;background:#FAFAF7;
+  }
+  .photobox.has-img{border-style:solid;}
+  .photo-empty-hint{
+    grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:8px;text-align:center;padding:20px 10px;color:var(--ink-soft);
+  }
+  .photo-empty-hint .icon{width:32px;height:32px;color:var(--line-strong);}
+  .photo-empty-hint .hint{font-size:12.5px;max-width:180px;}
+  .photo-thumb{
+    position:relative;aspect-ratio:1/1;border-radius:3px;overflow:hidden;border:1px solid var(--line);
+  }
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo-thumb .rm-btn{
+    position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+    background:rgba(28,37,48,0.75);color:#fff;border:none;font-size:12px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .photo-add-tile{
+    aspect-ratio:1/1;border:1.5px dashed var(--line-strong);border-radius:3px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    cursor:pointer;color:var(--ink-soft);background:#fff;
+  }
+  .photo-add-tile:hover{border-color:var(--steel-2);color:var(--steel-2);}
+  .photo-add-tile .plus{font-size:20px;line-height:1;font-weight:600;}
+  .photo-add-tile .add-label{font-size:10.5px;text-align:center;padding:0 6px;}
+  .photo-label{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;display:flex;justify-content:space-between;}
+  input[type="file"]{display:none;}
+  .bulk-row input[type="file"]{display:inline-block;}
+
+  .actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:18px;border-top:1px solid var(--line);}
+  .save-hint{font-size:11px;color:var(--ink-soft);margin-bottom:6px;max-width:220px;}
+  .btn{
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:600;padding:10px 20px;border-radius:3px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;
+  }
+  .btn.primary{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .btn.ghost{border-color:transparent;color:var(--ink-soft);}
+  .btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .compare{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px 28px 28px;}
+  .compare h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600;margin:0 0 4px;}
+  .compare .sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;}
+  .compare-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media (max-width:720px){.compare-grid{grid-template-columns:repeat(2,1fr);}}
+  .compare-cell{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#FAFAF7;}
+  .compare-cell .thumb{
+    aspect-ratio:1/1;
+    background:#EFEFE9 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C6C9BC' stroke-width='1.4'%3E%3Crect x='3' y='5' width='18' height='14' rx='2'/%3E%3Ccircle cx='9' cy='11' r='2'/%3E%3Cpath d='M21 17l-5.5-5.5L11 16l-2-2L3 19'/%3E%3C/svg%3E") center/32px no-repeat;
+    background-size:32px;position:relative;
+  }
+  .compare-cell .thumb img{width:100%;height:100%;object-fit:cover;}
+  .compare-cell .meta{padding:8px 10px;font-size:12px;}
+  .compare-cell .meta .stage-name{font-weight:600;display:block;}
+  .compare-cell .meta .stage-status{color:var(--ink-soft);font-size:11px;}
+
+  footer.foot{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-top:28px;}
+
+  .lightbox{
+    display:none;position:fixed;inset:0;background:rgba(28,37,48,0.92);
+    z-index:999;align-items:center;justify-content:center;padding:40px;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{max-width:90vw;max-height:90vh;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.4);}
+  .lightbox-close{
+    position:absolute;top:18px;right:22px;background:none;border:none;color:#fff;
+    font-size:32px;line-height:1;cursor:pointer;
+  }
+  .lightbox-nav{
+    position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;
+    background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:28px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .lightbox-nav:hover{background:rgba(255,255,255,0.22);}
+  .lightbox-prev{left:18px;}
+  .lightbox-next{right:18px;}
+  .lightbox-counter{
+    position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+    color:#fff;font-size:12.5px;background:rgba(0,0,0,0.4);padding:4px 12px;border-radius:20px;
+  }
+  .zoomable{cursor:zoom-in;}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="top">
+    <div class="brandmark">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6">
+          <path d="M3 7l9-4 9 4-9 4-9-4z"/>
+          <path d="M3 7v10l9 4 9-4V7"/>
+          <path d="M12 11v10"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Registro de ciclo de rental</h1>
+        <p>Control fotográfico de salida, entrega y retorno · Operación logística</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ingreso de pedidos: manual o carga masiva -->
+  <section class="section-card">
+    <h3>Ingresar pedidos</h3>
+    <div class="sub">Registra pedidos y SKU de forma manual, uno a uno, o carga varios a la vez desde una planilla.</div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="manual">Ingreso manual</button>
+      <button class="tab-btn" data-tab="bulk">Carga masiva</button>
+    </div>
+
+    <div class="tab-panel active" data-tabpanel="manual">
+      <div class="form-grid">
+        <div class="field"><label>N° de pedido</label><input type="text" id="mPedido" placeholder="G-10245"></div>
+        <div class="field"><label>SKU</label><input type="text" id="mSku" placeholder="RNT-00214"></div>
+        <div class="field"><label>Descripción</label><input type="text" id="mDesc" placeholder="Generador 5kVA"></div>
+        <div class="field"><label>Cliente</label><input type="text" id="mCliente" placeholder="Nombre cliente"></div>
+        <div class="field"><label>Dirección</label><input type="text" id="mDireccion" placeholder="Dirección de entrega"></div>
+      </div>
+      <div class="ingest-actions">
+        <button class="btn primary" id="mAddLineBtn">+ Agregar línea</button>
+        <span class="ingest-msg" id="mMsg"></span>
+      </div>
+
+      <div id="mStagedWrap" style="display:none;">
+        <div class="staged-table" id="mStagedTable"></div>
+        <div class="ingest-actions">
+          <button class="btn primary" id="mSubmitBtn">Cargar pedido (0 líneas)</button>
+          <button class="btn ghost" id="mClearBtn">Vaciar líneas</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" data-tabpanel="bulk">
+      <div class="bulk-hint">Numero de pedido, sku, descripción, cliente, dirección
+G-10245, RNT-00214, Generador 5kVA, Cliente Ejemplo SPA, Av. Siempre Viva 123
+G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva 123</div>
+      <div class="bulk-row">
+        <input type="file" id="csvFile" accept=".csv,text/csv,text/plain">
+        <span class="ingest-msg">o pega los datos directamente abajo (separados por coma, punto y coma o tabulador)</span>
+      </div>
+      <textarea id="bulkText" placeholder="Pega aquí las filas, incluyendo el encabezado…"></textarea>
+      <div class="ingest-actions">
+        <button class="btn primary" id="bulkProcessBtn">Procesar carga</button>
+      </div>
+      <div class="bulk-summary" id="bulkSummary"></div>
+    </div>
+  </section>
+
+  <!-- Historial general de pedidos -->
+  <section class="section-card">
+    <div class="resumen-top">
+      <h3 style="margin-bottom:0;">Historial general</h3>
+      <span class="resumen-count" id="resumenCount">0 pedidos · 0 SKU</span>
+    </div>
+    <div class="sub">Revisa el estado, las fechas y las fotos de cualquier SKU sin necesidad de buscar el pedido. Toca un pedido para ver sus SKU, y un SKU para ver el detalle.</div>
+    <div class="sync-row">
+      <button class="btn ghost" id="syncBtn">↻ Actualizar desde Google Sheets</button>
+      <span class="sync-status" id="syncStatus"></span>
+    </div>
+
+    <div class="filter-bar">
+      <div class="field"><label>N° de pedido</label><input type="text" id="fPedido" placeholder="Filtrar por pedido"></div>
+      <div class="field"><label>Cliente</label><input type="text" id="fCliente" placeholder="Filtrar por cliente"></div>
+      <div class="field"><label>Fecha desde</label><input type="date" id="fDesde"></div>
+      <div class="field"><label>Fecha hasta</label><input type="date" id="fHasta"></div>
+      <button class="btn ghost" id="fClearBtn">Limpiar filtros</button>
+    </div>
+
+    <div class="view-toggle">
+      <button class="view-btn active" data-view="cards">▦ Tarjetas</button>
+      <button class="view-btn" data-view="table">▤ Tabla</button>
+    </div>
+
+    <div class="resumen-list" id="resumenList"></div>
+    <div class="table-wrap" id="resumenTableWrap" style="display:none;">
+      <table class="resumen-table" id="resumenTable"></table>
+    </div>
+  </section>
+
+  <!-- Continuar un pedido existente -->
+  <div class="lookup">
+    <div class="field">
+      <label>N° de pedido</label>
+      <input type="text" id="pedidoInput" placeholder="Ej. G-10245">
+    </div>
+    <div class="lookup-actions">
+      <button class="btn primary" id="searchBtn">Buscar pedido</button>
+      <button class="btn ghost" id="resetBtn">Salir del pedido</button>
+    </div>
+    <div class="status-line" id="statusLine">Busca un pedido ya ingresado para continuar su flujo por SKU.</div>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <strong>Sin pedido cargado</strong>
+    Ingresa un pedido arriba (manual o carga masiva) y luego búscalo aquí para trabajar sus SKU.
+  </div>
+
+  <div id="workarea">
+
+    <section class="section-card" id="skuSection">
+      <div class="sku-section-head"><h3>SKU del pedido</h3></div>
+      <div class="sub">Cada SKU avanza su flujo de forma independiente. Toca uno para abrir su registro fotográfico.</div>
+      <div class="sku-grid" id="skuGrid"></div>
+    </section>
+
+    <section id="skuWorkspace">
+      <div class="workspace-head">
+        <button class="back-btn" id="backToSkusBtn">← Volver a SKU del pedido</button>
+        <div class="workspace-title" id="workspaceTitle"></div>
+      </div>
+
+      <section class="historial">
+        <h3>Historial del SKU</h3>
+        <div class="sub">Toca una etapa completada o la etapa activa para ver o editar sus datos.</div>
+        <div id="histList"></div>
+      </section>
+
+      <nav class="tracker" id="tracker">
+        <button class="node" data-stage="0"><span class="dot">1</span><span class="label">Salida</span></button>
+        <div class="connector" data-conn="0"></div>
+        <button class="node" data-stage="1"><span class="dot">2</span><span class="label">Entrega conforme</span></button>
+        <div class="connector" data-conn="1"></div>
+        <button class="node" data-stage="2"><span class="dot">3</span><span class="label">Retiro</span></button>
+        <div class="connector" data-conn="2"></div>
+        <button class="node" data-stage="3"><span class="dot">4</span><span class="label">Llegada a CD</span></button>
+      </nav>
+
+      <section class="panel stage-panel" data-panel="0">
+        <div class="panel-head">
+          <div><h2>Salida de bodega</h2><div class="sub">Registro del estado del producto antes de despachar al cliente</div></div>
+          <span class="badge salida">Etapa 1</span>
+        </div>
+        <div class="grid">
+          <div>
+            <div class="field"><label>Descripción del producto</label>
+              <input type="text" data-field="descripcion" placeholder="Ej. Generador eléctrico 5kVA"></div>
+            <div class="row-2">
+              <div class="field"><label>Cliente</label>
+                <input type="text" data-field="cliente" placeholder="Nombre del cliente"></div>
+              <div class="field"><label>Responsable de despacho</label>
+                <input type="text" data-field="responsable" placeholder="Nombre operador"></div>
+            </div>
+            <div class="field"><label>Dirección de entrega</label>
+              <input type="text" data-field="direccion" placeholder="Dirección del sitio de entrega"></div>
+            <div class="field"><label>Fecha y hora de salida</label>
+              <input type="datetime-local" data-field="fecha"></div>
+            <div class="field"><label>Observaciones de salida</label>
+              <textarea data-field="obs" placeholder="Estado general, accesorios incluidos, detalles previos…"></textarea></div>
+          </div>
+          <div>
+            <div class="photo-label"><span>Fotos de salida</span><span>Al menos 1 requerida</span></div>
+            <div class="photobox" data-photo="0"></div>
+            <input type="file" accept="image/*" capture="environment" multiple data-input="0">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" disabled>← Anterior</button>
+          <div style="text-align:right;">
+            <div class="save-hint">Se guarda en Sheets/Drive y se envía el correo automáticamente</div>
+            <button class="btn primary" data-save="0">Actualizar estado →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel stage-panel" data-panel="1" style="display:none;">
+        <div class="panel-head">
+          <div><h2>Entrega conforme</h2><div class="sub">Registro en el lugar de entrega, con el cliente presente</div></div>
+          <span class="badge entrega">Etapa 2</span>
+        </div>
+        <div class="grid">
+          <div>
+            <div class="row-2">
+              <div class="field"><label>Nombre de quien recibe</label>
+                <input type="text" data-field="receptor" placeholder="Nombre completo"></div>
+              <div class="field"><label>Fecha y hora de entrega</label>
+                <input type="datetime-local" data-field="fecha"></div>
+            </div>
+            <div class="field"><label>Estado del producto al llegar</label>
+              <select data-field="estado">
+                <option>Conforme — sin observaciones</option>
+                <option>Conforme — con observaciones menores</option>
+                <option>No conforme — reportar incidencia</option>
+              </select></div>
+            <div class="field"><label>Observaciones de entrega</label>
+              <textarea data-field="obs" placeholder="Detalles señalados por el cliente, condiciones del sitio…"></textarea></div>
+          </div>
+          <div>
+            <div class="photo-label"><span>Fotos en sitio de entrega</span><span>Al menos 1 requerida</span></div>
+            <div class="photobox" data-photo="1"></div>
+            <input type="file" accept="image/*" capture="environment" multiple data-input="1">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" data-prev="0">← Anterior</button>
+          <div style="text-align:right;">
+            <div class="save-hint">Se guarda en Sheets/Drive y se envía el correo automáticamente</div>
+            <button class="btn primary" data-save="1">Actualizar estado →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel stage-panel" data-panel="2" style="display:none;">
+        <div class="panel-head">
+          <div><h2>Retiro del producto</h2><div class="sub">Registro al momento de retirar el producto desde el cliente</div></div>
+          <span class="badge retiro">Etapa 3</span>
+        </div>
+        <div class="grid">
+          <div>
+            <div class="row-2">
+              <div class="field"><label>Responsable de retiro</label>
+                <input type="text" data-field="responsable" placeholder="Nombre operador"></div>
+              <div class="field"><label>Fecha y hora de retiro</label>
+                <input type="datetime-local" data-field="fecha"></div>
+            </div>
+            <div class="field"><label>Estado del producto al retirar</label>
+              <select data-field="estado">
+                <option>Bueno — igual que en la entrega</option>
+                <option>Con detalle — desgaste normal</option>
+                <option>Dañado — requiere revisión</option>
+              </select></div>
+            <div class="field"><label>Observaciones de retiro</label>
+              <textarea data-field="obs" placeholder="Diferencias notadas frente al estado de entrega…"></textarea></div>
+          </div>
+          <div>
+            <div class="photo-label"><span>Fotos al retirar</span><span>Al menos 1 requerida</span></div>
+            <div class="photobox" data-photo="2"></div>
+            <input type="file" accept="image/*" capture="environment" multiple data-input="2">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" data-prev="1">← Anterior</button>
+          <div style="text-align:right;">
+            <div class="save-hint">Se guarda en Sheets/Drive y se envía el correo automáticamente</div>
+            <button class="btn primary" data-save="2">Actualizar estado →</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel stage-panel" data-panel="3" style="display:none;">
+        <div class="panel-head">
+          <div><h2>Llegada a centro de distribución</h2><div class="sub">Cierre del ciclo: verificación del estado al volver a bodega</div></div>
+          <span class="badge cd">Etapa 4</span>
+        </div>
+        <div class="grid">
+          <div>
+            <div class="row-2">
+              <div class="field"><label>Responsable de recepción en CD</label>
+                <input type="text" data-field="responsable" placeholder="Nombre operador"></div>
+              <div class="field"><label>Fecha y hora de llegada</label>
+                <input type="datetime-local" data-field="fecha"></div>
+            </div>
+            <div class="field"><label>Estado final del producto</label>
+              <select data-field="estado">
+                <option>Igual que en la salida</option>
+                <option>Con desgaste normal</option>
+                <option>Con daño — abrir incidencia</option>
+              </select></div>
+            <div class="field"><label>Diferencias respecto al estado de salida</label>
+              <textarea data-field="obs" placeholder="Comparar contra la foto de salida; describir cualquier diferencia…"></textarea></div>
+          </div>
+          <div>
+            <div class="photo-label"><span>Fotos de llegada a CD</span><span>Al menos 1 requerida</span></div>
+            <div class="photobox" data-photo="3"></div>
+            <input type="file" accept="image/*" capture="environment" multiple data-input="3">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" data-prev="2">← Anterior</button>
+          <div style="text-align:right;">
+            <div class="save-hint">Se guarda en Sheets/Drive y se envía el correo automáticamente</div>
+            <button class="btn primary" data-save="3">Actualizar estado y cerrar ciclo ✓</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="compare">
+        <h3>Comparación visual del ciclo</h3>
+        <div class="sub">Revisa las cuatro fotos lado a lado para detectar diferencias de estado</div>
+        <div class="compare-grid">
+          <div class="compare-cell"><div class="thumb" data-thumb="0"></div><div class="meta"><span class="stage-name">Salida</span><span class="stage-status" data-status="0">Sin foto</span></div></div>
+          <div class="compare-cell"><div class="thumb" data-thumb="1"></div><div class="meta"><span class="stage-name">Entrega</span><span class="stage-status" data-status="1">Sin foto</span></div></div>
+          <div class="compare-cell"><div class="thumb" data-thumb="2"></div><div class="meta"><span class="stage-name">Retiro</span><span class="stage-status" data-status="2">Sin foto</span></div></div>
+          <div class="compare-cell"><div class="thumb" data-thumb="3"></div><div class="meta"><span class="stage-name">Llegada CD</span><span class="stage-status" data-status="3">Sin foto</span></div></div>
+        </div>
+      </section>
+
+    </section>
+
+  </div>
+
+  <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar">×</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior">‹</button>
+  <img id="lightboxImg" src="" alt="Foto ampliada">
+  <button class="lightbox-nav lightbox-next" id="lightboxNext" type="button" aria-label="Foto siguiente">›</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
+
+<script>
+  const stageNames = ["Salida","Entrega conforme","Retiro","Llegada a CD"];
+  const ticketLabels = ["Entregado","Recibido","Retirado","Llegada CD"];
+  const orders = {};
+  let currentOrder = null;
+  let currentSkuCode = null;
+  let currentStage = 0;
+
+  const pedidoInput = document.getElementById('pedidoInput');
+  const statusLine = document.getElementById('statusLine');
+  const emptyState = document.getElementById('emptyState');
+  const workarea = document.getElementById('workarea');
+  const skuSection = document.getElementById('skuSection');
+  const skuGrid = document.getElementById('skuGrid');
+  const skuWorkspace = document.getElementById('skuWorkspace');
+  const histList = document.getElementById('histList');
+  const workspaceTitle = document.getElementById('workspaceTitle');
+  const resumenList = document.getElementById('resumenList');
+  const resumenCount = document.getElementById('resumenCount');
+
+  /* ---------- Data model ---------- */
+
+  function blankStages(){
+    return [0,1,2,3].map(()=>({done:false, photos:[], fields:{}, timestamp:null}));
+  }
+  function blankOrder(pedido){ return { pedido, skus:{} }; }
+
+  function ingestRow(pedido, sku, descripcion, cliente, direccion){
+    pedido = (pedido||'').trim();
+    sku = (sku||'').trim();
+    if(!pedido || !sku) return false;
+    if(!orders[pedido]) orders[pedido] = blankOrder(pedido);
+    const order = orders[pedido];
+    if(!order.skus[sku]) order.skus[sku] = { skuCode:sku, stages:blankStages(), base:{}, createdAt:new Date().toISOString() };
+    const rec = order.skus[sku];
+    rec.base = {
+      descripcion: descripcion || rec.base.descripcion || '',
+      cliente: cliente || rec.base.cliente || '',
+      direccion: direccion || rec.base.direccion || ''
+    };
+    if(!rec.stages[0].done){
+      if(rec.base.descripcion) rec.stages[0].fields.descripcion = rec.base.descripcion;
+      if(rec.base.cliente) rec.stages[0].fields.cliente = rec.base.cliente;
+      if(rec.base.direccion) rec.stages[0].fields.direccion = rec.base.direccion;
+    }
+    return true;
+  }
+
+  function activeSku(){
+    return (currentOrder && currentSkuCode) ? currentOrder.skus[currentSkuCode] : null;
+  }
+
+  function isReachable(i){
+    const sku = activeSku();
+    if(!sku) return false;
+    return i === 0 || sku.stages[i-1].done;
+  }
+
+  function firstOpenStage(){
+    const sku = activeSku();
+    const idx = sku.stages.findIndex(s => !s.done);
+    return idx === -1 ? 3 : idx;
+  }
+
+  function escapeAttr(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function formatDate(d){
+    if(!d) return '';
+    const dt = new Date(d);
+    const dd = String(dt.getDate()).padStart(2,'0');
+    const mm = String(dt.getMonth()+1).padStart(2,'0');
+    const yyyy = dt.getFullYear();
+    const hh = String(dt.getHours()).padStart(2,'0');
+    const min = String(dt.getMinutes()).padStart(2,'0');
+    return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
+  }
+
+  /* ---------- Tabs ---------- */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.tab-panel[data-tabpanel="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  /* ---------- Manual ingest (líneas en espera antes de cargar) ---------- */
+  const mMsg = document.getElementById('mMsg');
+  const mStagedWrap = document.getElementById('mStagedWrap');
+  const mStagedTable = document.getElementById('mStagedTable');
+  const mSubmitBtn = document.getElementById('mSubmitBtn');
+  let manualStaged = [];
+
+  function renderStaged(){
+    if(manualStaged.length === 0){
+      mStagedWrap.style.display = 'none';
+      return;
+    }
+    mStagedWrap.style.display = 'block';
+    mSubmitBtn.textContent = `Cargar pedido (${manualStaged.length} línea${manualStaged.length===1?'':'s'})`;
+    mStagedTable.innerHTML = `
+      <div class="staged-row head"><span>Pedido</span><span>SKU</span><span>Descripción</span><span>Cliente</span><span>Dirección</span><span></span></div>
+      ${manualStaged.map((r,i)=>`
+        <div class="staged-row">
+          <span>${r.pedido}</span><span>${r.sku}</span><span>${r.desc||'—'}</span><span>${r.cliente||'—'}</span><span>${r.direccion||'—'}</span>
+          <button class="rm" type="button" data-rm="${i}" title="Quitar línea">×</button>
+        </div>`).join('')}
+    `;
+    mStagedTable.querySelectorAll('[data-rm]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        manualStaged.splice(parseInt(btn.dataset.rm),1);
+        renderStaged();
+      });
+    });
+  }
+
+  document.getElementById('mAddLineBtn').addEventListener('click', ()=>{
+    const pedido = document.getElementById('mPedido').value.trim();
+    const sku = document.getElementById('mSku').value.trim();
+    const desc = document.getElementById('mDesc').value.trim();
+    const cliente = document.getElementById('mCliente').value.trim();
+    const direccion = document.getElementById('mDireccion').value.trim();
+    if(!pedido || !sku){
+      mMsg.textContent = 'N° de pedido y SKU son obligatorios.';
+      mMsg.className = 'ingest-msg err';
+      return;
+    }
+    manualStaged.push({pedido, sku, desc, cliente, direccion});
+    mMsg.textContent = `Línea agregada. Sigue agregando o presiona "Cargar pedido" cuando termines.`;
+    mMsg.className = 'ingest-msg ok';
+    document.getElementById('mSku').value = '';
+    document.getElementById('mDesc').value = '';
+    document.getElementById('mCliente').value = '';
+    document.getElementById('mDireccion').value = '';
+    document.getElementById('mSku').focus();
+    renderStaged();
+  });
+
+  document.getElementById('mClearBtn').addEventListener('click', ()=>{
+    manualStaged = [];
+    renderStaged();
+    mMsg.textContent = 'Líneas en espera eliminadas.';
+    mMsg.className = 'ingest-msg';
+  });
+
+  mSubmitBtn.addEventListener('click', ()=>{
+    if(manualStaged.length === 0) return;
+    const pedidosSet = new Set();
+    manualStaged.forEach(r=>{
+      ingestRow(r.pedido, r.sku, r.desc, r.cliente, r.direccion);
+      pedidosSet.add(r.pedido);
+    });
+    mMsg.textContent = `${manualStaged.length} SKU cargados en ${pedidosSet.size} pedido(s).`;
+    mMsg.className = 'ingest-msg ok';
+    manualStaged = [];
+    renderStaged();
+    document.getElementById('mPedido').value = '';
+    if(currentOrder && pedidosSet.has(currentOrder.pedido)) renderSkuList();
+    renderResumen();
+  });
+
+  /* ---------- Bulk ingest ---------- */
+  const bulkText = document.getElementById('bulkText');
+  const bulkSummary = document.getElementById('bulkSummary');
+
+  document.getElementById('csvFile').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev)=>{ bulkText.value = ev.target.result; };
+    reader.readAsText(file, 'UTF-8');
+  });
+
+  function normalizeHeader(s){
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  }
+
+  function splitLine(line, delim){
+    return line.split(delim).map(c=>c.trim().replace(/^"(.*)"$/,'$1'));
+  }
+
+  document.getElementById('bulkProcessBtn').addEventListener('click', ()=>{
+    const raw = bulkText.value.trim();
+    if(!raw){
+      bulkSummary.innerHTML = '<span class="err-list">Pega o carga datos antes de procesar.</span>';
+      return;
+    }
+    const lines = raw.split(/\r?\n/).filter(l => l.trim() !== '');
+    if(lines.length < 2){
+      bulkSummary.innerHTML = '<span class="err-list">Incluye un encabezado y al menos una fila de datos.</span>';
+      return;
+    }
+    const headerLine = lines[0];
+    const delim = headerLine.includes('\t') ? '\t' : (headerLine.includes(';') ? ';' : ',');
+    const headers = splitLine(headerLine, delim).map(normalizeHeader);
+
+    const colIndex = {pedido:-1, sku:-1, descripcion:-1, cliente:-1, direccion:-1};
+    headers.forEach((h,i)=>{
+      if(h.includes('pedido')) colIndex.pedido = i;
+      else if(h.includes('sku') || h.includes('codigo')) colIndex.sku = i;
+      else if(h.includes('descripcion')) colIndex.descripcion = i;
+      else if(h.includes('cliente')) colIndex.cliente = i;
+      else if(h.includes('direccion')) colIndex.direccion = i;
+    });
+    if(colIndex.pedido === -1 || colIndex.sku === -1){
+      bulkSummary.innerHTML = '<span class="err-list">No se encontraron columnas de "N° de pedido" y "SKU" en el encabezado. Revisa el formato de ejemplo.</span>';
+      return;
+    }
+
+    let ok = 0;
+    const errors = [];
+    const pedidosSet = new Set();
+    for(let i=1;i<lines.length;i++){
+      const cells = splitLine(lines[i], delim);
+      const pedido = cells[colIndex.pedido] || '';
+      const sku = cells[colIndex.sku] || '';
+      const descripcion = colIndex.descripcion > -1 ? cells[colIndex.descripcion] || '' : '';
+      const cliente = colIndex.cliente > -1 ? cells[colIndex.cliente] || '' : '';
+      const direccion = colIndex.direccion > -1 ? cells[colIndex.direccion] || '' : '';
+      if(!pedido.trim() || !sku.trim()){
+        errors.push(`Fila ${i+1}: falta N° de pedido o SKU.`);
+        continue;
+      }
+      ingestRow(pedido, sku, descripcion, cliente, direccion);
+      pedidosSet.add(pedido.trim());
+      ok++;
+    }
+
+    bulkSummary.innerHTML = `<div class="ok-line">${ok} SKU cargados en ${pedidosSet.size} pedido(s).</div>` +
+      (errors.length ? `<div class="err-list">${errors.join('<br>')}</div>` : '');
+
+    if(ok > 0) bulkText.value = '';
+
+    if(currentOrder && pedidosSet.has(currentOrder.pedido)) renderSkuList();
+    renderResumen();
+  });
+
+  /* ---------- Historial general ---------- */
+
+  const expandedTickets = new Set();
+  const expandedPedidos = new Set();
+  const fPedido = document.getElementById('fPedido');
+  const fCliente = document.getElementById('fCliente');
+  const fDesde = document.getElementById('fDesde');
+  const fHasta = document.getElementById('fHasta');
+
+  [fPedido, fCliente, fDesde, fHasta].forEach(el=>{
+    el.addEventListener('input', renderResumen);
+  });
+  document.getElementById('fClearBtn').addEventListener('click', ()=>{
+    fPedido.value = ''; fCliente.value = ''; fDesde.value = ''; fHasta.value = '';
+    renderResumen();
+  });
+
+  function passesFilter(pedido, sku){
+    const pFilter = fPedido.value.trim().toLowerCase();
+    const cFilter = fCliente.value.trim().toLowerCase();
+    if(pFilter && !pedido.toLowerCase().includes(pFilter)) return false;
+    if(cFilter && !(sku.base.cliente||'').toLowerCase().includes(cFilter)) return false;
+    if(fDesde.value){
+      if(!sku.createdAt || new Date(sku.createdAt) < new Date(fDesde.value+'T00:00:00')) return false;
+    }
+    if(fHasta.value){
+      if(!sku.createdAt || new Date(sku.createdAt) > new Date(fHasta.value+'T23:59:59')) return false;
+    }
+    return true;
+  }
+
+  function stageSummary(st){
+    if(!st.done) return 'Pendiente de completar';
+    const who = st.fields.responsable || st.fields.receptor || '';
+    const estado = st.fields.estado || '';
+    const bits = [who, estado].filter(Boolean).join(' · ');
+    let out = bits || 'Sin datos adicionales';
+    if(st.fields.obs) out += ` — ${st.fields.obs.length > 70 ? st.fields.obs.slice(0,70)+'…' : st.fields.obs}`;
+    return out;
+  }
+
+  /* ---------- Vista tabla / tarjetas ---------- */
+  const resumenTableWrap = document.getElementById('resumenTableWrap');
+  const resumenTable = document.getElementById('resumenTable');
+  let currentView = 'cards';
+
+  document.querySelectorAll('.view-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      currentView = btn.dataset.view;
+      resumenList.style.display = currentView === 'cards' ? 'block' : 'none';
+      resumenTableWrap.style.display = currentView === 'table' ? 'block' : 'none';
+      renderResumen();
+    });
+  });
+
+  function renderResumenTable(){
+    const pedidos = Object.keys(orders);
+    const rowsHtml = [];
+
+    pedidos.forEach(pedido=>{
+      const order = orders[pedido];
+      const codes = Object.keys(order.skus);
+      const matchingCodes = codes.filter(code => passesFilter(pedido, order.skus[code]));
+      if(matchingCodes.length === 0) return;
+
+      const expanded = expandedPedidos.has(pedido);
+      const fechas = matchingCodes.map(code => order.skus[code].createdAt).filter(Boolean).sort();
+      const creado = fechas.length ? formatDate(fechas[0]) : '—';
+
+      const pedidoStageCells = ticketLabels.map((label,i)=>{
+        const total = matchingCodes.length;
+        const completos = matchingCodes.filter(code => order.skus[code].stages[i].done).length;
+        if(completos === 0) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge pending">Pendiente</span></td>`;
+        if(completos === total) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge done">✓ Completo</span></td>`;
+        return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge partial">${completos}/${total}</span></td>`;
+      }).join('');
+
+      rowsHtml.push(`
+        <tr class="pedido-row">
+          <td data-toggle="${escapeAttr(pedido)}"><strong>${pedido}</strong></td>
+          <td class="sku-count-cell">
+            <button class="table-plus" type="button" data-toggle-btn="${escapeAttr(pedido)}" aria-label="Ver SKU del pedido">${expanded ? '−' : '+'}</button>
+            <span>${matchingCodes.length}</span>
+          </td>
+          <td data-toggle="${escapeAttr(pedido)}">${creado}</td>
+          ${pedidoStageCells}
+        </tr>
+      `);
+
+      if(expanded){
+        matchingCodes.forEach(code=>{
+          const sku = order.skus[code];
+          const creadoSku = sku.createdAt ? formatDate(sku.createdAt) : '—';
+          const cells = ticketLabels.map((label,i)=>{
+            const st = sku.stages[i];
+            if(st.done){
+              return `<td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><span class="table-badge done">✓ Completo<span class="table-badge-time">${formatDate(st.timestamp)}</span></span></td>`;
+            }
+            return `<td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><span class="table-badge pending">Pendiente</span></td>`;
+          }).join('');
+          rowsHtml.push(`
+            <tr class="sku-row" data-open="${escapeAttr(pedido)}::${escapeAttr(code)}">
+              <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}" class="sku-row-indent">↳</td>
+              <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><strong>${code}</strong></td>
+              <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}">${creadoSku}</td>
+              ${cells}
+            </tr>
+          `);
+        });
+      }
+    });
+
+    if(rowsHtml.length === 0){
+      resumenTable.innerHTML = '<tr><td style="padding:20px;color:var(--ink-soft);">Ningún registro coincide con los filtros aplicados.</td></tr>';
+      return;
+    }
+
+    resumenTable.innerHTML = `
+      <tr>
+        <th>Pedido</th><th>SKU</th><th>Fecha de creación</th>
+        <th>Despacho (Salida)</th><th>Recepción</th><th>Retiro</th><th>Recepción CD</th>
+      </tr>
+      ${rowsHtml.join('')}
+    `;
+
+    resumenTable.querySelectorAll('[data-toggle-btn]').forEach(btn=>{
+      btn.addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        const pedido = btn.dataset.toggleBtn;
+        if(expandedPedidos.has(pedido)) expandedPedidos.delete(pedido);
+        else expandedPedidos.add(pedido);
+        renderResumenTable();
+      });
+    });
+    resumenTable.querySelectorAll('[data-toggle]').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const pedido = td.dataset.toggle;
+        if(expandedPedidos.has(pedido)) expandedPedidos.delete(pedido);
+        else expandedPedidos.add(pedido);
+        renderResumenTable();
+      });
+    });
+    resumenTable.querySelectorAll('[data-open]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const [pedido, code] = el.dataset.open.split('::');
+        openPedidoSku(pedido, code);
+      });
+    });
+  }
+
+  function renderResumen(){
+    const pedidos = Object.keys(orders);
+    let skuTotal = 0, skuComplete = 0, pedidosMatched = 0;
+    resumenList.innerHTML = '';
+
+    if(pedidos.length === 0){
+      resumenList.innerHTML = '<div class="resumen-empty">Aún no hay pedidos registrados. Usa el ingreso manual o la carga masiva de arriba.</div>';
+      resumenCount.textContent = '0 pedidos · 0 SKU';
+      resumenTable.innerHTML = '<tr><td style="padding:20px;color:var(--ink-soft);">Aún no hay pedidos registrados.</td></tr>';
+      return;
+    }
+
+    pedidos.forEach(pedido=>{
+      const order = orders[pedido];
+      const codes = Object.keys(order.skus);
+      const matchingCodes = codes.filter(code => passesFilter(pedido, order.skus[code]));
+
+      codes.forEach(code=>{
+        skuTotal++;
+        if(skuProgress(order.skus[code]) === 4) skuComplete++;
+      });
+
+      if(matchingCodes.length === 0) return;
+      pedidosMatched++;
+
+      const pedidoExpanded = expandedPedidos.has(pedido);
+      const pedidoCard = document.createElement('div');
+      pedidoCard.className = 'pedido-ticket' + (pedidoExpanded ? ' expanded' : '');
+
+      const completos = matchingCodes.filter(code => skuProgress(order.skus[code]) === 4).length;
+      const clientes = [...new Set(matchingCodes.map(code => order.skus[code].base.cliente).filter(Boolean))];
+
+      pedidoCard.innerHTML = `
+        <div class="pt-header">
+          <div class="rt-info">
+            <div class="rt-pedido">Pedido ${pedido}</div>
+            <div class="rt-meta">${matchingCodes.length} SKU · ${completos} completos${clientes.length ? ' · ' + clientes.join(', ') : ''}</div>
+          </div>
+          <div class="pt-actions">
+            <button class="pt-open-btn" type="button" title="Ver y gestionar todos los SKU de este pedido">Ver SKU del pedido →</button>
+            <span class="rt-chevron">▾</span>
+          </div>
+        </div>
+        <div class="pt-skus"></div>
+      `;
+      pedidoCard.querySelector('.pt-header').addEventListener('click', ()=>{
+        if(expandedPedidos.has(pedido)) expandedPedidos.delete(pedido);
+        else expandedPedidos.add(pedido);
+        renderResumen();
+      });
+      pedidoCard.querySelector('.pt-open-btn').addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        openPedidoSkuList(pedido);
+      });
+
+      const skusWrap = pedidoCard.querySelector('.pt-skus');
+      matchingCodes.forEach(code=>{
+        const sku = order.skus[code];
+        const key = pedido + '::' + code;
+        const expanded = expandedTickets.has(key);
+        const ticket = document.createElement('div');
+        ticket.className = 'resumen-ticket' + (expanded ? ' expanded' : '');
+        const metaBits = [sku.base.cliente, sku.base.direccion].filter(Boolean).join(' · ');
+        const creado = sku.createdAt ? formatDate(sku.createdAt) : '—';
+
+        ticket.innerHTML = `
+          <div class="rt-header">
+            <div class="rt-info">
+              <div class="rt-pedido">SKU ${code}</div>
+              <div class="rt-meta">${metaBits || 'Sin cliente/dirección registrados'}</div>
+              <div class="rt-dates">
+                <span>Creado: <strong>${creado}</strong></span>
+                ${ticketLabels.map((label,i)=>`<span>${label}: <strong>${sku.stages[i].done ? formatDate(sku.stages[i].timestamp) : 'Pendiente'}</strong></span>`).join('')}
+              </div>
+            </div>
+            <div class="rt-stages">
+              ${ticketLabels.map((label,i)=>`<span class="rt-stage ${sku.stages[i].done ? 'done' : ''}">${sku.stages[i].done ? '✓ ' : ''}${label}</span>`).join('')}
+            </div>
+            <span class="rt-chevron">▾</span>
+          </div>
+          <div class="rt-detail">
+            <div class="rt-detail-grid">
+              ${ticketLabels.map((label,i)=>{
+                const st = sku.stages[i];
+                return `
+                  <div class="rt-stage-card">
+                    <div class="rt-stage-thumb">${st.photos.length ? `<img class="zoomable" src="${escapeAttr(st.photos[0])}" data-src="${escapeAttr(st.photos[0])}" data-gallery="${escapeAttr(pedido)}::${escapeAttr(code)}::${i}" alt="Foto ${label}">` : 'Sin foto'}${st.photos.length > 1 ? `<span class="rt-photo-count">+${st.photos.length - 1}</span>` : ''}</div>
+                    <div class="rt-stage-meta">
+                      <span class="rsm-label">${label}</span>
+                      <span class="rsm-time">${st.done ? formatDate(st.timestamp) : 'Pendiente'}</span>
+                      <div class="rsm-summary">${stageSummary(st)}</div>
+                    </div>
+                  </div>`;
+              }).join('')}
+            </div>
+            <button class="rt-open-btn" data-open="${key}">Gestionar este SKU →</button>
+          </div>
+        `;
+
+        ticket.querySelector('.rt-header').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          if(expandedTickets.has(key)) expandedTickets.delete(key);
+          else expandedTickets.add(key);
+          renderResumen();
+        });
+        ticket.querySelector('.rt-open-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          openPedidoSku(pedido, code);
+        });
+        skusWrap.appendChild(ticket);
+      });
+
+      resumenList.appendChild(pedidoCard);
+    });
+
+    if(pedidosMatched === 0){
+      resumenList.innerHTML = '<div class="resumen-empty">Ningún registro coincide con los filtros aplicados.</div>';
+    }
+
+    resumenCount.innerHTML = `<strong>${pedidos.length}</strong> pedidos · <strong>${skuTotal}</strong> SKU · <strong>${skuComplete}</strong> completos`;
+    renderResumenTable();
+  }
+
+  function openPedidoSku(pedido, code){
+    currentOrder = orders[pedido];
+    emptyState.style.display = 'none';
+    workarea.style.display = 'block';
+    pedidoInput.value = pedido;
+    statusLine.innerHTML = `Pedido <strong>${pedido}</strong> cargado — ${Object.keys(currentOrder.skus).length} SKU registrados.`;
+    openSku(code);
+    window.scrollTo({top: skuWorkspace.offsetTop - 20, behavior:'smooth'});
+  }
+
+  // Abre el pedido mostrando la lista de todos sus SKU (sin entrar directo a uno)
+  function openPedidoSkuList(pedido){
+    currentOrder = orders[pedido];
+    emptyState.style.display = 'none';
+    workarea.style.display = 'block';
+    skuWorkspace.style.display = 'none';
+    skuSection.style.display = 'block';
+    pedidoInput.value = pedido;
+    statusLine.innerHTML = `Pedido <strong>${pedido}</strong> cargado — ${Object.keys(currentOrder.skus).length} SKU registrados.`;
+    renderSkuList();
+    window.scrollTo({top: skuSection.offsetTop - 20, behavior:'smooth'});
+  }
+
+  /* ---------- SKU list ---------- */
+
+  function skuProgress(sku){
+    return sku.stages.filter(s=>s.done).length;
+  }
+
+  function renderSkuList(){
+    const codes = Object.keys(currentOrder.skus);
+    if(codes.length === 0){
+      skuGrid.innerHTML = '<div class="sku-empty">Aún no hay SKU registrados en este pedido. Agrégalos arriba en "Ingresar pedidos".</div>';
+      return;
+    }
+    skuGrid.innerHTML = '';
+    codes.forEach(code=>{
+      const sku = currentOrder.skus[code];
+      const done = skuProgress(sku);
+      const complete = done === 4;
+      const card = document.createElement('div');
+      card.className = 'sku-card';
+      card.innerHTML = `
+        <div class="sku-code">${code}</div>
+        <div class="sku-desc">${sku.base.descripcion || 'Sin descripción'}</div>
+        <div class="sku-client">${sku.base.cliente || ''}</div>
+        <div class="sku-progress-bar"><div class="sku-progress-fill ${complete ? 'complete' : ''}" style="width:${(done/4)*100}%"></div></div>
+        <div class="sku-status">${complete ? 'Ciclo completo' : done === 0 ? 'Sin iniciar' : `${done} de 4 etapas`}</div>
+      `;
+      card.addEventListener('click', ()=> openSku(code));
+      skuGrid.appendChild(card);
+    });
+  }
+
+  function openSku(code){
+    currentSkuCode = code;
+    skuSection.style.display = 'none';
+    skuWorkspace.style.display = 'block';
+    workspaceTitle.innerHTML = `${code} <span class="muted">· Pedido ${currentOrder.pedido}</span>`;
+    renderAll();
+  }
+
+  function backToSkuList(){
+    currentSkuCode = null;
+    skuWorkspace.style.display = 'none';
+    skuSection.style.display = 'block';
+    renderSkuList();
+  }
+
+  /* ---------- SKU workspace ---------- */
+
+  function renderTracker(){
+    const sku = activeSku();
+    document.querySelectorAll('.tracker .node').forEach(node=>{
+      const i = parseInt(node.dataset.stage);
+      const st = sku.stages[i];
+      const reachable = isReachable(i);
+      node.classList.toggle('done', st.done);
+      node.classList.toggle('active', i === currentStage && !st.done);
+      node.classList.toggle('locked', !reachable);
+      const dot = node.querySelector('.dot');
+      dot.textContent = st.done ? '✓' : (!reachable ? '🔒' : String(i+1));
+    });
+    document.querySelectorAll('.connector').forEach(c=>{
+      const i = parseInt(c.dataset.conn);
+      c.classList.toggle('filled', sku.stages[i].done);
+    });
+  }
+
+  function renderHistorial(){
+    const sku = activeSku();
+    histList.innerHTML = '';
+    sku.stages.forEach((st,i)=>{
+      const reachable = isReachable(i);
+      const row = document.createElement('div');
+      row.className = 'hist-row' + (!reachable ? ' locked' : '');
+      let statusLabel, statusClass, detail, retryHtml = '';
+      if(st.done){
+        statusLabel = 'Completado'; statusClass = 'done';
+        const who = st.fields.responsable || st.fields.receptor || '';
+        let syncTxt = '';
+        if(st.syncStatus === 'sending') syncTxt = ' · ⏳ enviando a Sheets/Drive…';
+        else if(st.syncStatus === 'ok') syncTxt = ' · ✓ guardado y correo enviado';
+        else if(st.syncStatus === 'error') syncTxt = ' · ⚠️ ' + (st.syncError || 'no se pudo sincronizar');
+        detail = formatDate(st.timestamp) + (who ? ' · '+who : '') + syncTxt;
+        if(st.syncStatus === 'error') retryHtml = `<button class="retry-btn" type="button" data-retry="${i}">Reintentar</button>`;
+      } else if(reachable){
+        statusLabel = 'En curso'; statusClass = 'active';
+        detail = 'Pendiente de completar y agregar foto';
+      } else {
+        statusLabel = 'Bloqueada'; statusClass = 'locked';
+        detail = 'Se habilita al completar la etapa anterior';
+      }
+      row.innerHTML = `
+        <div class="hist-thumb">${st.photos.length ? `<img class="zoomable" src="${escapeAttr(st.photos[0])}" data-src="${escapeAttr(st.photos[0])}" data-gallery="${escapeAttr(currentOrder.pedido)}::${escapeAttr(sku.skuCode)}::${i}">` : (reachable ? '' : '🔒')}</div>
+        <div class="hist-main"><div class="name">${stageNames[i]}</div><div class="detail">${detail}</div>${retryHtml}</div>
+        <div class="hist-status ${statusClass}">${statusLabel}</div>
+      `;
+      if(retryHtml){
+        row.querySelector('.retry-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          retrySync(currentOrder.pedido, sku, i);
+        });
+      }
+      if(reachable) row.addEventListener('click', ()=> showStage(i));
+      histList.appendChild(row);
+    });
+  }
+
+  function renderPhotoboxes(){
+    const sku = activeSku();
+    for(let i=0;i<4;i++){
+      const box = document.querySelector(`.photobox[data-photo="${i}"]`);
+      const st = sku.stages[i];
+      box.classList.toggle('has-img', st.photos.length > 0);
+      box.innerHTML = '';
+      if(st.photos.length === 0){
+        box.innerHTML += `
+          <div class="photo-empty-hint">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5.5-5.5L11 16l-2-2L3 19"/></svg>
+            <span class="hint">Toca "+" para tomar o subir fotos</span>
+          </div>`;
+      }
+      st.photos.forEach((src, pIdx)=>{
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb';
+        thumb.innerHTML = `<img class="zoomable" src="${escapeAttr(src)}" data-src="${escapeAttr(src)}" data-gallery="${escapeAttr(currentOrder.pedido)}::${escapeAttr(sku.skuCode)}::${i}" alt="Foto ${stageNames[i]} ${pIdx+1}"><button class="rm-btn" type="button" title="Eliminar foto">×</button>`;
+        thumb.querySelector('.rm-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          st.photos.splice(pIdx,1);
+          renderPhotoboxes();
+          renderHistorial();
+          renderResumen();
+        });
+        box.appendChild(thumb);
+      });
+      const addTile = document.createElement('div');
+      addTile.className = 'photo-add-tile';
+      addTile.innerHTML = `<span class="plus">+</span><span class="add-label">Agregar foto</span>`;
+      addTile.addEventListener('click', ()=> document.querySelector(`input[data-input="${i}"]`).click());
+      box.appendChild(addTile);
+
+      const thumb = document.querySelector(`.compare [data-thumb="${i}"]`);
+      const statusEl = document.querySelector(`.compare [data-status="${i}"]`);
+      if(st.photos.length > 0){
+        thumb.innerHTML = `<img class="zoomable" src="${escapeAttr(st.photos[0])}" data-src="${escapeAttr(st.photos[0])}" data-gallery="${escapeAttr(currentOrder.pedido)}::${escapeAttr(sku.skuCode)}::${i}" alt="Foto ${stageNames[i]}">`;
+        statusEl.textContent = st.photos.length === 1 ? 'Foto cargada' : `${st.photos.length} fotos cargadas`;
+      } else {
+        thumb.innerHTML = '';
+        statusEl.textContent = 'Sin foto';
+      }
+      const panel = document.querySelector(`.stage-panel[data-panel="${i}"]`);
+      panel.querySelectorAll('[data-field]').forEach(el=>{
+        el.value = st.fields[el.dataset.field] || '';
+      });
+    }
+  }
+
+  function showStage(i){
+    if(!isReachable(i)) return;
+    document.querySelectorAll('.stage-panel').forEach(p=>{
+      p.style.display = (parseInt(p.dataset.panel) === i) ? 'block' : 'none';
+    });
+    currentStage = i;
+    renderTracker();
+  }
+
+  function renderAll(){
+    renderTracker();
+    renderHistorial();
+    renderPhotoboxes();
+    showStage(firstOpenStage());
+  }
+
+  /* ---------- Order lookup ---------- */
+
+  function loadOrder(pedido){
+    if(!orders[pedido]){
+      statusLine.innerHTML = `No se encontró el pedido <strong>${pedido}</strong>. Ingrésalo primero arriba (manual o carga masiva).`;
+      return;
+    }
+    currentOrder = orders[pedido];
+    emptyState.style.display = 'none';
+    workarea.style.display = 'block';
+    skuWorkspace.style.display = 'none';
+    skuSection.style.display = 'block';
+    const skuCount = Object.keys(currentOrder.skus).length;
+    statusLine.innerHTML = `Pedido <strong>${pedido}</strong> cargado — ${skuCount} SKU registrados.`;
+    renderSkuList();
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', ()=>{
+    const pedido = pedidoInput.value.trim();
+    if(!pedido){ statusLine.textContent = 'Ingresa un N° de pedido antes de buscar.'; return; }
+    loadOrder(pedido);
+  });
+  pedidoInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') document.getElementById('searchBtn').click(); });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    currentOrder = null;
+    currentSkuCode = null;
+    pedidoInput.value = '';
+    workarea.style.display = 'none';
+    emptyState.style.display = 'block';
+    statusLine.textContent = 'Busca un pedido ya ingresado para continuar su flujo por SKU.';
+    pedidoInput.focus();
+  });
+
+  document.getElementById('backToSkusBtn').addEventListener('click', backToSkuList);
+
+  document.querySelectorAll('.tracker .node').forEach(node=>{
+    node.addEventListener('click', ()=> showStage(parseInt(node.dataset.stage)));
+  });
+  document.querySelectorAll('[data-prev]').forEach(btn=>{
+    btn.addEventListener('click', ()=> showStage(parseInt(btn.dataset.prev)));
+  });
+
+  document.querySelectorAll('[data-save]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const i = parseInt(btn.dataset.save);
+      const sku = activeSku();
+      const st = sku.stages[i];
+      if(st.photos.length === 0){
+        alert('Agrega al menos una foto de esta etapa antes de continuar.');
+        return;
+      }
+      const panel = document.querySelector(`.stage-panel[data-panel="${i}"]`);
+      panel.querySelectorAll('[data-field]').forEach(el=>{
+        st.fields[el.dataset.field] = el.value;
+      });
+      st.done = true;
+      st.timestamp = new Date().toISOString();
+      st.syncStatus = 'sending';
+      renderAll();
+      renderResumen();
+      if(i < 3) showStage(i+1);
+
+      await sendStageToBackend(currentOrder.pedido, sku, i);
+      renderAll();
+      renderResumen();
+    });
+  });
+
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTqMBHZ4e6H4ZT55uSpEiW_Q8lZMMLr5p2XgU8nX5q0tIYVKT9llUQJGPbtushBovL/exec';
+
+  async function sendStageToBackend(pedido, sku, stageIndex){
+    const label = ticketLabels[stageIndex];
+    const st = sku.stages[stageIndex];
+    const payload = {
+      pedido: pedido,
+      sku: sku.skuCode,
+      etapa: label,
+      descripcion: sku.base.descripcion || st.fields.descripcion || '',
+      cliente: sku.base.cliente || '',
+      direccion: sku.base.direccion || '',
+      responsable: st.fields.responsable || st.fields.receptor || '',
+      estado: st.fields.estado || '',
+      observaciones: st.fields.obs || '',
+      photos: st.photos
+    };
+
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(data.ok){
+        st.syncStatus = 'ok';
+        st.emailSentAt = new Date().toISOString();
+      } else {
+        st.syncStatus = 'error';
+        st.syncError = data.error || 'Error desconocido del servidor.';
+      }
+    } catch(err){
+      st.syncStatus = 'error';
+      st.syncError = 'No se pudo contactar el servidor. Revisa tu conexión.';
+    }
+  }
+
+  async function retrySync(pedido, sku, stageIndex){
+    const sku2 = currentOrder.skus[sku.skuCode];
+    sku2.stages[stageIndex].syncStatus = 'sending';
+    renderAll();
+    renderResumen();
+    await sendStageToBackend(pedido, sku2, stageIndex);
+    renderAll();
+    renderResumen();
+  }
+
+  renderResumen();
+
+  /* ---------- Cargar historial real desde Google Sheets ---------- */
+  const syncStatusEl = document.getElementById('syncStatus');
+
+  function driveThumb(url){
+    const m = url.match(/\/file\/d\/([^/]+)\//);
+    return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800` : url;
+  }
+
+  function parseFechaDDMMYYYY(s){
+    if(!s) return new Date().toISOString();
+    const [datePart, timePart] = s.split(' ');
+    const [dd,mm,yyyy] = (datePart||'').split('-').map(Number);
+    const [hh,min] = (timePart||'00:00').split(':').map(Number);
+    if(!dd || !mm || !yyyy) return new Date().toISOString();
+    return new Date(yyyy, mm-1, dd, hh||0, min||0).toISOString();
+  }
+
+  function mergeStageFromBackend(sku, stageIndex, label, remoteStage){
+    if(!remoteStage) return;
+    const st = sku.stages[stageIndex];
+    if(st.done || !remoteStage.done) return; // no pisar datos locales ya cargados en esta sesión
+    st.done = true;
+    st.timestamp = parseFechaDDMMYYYY(remoteStage.fecha);
+    st.fields.responsable = remoteStage.responsable || '';
+    st.fields.receptor = remoteStage.responsable || '';
+    st.fields.estado = remoteStage.estado || '';
+    st.fields.obs = remoteStage.observaciones || '';
+    st.photos = (remoteStage.urls || []).map(driveThumb);
+    st.syncStatus = 'ok';
+  }
+
+  async function loadHistorialFromBackend(){
+    syncStatusEl.textContent = 'Cargando…';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=historial');
+      const data = await res.json();
+      if(!data.ok){ syncStatusEl.textContent = 'No se pudo leer el historial.'; return; }
+
+      Object.keys(data.pedidos).forEach(pedido=>{
+        if(!orders[pedido]) orders[pedido] = blankOrder(pedido);
+        const order = orders[pedido];
+        Object.keys(data.pedidos[pedido]).forEach(code=>{
+          const remoteSku = data.pedidos[pedido][code];
+          if(!order.skus[code]){
+            order.skus[code] = { skuCode: code, stages: blankStages(), base:{}, createdAt: null };
+          }
+          const sku = order.skus[code];
+          sku.base.cliente = sku.base.cliente || remoteSku.cliente || '';
+          sku.base.direccion = sku.base.direccion || remoteSku.direccion || '';
+          sku.base.descripcion = sku.base.descripcion || remoteSku.descripcion || '';
+          ticketLabels.forEach((label,i)=> mergeStageFromBackend(sku, i, label, remoteSku.stages[label]));
+        });
+      });
+
+      renderResumen();
+      if(currentOrder) renderSkuList();
+      const now = new Date();
+      syncStatusEl.textContent = `Sincronizado ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    } catch(err){
+      syncStatusEl.textContent = 'No se pudo conectar con Google Sheets.';
+    }
+  }
+
+  document.getElementById('syncBtn').addEventListener('click', loadHistorialFromBackend);
+  loadHistorialFromBackend();
+
+  document.querySelectorAll('input[type="file"][data-input]').forEach(input=>{
+    input.addEventListener('change', (e)=>{
+      const idx = parseInt(input.dataset.input);
+      const files = Array.from(e.target.files || []);
+      const sku = activeSku();
+      if(files.length === 0 || !sku) return;
+      let pending = files.length;
+      files.forEach(file=>{
+        const reader = new FileReader();
+        reader.onload = (ev)=>{
+          sku.stages[idx].photos.push(ev.target.result);
+          pending--;
+          if(pending === 0){
+            renderPhotoboxes();
+            renderHistorial();
+            renderResumen();
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+      input.value = '';
+    });
+  });
+
+  /* ---------- Lightbox: ver fotos en pantalla completa, con navegación ---------- */
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCounter = document.getElementById('lightboxCounter');
+  const lightboxPrev = document.getElementById('lightboxPrev');
+  const lightboxNext = document.getElementById('lightboxNext');
+  let lightboxPhotos = [];
+  let lightboxIndex = 0;
+
+  function renderLightbox(){
+    lightboxImg.src = lightboxPhotos[lightboxIndex] || '';
+    const multi = lightboxPhotos.length > 1;
+    lightboxCounter.textContent = multi ? `${lightboxIndex + 1} / ${lightboxPhotos.length}` : '';
+    lightboxCounter.style.display = multi ? 'block' : 'none';
+    lightboxPrev.style.display = multi ? 'flex' : 'none';
+    lightboxNext.style.display = multi ? 'flex' : 'none';
+  }
+
+  window.openLightbox = function(photos, startIndex){
+    lightboxPhotos = (Array.isArray(photos) ? photos : [photos]).filter(Boolean);
+    if(lightboxPhotos.length === 0) return;
+    lightboxIndex = Math.max(0, Math.min(startIndex || 0, lightboxPhotos.length - 1));
+    renderLightbox();
+    lightbox.classList.add('open');
+  };
+
+  function closeLightbox(){ lightbox.classList.remove('open'); }
+  document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', (ev)=>{ if(ev.target === lightbox) closeLightbox(); });
+  lightboxPrev.addEventListener('click', ()=>{ lightboxIndex = (lightboxIndex - 1 + lightboxPhotos.length) % lightboxPhotos.length; renderLightbox(); });
+  lightboxNext.addEventListener('click', ()=>{ lightboxIndex = (lightboxIndex + 1) % lightboxPhotos.length; renderLightbox(); });
+  document.addEventListener('keydown', (ev)=>{
+    if(!lightbox.classList.contains('open')) return;
+    if(ev.key === 'Escape') closeLightbox();
+    if(ev.key === 'ArrowLeft') lightboxPrev.click();
+    if(ev.key === 'ArrowRight') lightboxNext.click();
+  });
+
+  // Delegado (fase de captura): cualquier imagen .zoomable abre el visor antes de que
+  // el clic llegue a la fila/tarjeta que la contiene (evita navegar o expandir de más)
+  document.addEventListener('click', (ev)=>{
+    const img = ev.target.closest('.zoomable');
+    if(!img) return;
+    ev.stopPropagation();
+    let photos = [img.dataset.src || img.src];
+    let idx = 0;
+    const galleryKey = img.dataset.gallery;
+    if(galleryKey){
+      const [pedido, code, stageIdxStr] = galleryKey.split('::');
+      const sku = orders[pedido] && orders[pedido].skus[code];
+      if(sku){
+        const arr = sku.stages[parseInt(stageIdxStr)].photos;
+        if(arr && arr.length){
+          photos = arr;
+          const found = arr.indexOf(img.dataset.src);
+          idx = found >= 0 ? found : 0;
+        }
+      }
+    }
+    openLightbox(photos, idx);
+  }, true);
+</script>
+</body>
+</html>
