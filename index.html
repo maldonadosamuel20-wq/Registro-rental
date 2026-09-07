@@ -51,6 +51,50 @@
   .brandmark p{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
 
   /* Section shell reused across the page */
+  .flow-buttons{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px;}
+  @media (max-width:600px){.flow-buttons{grid-template-columns:1fr;}}
+
+  .flow-substats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+  @media (max-width:600px){.flow-substats{grid-template-columns:1fr;}}
+  .substat-group{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .substat-box{
+    background:var(--panel);border:1px solid var(--line);border-radius:4px;
+    padding:10px 14px;display:flex;flex-direction:column;gap:2px;
+    cursor:pointer;text-align:left;width:100%;font-family:inherit;transition:border-color .15s, background .15s;
+  }
+  .substat-box:hover{border-color:var(--steel-2);}
+  .substat-box.active{background:var(--steel);border-color:var(--steel);}
+  .substat-box.active .substat-label{color:#D8E0E5;}
+  .substat-box.active .substat-count{color:#fff;}
+  .substat-label{font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+  .substat-count{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;color:var(--ink);}
+  .flow-btn{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:var(--radius);
+    border:1.5px solid var(--line-strong);background:var(--panel);cursor:pointer;text-align:left;
+    font-family:'Inter',sans-serif;transition:border-color .12s,background .12s;
+  }
+  .flow-btn:hover{border-color:var(--steel);}
+  .flow-btn.active{background:var(--steel);border-color:var(--steel);}
+  .flow-btn.active .flow-title,.flow-btn.active .flow-icon{color:#fff;}
+  .flow-btn.active .flow-sub{color:#D8E0E5;}
+  .flow-btn.active .flow-count{background:rgba(255,255,255,0.25);color:#fff;}
+  .flow-icon{font-size:24px;line-height:1;}
+  .flow-text{flex:1;display:flex;flex-direction:column;gap:2px;}
+  .flow-title{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:17px;color:var(--ink);}
+  .flow-sub{font-size:11.5px;color:var(--ink-soft);}
+  .flow-count{
+    font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;
+    background:var(--lock-soft);color:var(--ink-soft);border-radius:20px;padding:4px 12px;min-width:20px;text-align:center;
+  }
+  .flow-active-banner{
+    display:none;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--amber-soft);border:1px solid #E2B25A;border-radius:3px;padding:10px 16px;margin-bottom:14px;font-size:12.5px;color:#8A5D14;
+  }
+  .flow-active-banner.show{display:flex;}
+  .flow-active-banner button{
+    background:none;border:1px solid #8A5D14;color:#8A5D14;border-radius:20px;padding:4px 12px;font-size:11.5px;cursor:pointer;font-weight:600;
+  }
+
   .section-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:20px;}
   .section-card h3{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:600;margin:0 0 2px;}
   .section-card .sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
@@ -66,7 +110,7 @@
   .tab-panel{display:none;}
   .tab-panel.active{display:block;}
 
-  .form-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:end;}
+  .form-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end;}
   @media (max-width:820px){.form-grid{grid-template-columns:repeat(2,1fr);}}
   .form-grid .field{margin:0;}
   .form-grid label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;}
@@ -82,7 +126,7 @@
 
   .staged-table{margin-top:16px;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
   .staged-row{
-    display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1.3fr auto;gap:10px;align-items:center;
+    display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1.3fr 0.8fr auto;gap:10px;align-items:center;
     padding:9px 12px;font-size:12.5px;border-top:1px solid var(--line);background:#FAFAF7;
   }
   .staged-row:first-child{border-top:none;}
@@ -135,6 +179,7 @@
   .table-badge.done{background:var(--green-soft);color:var(--green);}
   .table-badge.pending{background:var(--lock-soft);color:var(--lock);}
   .table-badge.partial{background:var(--amber-soft);color:#8A5D14;}
+  .table-badge.na{background:transparent;color:var(--line-strong);}
   .table-badge-time{display:block;font-size:10px;color:var(--ink-soft);margin-top:2px;font-weight:500;}
   .sku-count-cell{display:flex;align-items:center;gap:8px;}
   .table-plus{
@@ -164,17 +209,34 @@
 
   .pedido-ticket{border:1px solid var(--line-strong);border-radius:3px;margin-bottom:14px;background:var(--panel);overflow:hidden;}
   .pt-header{
-    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
     padding:14px 16px;cursor:pointer;background:#F0F1EC;
   }
   .pt-header:hover{background:#E9EAE3;}
   .pt-header .rt-pedido{font-size:17px;}
-  .pt-actions{display:flex;align-items:center;gap:14px;}
+  .pt-header-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;}
+  .pt-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;}
   .pt-open-btn{
     font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;
     border:1px solid var(--steel);background:#fff;color:var(--steel);cursor:pointer;white-space:nowrap;
   }
   .pt-open-btn:hover{background:var(--steel);color:#fff;}
+  .pt-edit-btn{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;white-space:nowrap;
+  }
+  .pt-edit-btn:hover{border-color:var(--steel);color:var(--steel);}
+  .pt-delete-btn{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:20px;
+    border:1px solid var(--flag);background:var(--flag-soft);color:var(--flag);cursor:pointer;white-space:nowrap;
+  }
+  .pt-delete-btn:hover{background:var(--flag);color:#fff;}
+  .pt-progress-row{display:flex;align-items:center;gap:8px;margin-top:7px;max-width:320px;}
+  .pt-progress-bar{flex:1;height:6px;border-radius:3px;background:var(--lock-soft);overflow:hidden;}
+  .pt-progress-fill{height:100%;background:var(--steel);border-radius:3px;transition:width .2s;}
+  .pt-progress-pct{font-size:11px;color:var(--ink-soft);font-weight:600;white-space:nowrap;}
+  .pt-status{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;white-space:nowrap;}
+  .pt-status.done{background:var(--green-soft);color:var(--green);}
+  .pt-status.pending{background:var(--amber-soft);color:#8A5D14;}
   .pedido-ticket.expanded .rt-chevron{transform:rotate(180deg);}
   .pt-skus{display:none;padding:14px;}
   .pedido-ticket.expanded .pt-skus{display:block;}
@@ -187,8 +249,13 @@
   .rt-header:hover{background:#F3F4EE;}
   .rt-chevron{color:var(--ink-soft);font-size:12px;transition:transform .15s;flex-shrink:0;}
   .resumen-ticket.expanded .rt-chevron{transform:rotate(180deg);}
+  .rt-idline{
+    font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ink-soft);font-weight:600;
+    letter-spacing:.2px;margin-bottom:3px;
+  }
   .rt-info .rt-pedido{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:16px;}
   .rt-info .rt-pedido .rt-sku{color:var(--ink-soft);font-weight:500;font-size:13px;font-family:'Inter',sans-serif;}
+  .rt-uid{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--ink-soft);font-weight:500;margin-left:6px;}
   .rt-info .rt-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
   .rt-dates{font-size:11px;color:var(--ink-soft);margin-top:4px;display:flex;gap:14px;flex-wrap:wrap;}
   .rt-dates span strong{color:var(--ink);font-weight:600;}
@@ -221,6 +288,16 @@
     font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:3px;
     border:1px solid var(--steel);background:var(--steel);color:#fff;cursor:pointer;
   }
+  .rt-edit-btn{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:3px;
+    border:1px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;margin-left:8px;
+  }
+  .rt-edit-btn:hover{border-color:var(--steel);color:var(--steel);}
+  .rt-delete-btn{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:3px;
+    border:1px solid var(--flag);background:var(--flag-soft);color:var(--flag);cursor:pointer;margin-left:8px;
+  }
+  .rt-delete-btn:hover{background:var(--flag);color:#fff;}
 
   .lookup{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
@@ -253,12 +330,21 @@
   }
   .sku-card:hover{border-color:var(--steel-2);}
   .sku-card .sku-code{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:18px;}
+  .sku-card .sku-uid{font-family:ui-monospace,monospace;font-size:10px;color:var(--ink-soft);margin-top:1px;}
   .sku-card .sku-desc{font-size:12px;color:var(--ink-soft);margin:2px 0 2px;min-height:15px;}
   .sku-card .sku-client{font-size:11.5px;color:var(--ink-soft);margin-bottom:10px;}
   .sku-progress-bar{height:5px;border-radius:3px;background:var(--lock-soft);overflow:hidden;margin-bottom:8px;}
   .sku-progress-fill{height:100%;background:var(--steel);border-radius:3px;}
   .sku-progress-fill.complete{background:var(--green);}
   .sku-card .sku-status{font-size:11.5px;font-weight:600;color:var(--ink-soft);}
+  .sku-card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .sku-edit-btn, .sku-delete-btn{
+    font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:20px;
+    border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink);
+  }
+  .sku-edit-btn:hover{border-color:var(--steel);color:var(--steel);}
+  .sku-delete-btn{border-color:var(--flag);color:var(--flag);}
+  .sku-delete-btn:hover{background:var(--flag);color:#fff;}
   .sku-empty{font-size:13px;color:var(--ink-soft);padding:8px 0;}
 
   #skuWorkspace{display:none;}
@@ -400,6 +486,35 @@
 
   footer.foot{text-align:center;font-size:11.5px;color:var(--ink-soft);margin-top:28px;}
 
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:12px 22px;border-radius:6px;font-size:13.5px;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;
+    z-index:1001;max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.error{background:var(--flag);}
+
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(28,37,48,0.55);
+    z-index:1000;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    background:#fff;border-radius:6px;max-width:480px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow-y:auto;
+  }
+  .modal-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 20px;border-bottom:1px solid var(--line);
+  }
+  .modal-head h3{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;margin:0;}
+  .modal-close{background:none;border:none;font-size:22px;color:var(--ink-soft);cursor:pointer;line-height:1;}
+  .modal-body{padding:18px 20px;}
+  .modal-actions{
+    display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--line);
+  }
+
   .lightbox{
     display:none;position:fixed;inset:0;background:rgba(28,37,48,0.92);
     z-index:999;align-items:center;justify-content:center;padding:40px;
@@ -444,6 +559,37 @@
     </div>
   </header>
 
+  <!-- Acceso rápido a los dos flujos operativos -->
+  <div class="flow-buttons">
+    <button class="flow-btn flow-entrega" id="flowEntregaBtn">
+      <span class="flow-icon">📦</span>
+      <span class="flow-text">
+        <span class="flow-title">Pedidos de entrega</span>
+        <span class="flow-sub">Salida · Entrega conforme</span>
+      </span>
+      <span class="flow-count" id="flowEntregaCount">0</span>
+    </button>
+    <button class="flow-btn flow-retiro" id="flowRetiroBtn">
+      <span class="flow-icon">🔄</span>
+      <span class="flow-text">
+        <span class="flow-title">Pedidos de retiro</span>
+        <span class="flow-sub">Retiro · Recepción CD</span>
+      </span>
+      <span class="flow-count" id="flowRetiroCount">0</span>
+    </button>
+  </div>
+
+  <div class="flow-substats">
+    <div class="substat-group">
+      <button class="substat-box" type="button" id="statEntregadoBtn" data-stage="0"><span class="substat-label">Entregado</span><span class="substat-count" id="statEntregado">0</span></button>
+      <button class="substat-box" type="button" id="statRecibidoBtn" data-stage="1"><span class="substat-label">Recibido</span><span class="substat-count" id="statRecibido">0</span></button>
+    </div>
+    <div class="substat-group">
+      <button class="substat-box" type="button" id="statRetiradoBtn" data-stage="2"><span class="substat-label">Retirado</span><span class="substat-count" id="statRetirado">0</span></button>
+      <button class="substat-box" type="button" id="statLlegadaCDBtn" data-stage="3"><span class="substat-label">Llegada CD</span><span class="substat-count" id="statLlegadaCD">0</span></button>
+    </div>
+  </div>
+
   <!-- Ingreso de pedidos: manual o carga masiva -->
   <section class="section-card">
     <h3>Ingresar pedidos</h3>
@@ -461,6 +607,12 @@
         <div class="field"><label>Descripción</label><input type="text" id="mDesc" placeholder="Generador 5kVA"></div>
         <div class="field"><label>Cliente</label><input type="text" id="mCliente" placeholder="Nombre cliente"></div>
         <div class="field"><label>Dirección</label><input type="text" id="mDireccion" placeholder="Dirección de entrega"></div>
+        <div class="field"><label>Tipo de pedido</label>
+          <select id="mTipo">
+            <option value="entrega">Entrega</option>
+            <option value="retiro">Retiro</option>
+          </select>
+        </div>
       </div>
       <div class="ingest-actions">
         <button class="btn primary" id="mAddLineBtn">+ Agregar línea</button>
@@ -477,9 +629,13 @@
     </div>
 
     <div class="tab-panel" data-tabpanel="bulk">
-      <div class="bulk-hint">Numero de pedido, sku, descripción, cliente, dirección
-G-10245, RNT-00214, Generador 5kVA, Cliente Ejemplo SPA, Av. Siempre Viva 123
-G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva 123</div>
+      <div class="bulk-hint">Numero de pedido, sku, descripción, cliente, dirección, tipo
+G-10245, RNT-00214, Generador 5kVA, Cliente Ejemplo SPA, Av. Siempre Viva 123, entrega
+G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva 123, retiro</div>
+      <div class="ingest-msg" style="margin-bottom:10px;">La columna "tipo" es opcional (Entrega o Retiro) — si no la incluyes, todas las líneas se cargan como "Entrega".</div>
+      <div class="bulk-row">
+        <button class="btn ghost" type="button" id="downloadTemplateBtn">⬇ Descargar plantilla (CSV / Excel)</button>
+      </div>
       <div class="bulk-row">
         <input type="file" id="csvFile" accept=".csv,text/csv,text/plain">
         <span class="ingest-msg">o pega los datos directamente abajo (separados por coma, punto y coma o tabulador)</span>
@@ -502,6 +658,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <div class="sync-row">
       <button class="btn ghost" id="syncBtn">↻ Actualizar desde Google Sheets</button>
       <span class="sync-status" id="syncStatus"></span>
+    </div>
+
+    <div class="flow-active-banner" id="flowActiveBanner">
+      <span id="flowActiveText"></span>
+      <button id="flowClearBtn" type="button">Ver todos los pedidos</button>
     </div>
 
     <div class="filter-bar">
@@ -737,6 +898,35 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
 
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Editar información del SKU</h3>
+      <button class="modal-close" id="editModalClose" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Descripción</label><input type="text" id="editDesc"></div>
+      <div class="row-2">
+        <div class="field"><label>Cliente</label><input type="text" id="editCliente"></div>
+        <div class="field"><label>Dirección</label><input type="text" id="editDireccion"></div>
+      </div>
+      <div class="field"><label>Tipo de pedido</label>
+        <select id="editTipo">
+          <option value="entrega">Entrega</option>
+          <option value="retiro">Retiro</option>
+        </select>
+      </div>
+      <div class="ingest-msg" id="editMsg"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="editCancelBtn" type="button">Cancelar</button>
+      <button class="btn primary" id="editSaveBtn" type="button">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightboxClose" type="button" aria-label="Cerrar">×</button>
   <button class="lightbox-nav lightbox-prev" id="lightboxPrev" type="button" aria-label="Foto anterior">‹</button>
@@ -770,16 +960,46 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   function blankStages(){
     return [0,1,2,3].map(()=>({done:false, photos:[], fields:{}, timestamp:null}));
   }
-  function blankOrder(pedido){ return { pedido, skus:{} }; }
+  function blankOrder(pedido){ return { pedido, skus:{}, createdAt: new Date().toISOString() }; }
 
-  function ingestRow(pedido, sku, descripcion, cliente, direccion){
+  function pedidoCreatedAt(pedido){
+    const order = orders[pedido];
+    if(!order) return 0;
+    if(order.createdAt) return new Date(order.createdAt).getTime();
+    const dates = Object.values(order.skus).map(s=>s.createdAt).filter(Boolean).map(d=>new Date(d).getTime());
+    return dates.length ? Math.min(...dates) : 0;
+  }
+
+  function sortedPedidos(){
+    return Object.keys(orders).sort((a,b) => pedidoCreatedAt(b) - pedidoCreatedAt(a));
+  }
+
+  function generateUid(){
+    return 'REG-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  }
+
+  function normalizeTipo(v){
+    const s = String(v||'').trim().toLowerCase();
+    if(!s) return '';
+    if(s.startsWith('r')) return 'retiro';
+    if(s.startsWith('e')) return 'entrega';
+    return '';
+  }
+
+  function effectiveTipo(sku){
+    return sku.stages[1].done ? 'retiro' : (sku.tipo || 'entrega');
+  }
+
+  function ingestRow(pedido, sku, descripcion, cliente, direccion, tipo){
     pedido = (pedido||'').trim();
     sku = (sku||'').trim();
     if(!pedido || !sku) return false;
     if(!orders[pedido]) orders[pedido] = blankOrder(pedido);
     const order = orders[pedido];
-    if(!order.skus[sku]) order.skus[sku] = { skuCode:sku, stages:blankStages(), base:{}, createdAt:new Date().toISOString() };
+    const tipoNorm = normalizeTipo(tipo);
+    if(!order.skus[sku]) order.skus[sku] = { skuCode:sku, uid:generateUid(), tipo: tipoNorm || 'entrega', stages:blankStages(), base:{}, createdAt:new Date().toISOString() };
     const rec = order.skus[sku];
+    if(tipoNorm) rec.tipo = tipoNorm;
     rec.base = {
       descripcion: descripcion || rec.base.descripcion || '',
       cliente: cliente || rec.base.cliente || '',
@@ -797,16 +1017,25 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     return (currentOrder && currentSkuCode) ? currentOrder.skus[currentSkuCode] : null;
   }
 
+  function relevantStages(sku){
+    return (sku && sku.tipo === 'retiro') ? [2,3] : [0,1];
+  }
+
   function isReachable(i){
     const sku = activeSku();
     if(!sku) return false;
-    return i === 0 || sku.stages[i-1].done;
+    const rel = relevantStages(sku);
+    const pos = rel.indexOf(i);
+    if(pos === -1) return false;
+    if(pos === 0) return true;
+    return sku.stages[rel[pos-1]].done;
   }
 
   function firstOpenStage(){
     const sku = activeSku();
-    const idx = sku.stages.findIndex(s => !s.done);
-    return idx === -1 ? 3 : idx;
+    const rel = relevantStages(sku);
+    const found = rel.find(i => !sku.stages[i].done);
+    return found === undefined ? rel[rel.length-1] : found;
   }
 
   function escapeAttr(str){
@@ -850,10 +1079,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     mStagedWrap.style.display = 'block';
     mSubmitBtn.textContent = `Cargar pedido (${manualStaged.length} línea${manualStaged.length===1?'':'s'})`;
     mStagedTable.innerHTML = `
-      <div class="staged-row head"><span>Pedido</span><span>SKU</span><span>Descripción</span><span>Cliente</span><span>Dirección</span><span></span></div>
+      <div class="staged-row head"><span>Pedido</span><span>SKU</span><span>Descripción</span><span>Cliente</span><span>Dirección</span><span>Tipo</span><span></span></div>
       ${manualStaged.map((r,i)=>`
         <div class="staged-row">
-          <span>${r.pedido}</span><span>${r.sku}</span><span>${r.desc||'—'}</span><span>${r.cliente||'—'}</span><span>${r.direccion||'—'}</span>
+          <span>${r.pedido}</span><span>${r.sku}</span><span>${r.desc||'—'}</span><span>${r.cliente||'—'}</span><span>${r.direccion||'—'}</span><span>${r.tipo === 'retiro' ? 'Retiro' : 'Entrega'}</span>
           <button class="rm" type="button" data-rm="${i}" title="Quitar línea">×</button>
         </div>`).join('')}
     `;
@@ -871,12 +1100,13 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const desc = document.getElementById('mDesc').value.trim();
     const cliente = document.getElementById('mCliente').value.trim();
     const direccion = document.getElementById('mDireccion').value.trim();
+    const tipo = document.getElementById('mTipo').value;
     if(!pedido || !sku){
       mMsg.textContent = 'N° de pedido y SKU son obligatorios.';
       mMsg.className = 'ingest-msg err';
       return;
     }
-    manualStaged.push({pedido, sku, desc, cliente, direccion});
+    manualStaged.push({pedido, sku, desc, cliente, direccion, tipo});
     mMsg.textContent = `Línea agregada. Sigue agregando o presiona "Cargar pedido" cuando termines.`;
     mMsg.className = 'ingest-msg ok';
     document.getElementById('mSku').value = '';
@@ -898,8 +1128,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     if(manualStaged.length === 0) return;
     const pedidosSet = new Set();
     manualStaged.forEach(r=>{
-      ingestRow(r.pedido, r.sku, r.desc, r.cliente, r.direccion);
+      ingestRow(r.pedido, r.sku, r.desc, r.cliente, r.direccion, r.tipo);
       pedidosSet.add(r.pedido);
+      const sku = orders[r.pedido] && orders[r.pedido].skus[r.sku.trim()];
+      if(sku) registerBaseToBackend(r.pedido.trim(), sku);
     });
     mMsg.textContent = `${manualStaged.length} SKU cargados en ${pedidosSet.size} pedido(s).`;
     mMsg.className = 'ingest-msg ok';
@@ -930,6 +1162,27 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     return line.split(delim).map(c=>c.trim().replace(/^"(.*)"$/,'$1'));
   }
 
+  document.getElementById('downloadTemplateBtn').addEventListener('click', ()=>{
+    const rows = [
+      ['Numero de pedido','sku','descripcion','cliente','direccion','tipo'],
+      ['G-10245','RNT-00214','Generador 5kVA','Cliente Ejemplo SPA','Av. Siempre Viva 123','entrega'],
+      ['G-10245','RNT-00311','Torre de iluminación','Cliente Ejemplo SPA','Av. Siempre Viva 123','retiro']
+    ];
+    const csv = rows.map(r => r.map(cell=>{
+      const s = String(cell);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+    }).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla_carga_masiva.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
   document.getElementById('bulkProcessBtn').addEventListener('click', ()=>{
     const raw = bulkText.value.trim();
     if(!raw){
@@ -945,13 +1198,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const delim = headerLine.includes('\t') ? '\t' : (headerLine.includes(';') ? ';' : ',');
     const headers = splitLine(headerLine, delim).map(normalizeHeader);
 
-    const colIndex = {pedido:-1, sku:-1, descripcion:-1, cliente:-1, direccion:-1};
+    const colIndex = {pedido:-1, sku:-1, descripcion:-1, cliente:-1, direccion:-1, tipo:-1};
     headers.forEach((h,i)=>{
       if(h.includes('pedido')) colIndex.pedido = i;
       else if(h.includes('sku') || h.includes('codigo')) colIndex.sku = i;
       else if(h.includes('descripcion')) colIndex.descripcion = i;
       else if(h.includes('cliente')) colIndex.cliente = i;
       else if(h.includes('direccion')) colIndex.direccion = i;
+      else if(h.includes('tipo')) colIndex.tipo = i;
     });
     if(colIndex.pedido === -1 || colIndex.sku === -1){
       bulkSummary.innerHTML = '<span class="err-list">No se encontraron columnas de "N° de pedido" y "SKU" en el encabezado. Revisa el formato de ejemplo.</span>';
@@ -968,12 +1222,15 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const descripcion = colIndex.descripcion > -1 ? cells[colIndex.descripcion] || '' : '';
       const cliente = colIndex.cliente > -1 ? cells[colIndex.cliente] || '' : '';
       const direccion = colIndex.direccion > -1 ? cells[colIndex.direccion] || '' : '';
+      const tipo = colIndex.tipo > -1 ? cells[colIndex.tipo] || '' : '';
       if(!pedido.trim() || !sku.trim()){
         errors.push(`Fila ${i+1}: falta N° de pedido o SKU.`);
         continue;
       }
-      ingestRow(pedido, sku, descripcion, cliente, direccion);
+      ingestRow(pedido, sku, descripcion, cliente, direccion, tipo);
       pedidosSet.add(pedido.trim());
+      const skuObj = orders[pedido.trim()] && orders[pedido.trim()].skus[sku.trim()];
+      if(skuObj) registerBaseToBackend(pedido.trim(), skuObj);
       ok++;
     }
 
@@ -1003,7 +1260,18 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     renderResumen();
   });
 
+  let flowFilter = null; // null | 'entrega' | 'retiro'
+  let stageFilter = null; // null | 0 | 1 | 2 | 3 (índice de etapa: Entregado/Recibido/Retirado/Llegada CD)
+
+  function passesFlowFilter(sku){
+    if(flowFilter === 'entrega') return effectiveTipo(sku) === 'entrega';
+    if(flowFilter === 'retiro') return effectiveTipo(sku) === 'retiro' && !sku.stages[3].done;
+    return true;
+  }
+
   function passesFilter(pedido, sku){
+    if(!passesFlowFilter(sku)) return false;
+    if(stageFilter !== null && !sku.stages[stageFilter].done) return false;
     const pFilter = fPedido.value.trim().toLowerCase();
     const cFilter = fCliente.value.trim().toLowerCase();
     if(pFilter && !pedido.toLowerCase().includes(pFilter)) return false;
@@ -1016,6 +1284,82 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     }
     return true;
   }
+
+  function computeFlowCounts(){
+    let entrega = 0, retiro = 0;
+    Object.keys(orders).forEach(pedido=>{
+      Object.values(orders[pedido].skus).forEach(sku=>{
+        const tipo = effectiveTipo(sku);
+        if(tipo === 'entrega') entrega++;
+        else if(tipo === 'retiro' && !sku.stages[3].done) retiro++;
+      });
+    });
+    return {entrega, retiro};
+  }
+
+  function computeStageCounts(){
+    const counts = [0,0,0,0];
+    Object.values(orders).forEach(order=>{
+      Object.values(order.skus).forEach(sku=>{
+        sku.stages.forEach((st,i)=>{ if(st.done) counts[i]++; });
+      });
+    });
+    return counts;
+  }
+
+  const stageFilterLabels = ['Entregado','Recibido','Retirado','Llegada CD'];
+
+  function updateFilterBanner(){
+    const banner = document.getElementById('flowActiveBanner');
+    const bannerText = document.getElementById('flowActiveText');
+    const parts = [];
+    if(flowFilter === 'entrega') parts.push('en fase de entrega (Salida / Entrega conforme)');
+    if(flowFilter === 'retiro') parts.push('en fase de retiro (Retiro / Recepción CD)');
+    if(stageFilter !== null) parts.push(`con "${stageFilterLabels[stageFilter]}" completado`);
+    if(parts.length){
+      banner.classList.add('show');
+      bannerText.textContent = 'Mostrando solo pedidos ' + parts.join(' y ') + '.';
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  function setFlowFilter(value){
+    flowFilter = value;
+    document.getElementById('flowEntregaBtn').classList.toggle('active', value === 'entrega');
+    document.getElementById('flowRetiroBtn').classList.toggle('active', value === 'retiro');
+    updateFilterBanner();
+    renderResumen();
+    document.getElementById('resumenCount').closest('.section-card')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function setStageFilter(value){
+    stageFilter = value;
+    document.querySelectorAll('.substat-box').forEach(btn=>{
+      btn.classList.toggle('active', parseInt(btn.dataset.stage) === value);
+    });
+    updateFilterBanner();
+    renderResumen();
+    document.getElementById('resumenCount').closest('.section-card')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  document.getElementById('flowEntregaBtn').addEventListener('click', ()=> setFlowFilter(flowFilter === 'entrega' ? null : 'entrega'));
+  document.getElementById('flowRetiroBtn').addEventListener('click', ()=> setFlowFilter(flowFilter === 'retiro' ? null : 'retiro'));
+  document.querySelectorAll('.substat-box').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const v = parseInt(btn.dataset.stage);
+      setStageFilter(stageFilter === v ? null : v);
+    });
+  });
+  document.getElementById('flowClearBtn').addEventListener('click', ()=>{
+    flowFilter = null;
+    stageFilter = null;
+    document.getElementById('flowEntregaBtn').classList.remove('active');
+    document.getElementById('flowRetiroBtn').classList.remove('active');
+    document.querySelectorAll('.substat-box').forEach(btn=> btn.classList.remove('active'));
+    updateFilterBanner();
+    renderResumen();
+  });
 
   function stageSummary(st){
     if(!st.done) return 'Pendiente de completar';
@@ -1044,7 +1388,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   });
 
   function renderResumenTable(){
-    const pedidos = Object.keys(orders);
+    const pedidos = sortedPedidos();
     const rowsHtml = [];
 
     pedidos.forEach(pedido=>{
@@ -1056,13 +1400,18 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const expanded = expandedPedidos.has(pedido);
       const fechas = matchingCodes.map(code => order.skus[code].createdAt).filter(Boolean).sort();
       const creado = fechas.length ? formatDate(fechas[0]) : '—';
+      const tiposPresentes = [...new Set(matchingCodes.map(code => effectiveTipo(order.skus[code])))];
+      const tipoPedidoLabel = tiposPresentes.length > 1
+        ? 'Mixto'
+        : (tiposPresentes[0] === 'retiro' ? '🔄 Retiro' : '📦 Entrega');
 
       const pedidoStageCells = ticketLabels.map((label,i)=>{
-        const total = matchingCodes.length;
-        const completos = matchingCodes.filter(code => order.skus[code].stages[i].done).length;
+        const applicable = matchingCodes.filter(code => relevantStages(order.skus[code]).includes(i));
+        if(applicable.length === 0) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge na">N/A</span></td>`;
+        const completos = applicable.filter(code => order.skus[code].stages[i].done).length;
         if(completos === 0) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge pending">Pendiente</span></td>`;
-        if(completos === total) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge done">✓ Completo</span></td>`;
-        return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge partial">${completos}/${total}</span></td>`;
+        if(completos === applicable.length) return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge done">✓ Completo</span></td>`;
+        return `<td data-toggle="${escapeAttr(pedido)}"><span class="table-badge partial">${completos}/${applicable.length}</span></td>`;
       }).join('');
 
       rowsHtml.push(`
@@ -1072,6 +1421,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
             <button class="table-plus" type="button" data-toggle-btn="${escapeAttr(pedido)}" aria-label="Ver SKU del pedido">${expanded ? '−' : '+'}</button>
             <span>${matchingCodes.length}</span>
           </td>
+          <td data-toggle="${escapeAttr(pedido)}">${tipoPedidoLabel}</td>
           <td data-toggle="${escapeAttr(pedido)}">${creado}</td>
           ${pedidoStageCells}
         </tr>
@@ -1081,8 +1431,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         matchingCodes.forEach(code=>{
           const sku = order.skus[code];
           const creadoSku = sku.createdAt ? formatDate(sku.createdAt) : '—';
+          const tipoSkuLabel = sku.tipo === 'retiro' ? '🔄 Retiro' : '📦 Entrega';
           const cells = ticketLabels.map((label,i)=>{
             const st = sku.stages[i];
+            if(!relevantStages(sku).includes(i)){
+              return `<td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><span class="table-badge na">N/A</span></td>`;
+            }
             if(st.done){
               return `<td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><span class="table-badge done">✓ Completo<span class="table-badge-time">${formatDate(st.timestamp)}</span></span></td>`;
             }
@@ -1092,6 +1446,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
             <tr class="sku-row" data-open="${escapeAttr(pedido)}::${escapeAttr(code)}">
               <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}" class="sku-row-indent">↳</td>
               <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}"><strong>${code}</strong></td>
+              <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}">${tipoSkuLabel}</td>
               <td data-open="${escapeAttr(pedido)}::${escapeAttr(code)}">${creadoSku}</td>
               ${cells}
             </tr>
@@ -1107,8 +1462,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
     resumenTable.innerHTML = `
       <tr>
-        <th>Pedido</th><th>SKU</th><th>Fecha de creación</th>
-        <th>Despacho (Salida)</th><th>Recepción</th><th>Retiro</th><th>Recepción CD</th>
+        <th>Pedido</th><th>SKU</th><th>Tipo</th><th>Fecha de creación</th>
+        <th>Entrega</th><th>Recepción</th><th>Retiro</th><th>Recepción CD</th>
       </tr>
       ${rowsHtml.join('')}
     `;
@@ -1139,7 +1494,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   }
 
   function renderResumen(){
-    const pedidos = Object.keys(orders);
+    const pedidos = sortedPedidos();
     let skuTotal = 0, skuComplete = 0, pedidosMatched = 0;
     resumenList.innerHTML = '';
 
@@ -1147,6 +1502,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       resumenList.innerHTML = '<div class="resumen-empty">Aún no hay pedidos registrados. Usa el ingreso manual o la carga masiva de arriba.</div>';
       resumenCount.textContent = '0 pedidos · 0 SKU';
       resumenTable.innerHTML = '<tr><td style="padding:20px;color:var(--ink-soft);">Aún no hay pedidos registrados.</td></tr>';
+      document.getElementById('flowEntregaCount').textContent = '0';
+      document.getElementById('flowRetiroCount').textContent = '0';
       return;
     }
 
@@ -1157,7 +1514,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
       codes.forEach(code=>{
         skuTotal++;
-        if(skuProgress(order.skus[code]) === 4) skuComplete++;
+        if(skuProgress(order.skus[code]) === relevantStages(order.skus[code]).length) skuComplete++;
       });
 
       if(matchingCodes.length === 0) return;
@@ -1167,18 +1524,35 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const pedidoCard = document.createElement('div');
       pedidoCard.className = 'pedido-ticket' + (pedidoExpanded ? ' expanded' : '');
 
-      const completos = matchingCodes.filter(code => skuProgress(order.skus[code]) === 4).length;
+      const completos = matchingCodes.filter(code => { const s = order.skus[code]; return skuProgress(s) === relevantStages(s).length; }).length;
       const clientes = [...new Set(matchingCodes.map(code => order.skus[code].base.cliente).filter(Boolean))];
+      const pedidoCreado = pedidoCreatedAt(pedido) ? formatDate(new Date(pedidoCreatedAt(pedido)).toISOString()) : '—';
+
+      const totalEtapas = matchingCodes.reduce((sum, code) => sum + relevantStages(order.skus[code]).length, 0);
+      const etapasCompletas = matchingCodes.reduce((sum, code) => sum + skuProgress(order.skus[code]), 0);
+      const pctAvance = totalEtapas > 0 ? Math.round((etapasCompletas / totalEtapas) * 100) : 0;
+      const estadoFinal = completos === matchingCodes.length
+        ? '<span class="pt-status done">✓ Completo</span>'
+        : `<span class="pt-status pending">⏳ En proceso (${etapasCompletas}/${totalEtapas} etapas)</span>`;
 
       pedidoCard.innerHTML = `
         <div class="pt-header">
-          <div class="rt-info">
-            <div class="rt-pedido">Pedido ${pedido}</div>
-            <div class="rt-meta">${matchingCodes.length} SKU · ${completos} completos${clientes.length ? ' · ' + clientes.join(', ') : ''}</div>
+          <div class="pt-header-top">
+            <div class="rt-info">
+              <div class="rt-pedido">Pedido ${pedido}</div>
+              <div class="rt-meta">${matchingCodes.length} SKU · ${completos} completos${clientes.length ? ' · ' + clientes.join(', ') : ''} · Creado ${pedidoCreado}</div>
+              <div class="pt-progress-row">
+                <div class="pt-progress-bar"><div class="pt-progress-fill" style="width:${pctAvance}%"></div></div>
+                <span class="pt-progress-pct">${pctAvance}%</span>
+                ${estadoFinal}
+              </div>
+            </div>
+            <span class="rt-chevron">▾</span>
           </div>
           <div class="pt-actions">
             <button class="pt-open-btn" type="button" title="Ver y gestionar todos los SKU de este pedido">Ver SKU del pedido →</button>
-            <span class="rt-chevron">▾</span>
+            ${matchingCodes.length === 1 ? `<button class="pt-edit-btn" type="button" title="Editar información de este pedido">✎ Editar</button>` : ''}
+            <button class="pt-delete-btn" type="button" title="Eliminar todo el pedido">🗑 Eliminar pedido</button>
           </div>
         </div>
         <div class="pt-skus"></div>
@@ -1192,36 +1566,49 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         ev.stopPropagation();
         openPedidoSkuList(pedido);
       });
+      if(matchingCodes.length === 1){
+        pedidoCard.querySelector('.pt-edit-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          openEditModal(pedido, matchingCodes[0]);
+        });
+      }
+      pedidoCard.querySelector('.pt-delete-btn').addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        deleteWholePedidoFlow(pedido);
+      });
 
       const skusWrap = pedidoCard.querySelector('.pt-skus');
       matchingCodes.forEach(code=>{
         const sku = order.skus[code];
+        const rel = relevantStages(sku);
         const key = pedido + '::' + code;
         const expanded = expandedTickets.has(key);
         const ticket = document.createElement('div');
         ticket.className = 'resumen-ticket' + (expanded ? ' expanded' : '');
         const metaBits = [sku.base.cliente, sku.base.direccion].filter(Boolean).join(' · ');
         const creado = sku.createdAt ? formatDate(sku.createdAt) : '—';
+        const tipoLabel = sku.tipo === 'retiro' ? '🔄 Retiro' : '📦 Entrega';
 
         ticket.innerHTML = `
           <div class="rt-header">
             <div class="rt-info">
+              <div class="rt-idline">${pedido} · ${sku.uid || 'sin ID'} · ${tipoLabel} · Creado ${creado}</div>
               <div class="rt-pedido">SKU ${code}</div>
               <div class="rt-meta">${metaBits || 'Sin cliente/dirección registrados'}</div>
               <div class="rt-dates">
-                <span>Creado: <strong>${creado}</strong></span>
-                ${ticketLabels.map((label,i)=>`<span>${label}: <strong>${sku.stages[i].done ? formatDate(sku.stages[i].timestamp) : 'Pendiente'}</strong></span>`).join('')}
+                ${rel.map(i=>`<span>${ticketLabels[i]}: <strong>${sku.stages[i].done ? formatDate(sku.stages[i].timestamp) : 'Pendiente'}</strong></span>`).join('')}
               </div>
             </div>
             <div class="rt-stages">
-              ${ticketLabels.map((label,i)=>`<span class="rt-stage ${sku.stages[i].done ? 'done' : ''}">${sku.stages[i].done ? '✓ ' : ''}${label}</span>`).join('')}
+              ${rel.map(i=>`<span class="rt-stage ${sku.stages[i].done ? 'done' : ''}">${sku.stages[i].done ? '✓ ' : ''}${ticketLabels[i]}</span>`).join('')}
             </div>
             <span class="rt-chevron">▾</span>
           </div>
           <div class="rt-detail">
-            <div class="rt-detail-grid">
-              ${ticketLabels.map((label,i)=>{
+            <div class="rt-detail-grid" style="grid-template-columns:repeat(${rel.length},1fr);">
+              ${rel.map(i=>{
                 const st = sku.stages[i];
+                const label = ticketLabels[i];
                 return `
                   <div class="rt-stage-card">
                     <div class="rt-stage-thumb">${st.photos.length ? `<img class="zoomable" src="${escapeAttr(st.photos[0])}" data-src="${escapeAttr(st.photos[0])}" data-gallery="${escapeAttr(pedido)}::${escapeAttr(code)}::${i}" alt="Foto ${label}">` : 'Sin foto'}${st.photos.length > 1 ? `<span class="rt-photo-count">+${st.photos.length - 1}</span>` : ''}</div>
@@ -1234,6 +1621,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
               }).join('')}
             </div>
             <button class="rt-open-btn" data-open="${key}">Gestionar este SKU →</button>
+            <button class="rt-edit-btn" data-edit="${key}" type="button">✎ Editar información</button>
+            <button class="rt-delete-btn" data-delete="${key}" type="button">🗑 Eliminar pedido</button>
           </div>
         `;
 
@@ -1247,6 +1636,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           ev.stopPropagation();
           openPedidoSku(pedido, code);
         });
+        ticket.querySelector('.rt-edit-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          openEditModal(pedido, code);
+        });
+        ticket.querySelector('.rt-delete-btn').addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          deleteSkuFlow(pedido, code);
+        });
         skusWrap.appendChild(ticket);
       });
 
@@ -1259,6 +1656,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
     resumenCount.innerHTML = `<strong>${pedidos.length}</strong> pedidos · <strong>${skuTotal}</strong> SKU · <strong>${skuComplete}</strong> completos`;
     renderResumenTable();
+    const flowCounts = computeFlowCounts();
+    document.getElementById('flowEntregaCount').textContent = flowCounts.entrega;
+    document.getElementById('flowRetiroCount').textContent = flowCounts.retiro;
+    const stageCounts = computeStageCounts();
+    document.getElementById('statEntregado').textContent = stageCounts[0];
+    document.getElementById('statRecibido').textContent = stageCounts[1];
+    document.getElementById('statRetirado').textContent = stageCounts[2];
+    document.getElementById('statLlegadaCD').textContent = stageCounts[3];
   }
 
   function openPedidoSku(pedido, code){
@@ -1287,7 +1692,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   /* ---------- SKU list ---------- */
 
   function skuProgress(sku){
-    return sku.stages.filter(s=>s.done).length;
+    return relevantStages(sku).filter(i => sku.stages[i].done).length;
   }
 
   function renderSkuList(){
@@ -1299,18 +1704,33 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     skuGrid.innerHTML = '';
     codes.forEach(code=>{
       const sku = currentOrder.skus[code];
+      const rel = relevantStages(sku);
       const done = skuProgress(sku);
-      const complete = done === 4;
+      const complete = done === rel.length;
+      const tipoLabel = sku.tipo === 'retiro' ? '🔄 Retiro' : '📦 Entrega';
       const card = document.createElement('div');
       card.className = 'sku-card';
       card.innerHTML = `
         <div class="sku-code">${code}</div>
+        <div class="sku-uid">${sku.uid || ''} · ${tipoLabel}</div>
         <div class="sku-desc">${sku.base.descripcion || 'Sin descripción'}</div>
         <div class="sku-client">${sku.base.cliente || ''}</div>
-        <div class="sku-progress-bar"><div class="sku-progress-fill ${complete ? 'complete' : ''}" style="width:${(done/4)*100}%"></div></div>
-        <div class="sku-status">${complete ? 'Ciclo completo' : done === 0 ? 'Sin iniciar' : `${done} de 4 etapas`}</div>
+        <div class="sku-progress-bar"><div class="sku-progress-fill ${complete ? 'complete' : ''}" style="width:${(done/rel.length)*100}%"></div></div>
+        <div class="sku-status">${complete ? 'Ciclo completo' : done === 0 ? 'Sin iniciar' : `${done} de ${rel.length} etapas`}</div>
+        <div class="sku-card-actions">
+          <button class="sku-edit-btn" type="button" data-edit="${code}">✎ Editar</button>
+          <button class="sku-delete-btn" type="button" data-delete="${code}">🗑 Eliminar</button>
+        </div>
       `;
       card.addEventListener('click', ()=> openSku(code));
+      card.querySelector('.sku-edit-btn').addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        openEditModal(currentOrder.pedido, code);
+      });
+      card.querySelector('.sku-delete-btn').addEventListener('click', (ev)=>{
+        ev.stopPropagation();
+        deleteSkuFlow(currentOrder.pedido, code);
+      });
       skuGrid.appendChild(card);
     });
   }
@@ -1319,7 +1739,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     currentSkuCode = code;
     skuSection.style.display = 'none';
     skuWorkspace.style.display = 'block';
-    workspaceTitle.innerHTML = `${code} <span class="muted">· Pedido ${currentOrder.pedido}</span>`;
+    const sku = currentOrder.skus[code];
+    const tipoLabel = sku.tipo === 'retiro' ? '🔄 Retiro' : '📦 Entrega';
+    workspaceTitle.innerHTML = `${code} <span class="muted">· Pedido ${currentOrder.pedido}${sku.uid ? ' · ID ' + sku.uid : ''} · ${tipoLabel}</span>`;
     renderAll();
   }
 
@@ -1334,26 +1756,36 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   function renderTracker(){
     const sku = activeSku();
+    const rel = relevantStages(sku);
     document.querySelectorAll('.tracker .node').forEach(node=>{
       const i = parseInt(node.dataset.stage);
+      const relevant = rel.includes(i);
+      node.style.display = relevant ? '' : 'none';
+      if(!relevant) return;
+      const pos = rel.indexOf(i);
       const st = sku.stages[i];
       const reachable = isReachable(i);
       node.classList.toggle('done', st.done);
       node.classList.toggle('active', i === currentStage && !st.done);
       node.classList.toggle('locked', !reachable);
       const dot = node.querySelector('.dot');
-      dot.textContent = st.done ? '✓' : (!reachable ? '🔒' : String(i+1));
+      dot.textContent = st.done ? '✓' : (!reachable ? '🔒' : String(pos+1));
     });
     document.querySelectorAll('.connector').forEach(c=>{
       const i = parseInt(c.dataset.conn);
+      const relevant = rel.includes(i) && rel.includes(i+1);
+      c.style.display = relevant ? '' : 'none';
+      if(!relevant) return;
       c.classList.toggle('filled', sku.stages[i].done);
     });
   }
 
   function renderHistorial(){
     const sku = activeSku();
+    const rel = relevantStages(sku);
     histList.innerHTML = '';
-    sku.stages.forEach((st,i)=>{
+    rel.forEach(i=>{
+      const st = sku.stages[i];
       const reachable = isReachable(i);
       const row = document.createElement('div');
       row.className = 'hist-row' + (!reachable ? ' locked' : '');
@@ -1392,7 +1824,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   function renderPhotoboxes(){
     const sku = activeSku();
+    const rel = relevantStages(sku);
+    const compareGrid = document.querySelector('.compare-grid');
+    if(compareGrid) compareGrid.style.gridTemplateColumns = rel.length === 2 ? 'repeat(2,1fr)' : 'repeat(4,1fr)';
     for(let i=0;i<4;i++){
+      const relevant = rel.includes(i);
+      const compareCell = document.querySelector(`.compare [data-thumb="${i}"]`)?.closest('.compare-cell');
+      if(compareCell) compareCell.style.display = relevant ? '' : 'none';
+      if(!relevant) continue;
       const box = document.querySelector(`.photobox[data-photo="${i}"]`);
       const st = sku.stages[i];
       box.classList.toggle('has-img', st.photos.length > 0);
@@ -1432,11 +1871,45 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         thumb.innerHTML = '';
         statusEl.textContent = 'Sin foto';
       }
-      const panel = document.querySelector(`.stage-panel[data-panel="${i}"]`);
-      panel.querySelectorAll('[data-field]').forEach(el=>{
-        el.value = st.fields[el.dataset.field] || '';
-      });
     }
+  }
+
+  function configureStagePanels(){
+    const sku = activeSku();
+    const rel = relevantStages(sku);
+    rel.forEach((i, pos)=>{
+      const panel = document.querySelector(`.stage-panel[data-panel="${i}"]`);
+      if(!panel) return;
+      const badge = panel.querySelector('.badge');
+      if(badge) badge.textContent = `Etapa ${pos+1} de ${rel.length}`;
+
+      const actions = panel.querySelector('.actions');
+      const prevSlot = actions.children[0];
+      if(pos === 0){
+        if(prevSlot.tagName === 'BUTTON' && !prevSlot.disabled){
+          const fresh = document.createElement('button');
+          fresh.className = 'btn ghost';
+          fresh.disabled = true;
+          fresh.textContent = '← Anterior';
+          prevSlot.replaceWith(fresh);
+        }
+      } else {
+        const fresh = document.createElement('button');
+        fresh.className = 'btn';
+        fresh.dataset.prev = rel[pos-1];
+        fresh.textContent = '← Anterior';
+        fresh.addEventListener('click', ()=> showStage(parseInt(fresh.dataset.prev)));
+        prevSlot.replaceWith(fresh);
+      }
+
+      const saveBtn = panel.querySelector('[data-save]');
+      if(saveBtn) saveBtn.textContent = (pos === rel.length - 1) ? 'Actualizar estado y cerrar ciclo ✓' : 'Actualizar estado →';
+    });
+  }
+
+  function localDatetimeValue(d){
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   function showStage(i){
@@ -1446,9 +1919,40 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     });
     currentStage = i;
     renderTracker();
+
+    const sku = activeSku();
+    if(!sku) return;
+    const st = sku.stages[i];
+    const panel = document.querySelector(`.stage-panel[data-panel="${i}"]`);
+    if(panel){
+      // Restaura lo ya guardado para esta etapa (solo al entrar a la etapa, no en cada render)
+      panel.querySelectorAll('[data-field]').forEach(el=>{
+        el.value = st.fields[el.dataset.field] || '';
+      });
+      // Autocompleta la fecha/hora con la del dispositivo si el campo aún está vacío
+      if(!st.done){
+        const fechaInput = panel.querySelector('[data-field="fecha"]');
+        if(fechaInput && !fechaInput.value){
+          fechaInput.value = localDatetimeValue(new Date());
+          st.fields.fecha = fechaInput.value;
+        }
+      }
+    }
   }
 
+  // Guarda en vivo lo que se va escribiendo, para que nunca se pierda al agregar fotos u otras acciones
+  document.querySelectorAll('.stage-panel [data-field]').forEach(el=>{
+    el.addEventListener('input', ()=>{
+      const sku = activeSku();
+      if(!sku) return;
+      const panel = el.closest('.stage-panel');
+      const i = parseInt(panel.dataset.panel);
+      sku.stages[i].fields[el.dataset.field] = el.value;
+    });
+  });
+
   function renderAll(){
+    configureStagePanels();
     renderTracker();
     renderHistorial();
     renderPhotoboxes();
@@ -1516,15 +2020,198 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       st.syncStatus = 'sending';
       renderAll();
       renderResumen();
-      if(i < 3) showStage(i+1);
+      const rel = relevantStages(sku);
+      const pos = rel.indexOf(i);
+      const esUltimaEtapa = pos !== -1 && pos === rel.length - 1;
+      if(!esUltimaEtapa) showStage(rel[pos+1]);
 
       await sendStageToBackend(currentOrder.pedido, sku, i);
       renderAll();
       renderResumen();
+
+      if(st.syncStatus === 'ok'){
+        if(esUltimaEtapa){
+          showToast('✓ Ciclo cerrado y guardado correctamente', 'ok');
+          setTimeout(()=>{
+            backToSkuList();
+            skuSection.scrollIntoView({behavior:'smooth', block:'start'});
+          }, 1100);
+        } else {
+          showToast('✓ Etapa guardada correctamente', 'ok');
+        }
+      } else {
+        showToast('⚠️ No se pudo guardar — revisa el historial para reintentar', 'error');
+      }
     });
   });
 
+  function showToast(message, type){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>{ toast.className = 'toast'; }, 3200);
+  }
+
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTqMBHZ4e6H4ZT55uSpEiW_Q8lZMMLr5p2XgU8nX5q0tIYVKT9llUQJGPbtushBovL/exec';
+
+  // Registra el pedido/SKU base en Sheets apenas se carga (manual o masivo),
+  // sin foto ni etapa, para que no se pierda si se cierra el navegador antes de trabajarlo.
+  async function registerBaseToBackend(pedido, sku){
+    const payload = {
+      pedido: pedido,
+      sku: sku.skuCode,
+      uid: sku.uid || '',
+      tipo: sku.tipo || 'entrega',
+      descripcion: sku.base.descripcion || '',
+      cliente: sku.base.cliente || '',
+      direccion: sku.base.direccion || ''
+      // sin "etapa": el backend solo guarda los datos base, no toca columnas de etapa ni envía correo
+    };
+    try{
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch(err){
+      console.warn('No se pudo registrar el pedido base en Sheets todavía:', err);
+    }
+  }
+
+  /* ---------- Editar información de un SKU ---------- */
+  const editModal = document.getElementById('editModal');
+  let editTarget = null; // { pedido, code }
+
+  function openEditModal(pedido, code){
+    const sku = orders[pedido] && orders[pedido].skus[code];
+    if(!sku) return;
+    editTarget = { pedido, code };
+    document.getElementById('editDesc').value = sku.base.descripcion || '';
+    document.getElementById('editCliente').value = sku.base.cliente || '';
+    document.getElementById('editDireccion').value = sku.base.direccion || '';
+    document.getElementById('editTipo').value = sku.tipo === 'retiro' ? 'retiro' : 'entrega';
+    document.getElementById('editMsg').textContent = '';
+    editModal.classList.add('open');
+  }
+
+  function closeEditModal(){
+    editModal.classList.remove('open');
+    editTarget = null;
+  }
+
+  document.getElementById('editModalClose').addEventListener('click', closeEditModal);
+  document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+  editModal.addEventListener('click', (ev)=>{ if(ev.target === editModal) closeEditModal(); });
+
+  document.getElementById('editSaveBtn').addEventListener('click', async ()=>{
+    if(!editTarget) return;
+    const { pedido, code } = editTarget;
+    const sku = orders[pedido] && orders[pedido].skus[code];
+    if(!sku) return;
+
+    sku.base.descripcion = document.getElementById('editDesc').value.trim();
+    sku.base.cliente = document.getElementById('editCliente').value.trim();
+    sku.base.direccion = document.getElementById('editDireccion').value.trim();
+    sku.tipo = document.getElementById('editTipo').value;
+
+    const msg = document.getElementById('editMsg');
+    msg.textContent = 'Guardando…';
+    msg.className = 'ingest-msg';
+
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          pedido: pedido, sku: sku.skuCode, uid: sku.uid || '',
+          tipo: sku.tipo, descripcion: sku.base.descripcion, cliente: sku.base.cliente,
+          direccion: sku.base.direccion, editar: true
+        })
+      });
+      const data = await res.json();
+      if(data.ok){
+        showToast('✓ Información actualizada', 'ok');
+        closeEditModal();
+        renderResumen();
+        if(currentOrder && currentOrder.pedido === pedido) renderSkuList();
+      } else {
+        msg.textContent = '⚠️ ' + (data.error || 'No se pudo guardar.');
+        msg.className = 'ingest-msg err';
+      }
+    } catch(err){
+      msg.textContent = '⚠️ No se pudo conectar con el servidor.';
+      msg.className = 'ingest-msg err';
+    }
+  });
+
+  /* ---------- Eliminar un SKU / pedido ---------- */
+  async function deleteSkuFlow(pedido, code){
+    const sku = orders[pedido] && orders[pedido].skus[code];
+    if(!sku) return;
+    const confirmado = confirm(`¿Eliminar el SKU ${code} del pedido ${pedido}? Esta acción borra el registro de la hoja de Sheets y no se puede deshacer.`);
+    if(!confirmado) return;
+
+    delete orders[pedido].skus[code];
+    if(Object.keys(orders[pedido].skus).length === 0){
+      delete orders[pedido];
+    }
+    if(currentOrder && currentOrder.pedido === pedido){
+      if(!orders[pedido]){
+        backToSkuList();
+        currentOrder = null;
+        workarea.style.display = 'none';
+        emptyState.style.display = 'block';
+      } else {
+        if(currentSkuCode === code) backToSkuList();
+        renderSkuList();
+      }
+    }
+    renderResumen();
+    showToast('🗑 SKU eliminado', 'ok');
+
+    try{
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ pedido: pedido, sku: code, eliminar: true })
+      });
+    } catch(err){
+      console.warn('No se pudo eliminar el registro en Sheets:', err);
+    }
+  }
+
+  async function deleteWholePedidoFlow(pedido){
+    const order = orders[pedido];
+    if(!order) return;
+    const codes = Object.keys(order.skus);
+    if(codes.length === 0) return;
+    const confirmado = confirm(`¿Eliminar el pedido ${pedido} completo, con ${codes.length} SKU? Esta acción borra las filas de la hoja de Sheets y no se puede deshacer.`);
+    if(!confirmado) return;
+
+    delete orders[pedido];
+    if(currentOrder && currentOrder.pedido === pedido){
+      currentOrder = null;
+      skuWorkspace.style.display = 'none';
+      skuSection.style.display = 'none';
+      workarea.style.display = 'none';
+      emptyState.style.display = 'block';
+    }
+    renderResumen();
+    showToast(`🗑 Pedido ${pedido} eliminado (${codes.length} SKU)`, 'ok');
+
+    for(const code of codes){
+      try{
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ pedido: pedido, sku: code, eliminar: true })
+        });
+      } catch(err){
+        console.warn('No se pudo eliminar', code, err);
+      }
+    }
+  }
 
   async function sendStageToBackend(pedido, sku, stageIndex){
     const label = ticketLabels[stageIndex];
@@ -1532,6 +2219,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const payload = {
       pedido: pedido,
       sku: sku.skuCode,
+      uid: sku.uid || '',
+      tipo: sku.tipo || 'entrega',
       etapa: label,
       descripcion: sku.base.descripcion || st.fields.descripcion || '',
       cliente: sku.base.cliente || '',
@@ -1617,10 +2306,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         const order = orders[pedido];
         Object.keys(data.pedidos[pedido]).forEach(code=>{
           const remoteSku = data.pedidos[pedido][code];
+          const remoteCreatedAt = remoteSku.creado ? parseFechaDDMMYYYY(remoteSku.creado) : null;
           if(!order.skus[code]){
-            order.skus[code] = { skuCode: code, stages: blankStages(), base:{}, createdAt: null };
+            order.skus[code] = { skuCode: code, uid: remoteSku.uid || generateUid(), tipo: normalizeTipo(remoteSku.tipo) || 'entrega', stages: blankStages(), base:{}, createdAt: remoteCreatedAt };
           }
           const sku = order.skus[code];
+          sku.uid = sku.uid || remoteSku.uid || generateUid();
+          sku.tipo = sku.tipo || normalizeTipo(remoteSku.tipo) || 'entrega';
+          sku.createdAt = sku.createdAt || remoteCreatedAt;
           sku.base.cliente = sku.base.cliente || remoteSku.cliente || '';
           sku.base.direccion = sku.base.direccion || remoteSku.direccion || '';
           sku.base.descripcion = sku.base.descripcion || remoteSku.descripcion || '';
@@ -1640,6 +2333,30 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   document.getElementById('syncBtn').addEventListener('click', loadHistorialFromBackend);
   loadHistorialFromBackend();
 
+  // Redimensiona y comprime una imagen para evitar errores por archivos muy pesados
+  function compressImage(dataUrl, maxDim, quality){
+    maxDim = maxDim || 1600;
+    quality = quality || 0.8;
+    return new Promise((resolve)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height * (maxDim / width)); width = maxDim; }
+          else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ()=> resolve(dataUrl); // si falla, usa la original como respaldo
+      img.src = dataUrl;
+    });
+  }
+
   document.querySelectorAll('input[type="file"][data-input]').forEach(input=>{
     input.addEventListener('change', (e)=>{
       const idx = parseInt(input.dataset.input);
@@ -1649,8 +2366,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       let pending = files.length;
       files.forEach(file=>{
         const reader = new FileReader();
-        reader.onload = (ev)=>{
-          sku.stages[idx].photos.push(ev.target.result);
+        reader.onload = async (ev)=>{
+          const compressed = await compressImage(ev.target.result);
+          sku.stages[idx].photos.push(compressed);
           pending--;
           if(pending === 0){
             renderPhotoboxes();
