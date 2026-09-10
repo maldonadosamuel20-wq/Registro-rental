@@ -6,6 +6,7 @@
 <title>Operación Excelencia Operacional</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#EEF0EA;
@@ -2670,10 +2671,15 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     gembaDashboardVisible = !gembaDashboardVisible;
     const dashArea = document.getElementById('gembaDashboardArea');
     const formArea = document.getElementById('gembaFormArea');
-    const typeGrid = document.getElementById('gembaTypeGrid').closest('.section-card');
+    const typeGrid = document.getElementById('gembaTypeGrid');
+    const typeGridCard = typeGrid.closest('.section-card');
+    const subText = typeGridCard ? typeGridCard.querySelector('.sub') : null;
     dashArea.style.display = gembaDashboardVisible ? 'block' : 'none';
-    document.getElementById('gembaDashboardBtn').textContent = gembaDashboardVisible ? '← Volver a Gembas' : '📊 Ver Dashboard';
+    document.getElementById('gembaDashboardBtn').textContent = gembaDashboardVisible ? '✕ Cerrar Dashboard' : '📊 Ver Dashboard';
+    // Importante: solo se oculta la grilla de tipos y el subtítulo, NUNCA la tarjeta completa
+    // (esa tarjeta contiene este mismo botón — ocultarla entera dejaba sin forma de volver).
     typeGrid.style.display = gembaDashboardVisible ? 'none' : 'block';
+    if(subText) subText.style.display = gembaDashboardVisible ? 'none' : 'block';
     formArea.style.display = gembaDashboardVisible ? 'none' : 'block';
     if(gembaDashboardVisible) cargarDashboardGemba();
   });
@@ -2722,6 +2728,239 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     `;
   }
 
+  // Tabla pivote: filas = Área, columnas = Trimestre (Q1-Q4), valores = nota promedio,
+  // con columna y fila de "Total general" — igual a la tabla dinámica de referencia.
+  function renderPivotTrimestre(filas){
+    const data = {};
+    const trimestresSet = new Set();
+    filas.forEach(r=>{
+      const area = r.area || 'Sin área';
+      const q = r.trimestre;
+      if(!q) return;
+      trimestresSet.add(q);
+      if(!data[area]) data[area] = {};
+      if(!data[area][q]) data[area][q] = {s:0, c:0};
+      data[area][q].s += Number(r.nota) || 0;
+      data[area][q].c++;
+    });
+    const trimestres = ['Q1','Q2','Q3','Q4'].filter(q=>trimestresSet.has(q));
+    const areas = Object.keys(data).sort();
+    if(!areas.length || !trimestres.length){
+      return '<div class="resumen-empty">Sin datos suficientes todavía.</div>';
+    }
+
+    const totalPorTrimestre = {};
+    trimestres.forEach(q=> totalPorTrimestre[q] = {s:0, c:0});
+    let totalGeneralS = 0, totalGeneralC = 0;
+
+    const filasHtml = areas.map(area=>{
+      let rowS = 0, rowC = 0;
+      const celdas = trimestres.map(q=>{
+        const cell = data[area][q];
+        if(!cell) return `<td style="padding:7px 10px;text-align:center;color:var(--ink-soft);">—</td>`;
+        const prom = Math.round((cell.s/cell.c)*10)/10;
+        rowS += cell.s; rowC += cell.c;
+        totalPorTrimestre[q].s += cell.s; totalPorTrimestre[q].c += cell.c;
+        return `<td style="padding:7px 10px;text-align:center;font-weight:600;color:${colorPorNota(prom)};">${prom.toFixed(1)}</td>`;
+      }).join('');
+      const rowProm = rowC ? Math.round((rowS/rowC)*10)/10 : 0;
+      totalGeneralS += rowS; totalGeneralC += rowC;
+      return `<tr><td style="padding:7px 10px;border-top:1px solid var(--line);">${escapeAttr(area)}</td>${celdas}<td style="padding:7px 10px;text-align:center;font-weight:700;background:#F4F4EF;border-top:1px solid var(--line);">${rowProm.toFixed(1)}</td></tr>`;
+    }).join('');
+
+    const totalRowCeldas = trimestres.map(q=>{
+      const t = totalPorTrimestre[q];
+      const prom = t.c ? Math.round((t.s/t.c)*10)/10 : 0;
+      return `<td style="padding:7px 10px;text-align:center;font-weight:700;">${prom.toFixed(1)}</td>`;
+    }).join('');
+    const totalGeneralProm = totalGeneralC ? Math.round((totalGeneralS/totalGeneralC)*10)/10 : 0;
+
+    return `
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+          <thead>
+            <tr style="background:var(--steel);color:#fff;">
+              <th style="padding:8px 10px;text-align:left;">Área</th>
+              ${trimestres.map(q=>`<th style="padding:8px 10px;text-align:center;">${q}</th>`).join('')}
+              <th style="padding:8px 10px;text-align:center;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filasHtml}
+            <tr style="background:var(--lock-soft,#E7E8E1);font-weight:700;">
+              <td style="padding:8px 10px;border-top:2px solid var(--line-strong);">Total general</td>
+              ${totalRowCeldas.replace(/<td/g, '<td style="border-top:2px solid var(--line-strong);"')}
+              <td style="padding:8px 10px;text-align:center;border-top:2px solid var(--line-strong);">${totalGeneralProm.toFixed(1)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // Gráfico de barras (Chart.js): nota promedio por Área, filtrable por mes
+  let gembaChartInstance = null;
+  function renderGraficoNotas(filas){
+    const selectEl = document.getElementById('dashFiltroMes');
+    if(!selectEl) return;
+    const meses = [...new Set(filas.map(r=>r.mes).filter(Boolean))].sort();
+    if(!meses.length){
+      selectEl.innerHTML = '<option value="">Sin datos</option>';
+      if(gembaChartInstance){ gembaChartInstance.destroy(); gembaChartInstance = null; }
+      return;
+    }
+    const valorPrevio = selectEl.value;
+    selectEl.innerHTML = meses.map(m=>`<option value="${m}">${m}</option>`).join('');
+    selectEl.value = meses.includes(valorPrevio) ? valorPrevio : meses[meses.length - 1];
+
+    function dibujar(mes){
+      const filtradas = filas.filter(r=>r.mes === mes);
+      const porArea = promedioNota(filtradas, r=>r.area);
+      const canvas = document.getElementById('dashChartNotas');
+      if(!canvas) return;
+      if(gembaChartInstance){ gembaChartInstance.destroy(); }
+      gembaChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: porArea.map(d=>d.label),
+          datasets: [{
+            label: 'Nota promedio',
+            data: porArea.map(d=>d.promedio),
+            backgroundColor: porArea.map(d=>colorPorNota(d.promedio)),
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            title: { display: true, text: 'Notas por Turno / Área — ' + mes, font: { size: 13 } }
+          },
+          scales: { y: { beginAtZero: true, max: 7, ticks: { stepSize: 1 } } }
+        }
+      });
+    }
+
+    selectEl.onchange = ()=> dibujar(selectEl.value);
+    dibujar(selectEl.value);
+  }
+
+  // Convierte 'dd-MM-yyyy HH:mm' a timestamp, para poder ordenar el historial de más nuevo a más antiguo
+  function parseFechaGemba(str){
+    if(!str) return 0;
+    const m = String(str).match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/);
+    if(!m) return 0;
+    return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]).getTime();
+  }
+
+  let gembaHistorialPorId = {};
+
+  // Reconstruye las respuestas de un Gemba puntual usando el mismo esquema (GEMBA_FORMS)
+  // que se usó para llenarlo, cruzado con el JSON crudo de respuestas guardado en Sheets.
+  function renderDetalleGemba(r){
+    const schema = GEMBA_FORMS[r.tipoGembaId];
+    let respuestas = {};
+    try{ respuestas = JSON.parse(r.respuestas || '{}'); } catch(e){ /* sin respuestas parseables */ }
+
+    let html = '';
+    if(schema){
+      schema.secciones.forEach(sec=>{
+        const filasCampos = sec.campos.map(campo=>{
+          if(campo.tipo === 'conforme'){
+            const val = respuestas[campo.id];
+            const etiqueta = val === 'conforme' ? 'Conforme' : val === 'no_conforme' ? 'No conforme' : val === 'no_aplica' ? 'No aplica' : 'Sin responder';
+            const color = val === 'conforme' ? 'var(--green)' : val === 'no_conforme' ? 'var(--flag)' : 'var(--ink-soft)';
+            const bg = val === 'conforme' ? 'var(--green-soft)' : val === 'no_conforme' ? 'var(--flag-soft)' : '#F1F1EC';
+            return `<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #EFEFEA;font-size:12.5px;">
+              <span style="flex:1;">${escapeAttr(campo.label)}</span>
+              <span style="flex-shrink:0;padding:2px 10px;border-radius:20px;font-weight:600;color:${color};background:${bg};white-space:nowrap;">${etiqueta}</span>
+            </div>`;
+          }
+          if(campo.tipo === 'comentario' || campo.tipo === 'textarea'){
+            const val = (respuestas[campo.id] || '').trim();
+            if(!val) return '';
+            return `<div style="padding:6px 0;font-size:12.5px;"><strong>${escapeAttr(campo.label)}:</strong> ${escapeAttr(val)}</div>`;
+          }
+          if(campo.tipo === 'estrellas'){
+            const val = respuestas[campo.id];
+            if(!val) return '';
+            return `<div style="padding:6px 0;font-size:12.5px;"><strong>${escapeAttr(campo.label)}:</strong> ${escapeAttr(String(val))} / ${campo.max || 10} ★</div>`;
+          }
+          if(campo.tipo === 'texto' || campo.tipo === 'editableselect'){
+            const val = (respuestas[campo.id] || '').trim();
+            if(!val) return '';
+            return `<div style="padding:6px 0;font-size:12.5px;"><strong>${escapeAttr(campo.label)}:</strong> ${escapeAttr(val)}</div>`;
+          }
+          return '';
+        }).filter(Boolean).join('');
+        if(!filasCampos) return;
+        html += `<div style="margin-top:12px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:13.5px;color:var(--steel);margin-bottom:4px;">${escapeAttr(sec.titulo)}</div>
+          ${filasCampos}
+        </div>`;
+      });
+    }
+    if(r.pdfLink){
+      html += `<div style="margin-top:14px;"><a href="${escapeAttr(r.pdfLink)}" target="_blank" rel="noopener" class="btn ghost" style="display:inline-block;text-decoration:none;">📄 Ver PDF de este Gemba</a></div>`;
+    }
+    return html || '<div class="resumen-empty">Sin detalle disponible para este Gemba.</div>';
+  }
+
+  function renderHistorialGembas(filas){
+    const contenedor = document.getElementById('dashHistorialArea');
+    if(!contenedor) return;
+    gembaHistorialPorId = {};
+    filas.forEach(r=> gembaHistorialPorId[r.id] = r);
+
+    const ordenadas = [...filas].sort((a,b)=> parseFechaGemba(b.fecha) - parseFechaGemba(a.fecha));
+    if(!ordenadas.length){
+      contenedor.innerHTML = '<div class="resumen-empty">Sin Gembas registrados todavía.</div>';
+      return;
+    }
+
+    contenedor.innerHTML = ordenadas.map(r=>{
+      const esConf = r.tipoGembaId === 'confirmacion';
+      const titulo = esConf ? (r.equipo || r.usuario || 'Confirmación de Estándar') : (r.tipoGemba || 'Gemba');
+      const sub = esConf ? [r.area, r.usuario].filter(Boolean).join(' · ') : [r.turno, r.auditor].filter(Boolean).join(' · ');
+      return `
+        <div style="border-bottom:1px solid var(--line);">
+          <button type="button" class="gemba-hist-head" data-hist-id="${escapeAttr(r.id)}" style="width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;background:none;border:none;cursor:pointer;text-align:left;font-family:inherit;">
+            <span>
+              <strong style="font-size:13px;color:var(--ink);">${escapeAttr(titulo)}</strong>
+              <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">${escapeAttr(sub)} · ${escapeAttr(r.fecha)}</div>
+            </span>
+            <span style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+              <strong style="color:${colorPorNota(r.nota)};">${Number(r.nota || 0).toFixed(1)} / 7.0</strong>
+              <span class="gemba-hist-caret" style="font-size:15px;color:var(--ink-soft);">▾</span>
+            </span>
+          </button>
+          <div class="gemba-hist-body" id="hist-body-${escapeAttr(r.id)}" style="display:none;padding:2px 2px 16px;"></div>
+        </div>
+      `;
+    }).join('');
+
+    contenedor.querySelectorAll('.gemba-hist-head').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.histId;
+        const body = document.getElementById('hist-body-' + id);
+        const caret = btn.querySelector('.gemba-hist-caret');
+        const abierto = body.style.display !== 'none';
+        if(abierto){
+          body.style.display = 'none';
+          caret.textContent = '▾';
+        } else {
+          if(!body.dataset.cargado){
+            body.innerHTML = renderDetalleGemba(gembaHistorialPorId[id]);
+            body.dataset.cargado = '1';
+          }
+          body.style.display = 'block';
+          caret.textContent = '▴';
+        }
+      });
+    });
+  }
+
   async function cargarDashboardGemba(){
     const area = document.getElementById('gembaDashboardArea');
     area.innerHTML = '<div class="resumen-empty">Cargando dashboard…</div>';
@@ -2745,7 +2984,27 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           </div>
           <div class="sub" id="dashResumenTexto"></div>
         </div>
+
+        <div class="section-card" style="margin-bottom:14px;">
+          <div class="sku-section-head">
+            <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Notas por Turno / Área</h4>
+            <select class="gemba-input" id="dashFiltroMes" style="max-width:150px;"></select>
+          </div>
+          <div style="height:260px;"><canvas id="dashChartNotas"></canvas></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom:14px;">
+          <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 12px;">Nota promedio por Área y Trimestre</h4>
+          <div id="dashPivotArea"></div>
+        </div>
+
         <div id="dashTablasArea"></div>
+
+        <div class="section-card">
+          <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 6px;">Historial de Gembas</h4>
+          <div class="sub" style="margin-bottom:6px;">Toca un Gemba para ver el detalle de sus respuestas.</div>
+          <div id="dashHistorialArea"></div>
+        </div>
       `;
 
       function render(filtro){
@@ -2754,6 +3013,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         const notaGeneral = totalGembas ? Math.round((filas.reduce((s,r)=>s+Number(r.nota||0),0)/totalGembas)*10)/10 : 0;
         document.getElementById('dashResumenTexto').innerHTML =
           `<strong>${totalGembas}</strong> Gemba(s) realizados · Nota general promedio: <strong style="color:${colorPorNota(notaGeneral)};">${notaGeneral.toFixed(1)} / 7.0</strong>`;
+
+        renderGraficoNotas(filas);
+        document.getElementById('dashPivotArea').innerHTML = renderPivotTrimestre(filas);
 
         const porMes = promedioNota(filas, r => r.mes);
         const porTrimestre = promedioNota(filas, r => r.anio && r.trimestre ? r.anio + ' ' + r.trimestre : '');
@@ -2767,6 +3029,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           renderDashboardTabla('Nota promedio por semestre', porSemestre) +
           renderDashboardTabla('Nota promedio por año completo', porAnio) +
           renderDashboardTabla('Nota promedio por Turno / Área', porArea);
+
+        renderHistorialGembas(filas);
       }
 
       document.getElementById('dashFiltroTipo').addEventListener('change', (e)=> render(e.target.value));
