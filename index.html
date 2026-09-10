@@ -640,7 +640,6 @@
   }
   .zoomable{cursor:zoom-in;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <div class="sheet">
@@ -3176,96 +3175,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     return new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
   }
 
-  async function generarGembaPdfBase64(){
-    const el = document.getElementById('gembaReportPrintArea');
-    await esperarPintado();
-    return html2pdf().set({
-      margin: 10,
-      html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY, windowWidth: el.scrollWidth, windowHeight: el.scrollHeight },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(el).outputPdf('datauristring');
-  }
-
-  async function descargarGembaPdf(schema, r){
-    const el = document.getElementById('gembaReportPrintArea');
-    const nombreSchemaLimpio = schema.nombre.replace(/\s+/g,'_');
-    const nombreArchivo = `Gemba_${nombreSchemaLimpio}_${new Date().toISOString().slice(0,10)}.pdf`;
-    await esperarPintado();
-    html2pdf().set({
-      margin: 10,
-      filename: nombreArchivo,
-      html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY, windowWidth: el.scrollWidth, windowHeight: el.scrollHeight },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(el).save();
-  }
-
-  async function enviarGembaPorCorreo(schema, r){
-    const btn = document.getElementById('gembaEmailBtn');
-    const msg = document.getElementById('gembaEmailMsg');
-    btn.disabled = true;
-    btn.textContent = 'Generando PDF…';
-    msg.textContent = '';
-    msg.className = 'ingest-msg';
-    try{
-      const pdfBase64 = await generarGembaPdfBase64();
-      btn.textContent = 'Enviando correo…';
-      const payload = {
-        modulo: 'gemba',
-        accion: 'email',
-        tipoGemba: schema.nombre,
-        tipoGembaId: schema.id,
-        auditor: gembaRespuestas.auditor || gembaRespuestas.equipo || '',
-        usuario: gembaRespuestas.usuario || '',
-        turno: gembaRespuestas.turno || gembaRespuestas.area || '',
-        proceso: gembaRespuestas.proceso || '',
-        instructivo: gembaRespuestas.instructivo || '',
-        lider: gembaRespuestas.lider || '',
-        nota: r.nota,
-        estado: r.estado,
-        conformes: r.conformes,
-        noConformes: r.noConformes,
-        noAplica: r.noAplica,
-        totalEvaluados: r.totalEvaluados,
-        estrellas: r.estrellas,
-        estrellasMax: r.estrellasMax,
-        planAccion: gembaRespuestas.plan || '',
-        observaciones: gembaRespuestas.observaciones || '',
-        recomendaciones: gembaRespuestas.recomendaciones || '',
-        respuestas: JSON.stringify(gembaRespuestas),
-        fotos: gembaFotos,
-        pdfBase64: pdfBase64
-      };
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if(data.ok){
-        msg.textContent = '✓ Correo enviado con el PDF y las fotos adjuntas.';
-        msg.className = 'ingest-msg ok';
-      } else {
-        msg.textContent = '⚠️ ' + (data.error || 'No se pudo enviar el correo.');
-        msg.className = 'ingest-msg err';
-      }
-    } catch(err){
-      msg.textContent = '⚠️ No se pudo generar o enviar el PDF. Revisa tu conexión.';
-      msg.className = 'ingest-msg err';
-    }
-    btn.disabled = false;
-    btn.textContent = '✉️ Enviar por correo';
-  }
-
-  async function guardarGembaEnBackend(schema, r){
-    let pdfBase64 = '';
-    try{
-      pdfBase64 = await generarGembaPdfBase64();
-    } catch(err){
-      console.warn('No se pudo generar el PDF para guardar en Drive:', err);
-    }
-    const payload = {
+  // Arma el payload común que se envía al backend para guardar, descargar o enviar por correo
+  function buildGembaPayload(schema, r, accion){
+    return {
       modulo: 'gemba',
-      accion: 'guardar',
+      accion: accion,
       tipoGemba: schema.nombre,
       tipoGembaId: schema.id,
       auditor: gembaRespuestas.auditor || gembaRespuestas.equipo || '',
@@ -3286,9 +3200,78 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       observaciones: gembaRespuestas.observaciones || '',
       recomendaciones: gembaRespuestas.recomendaciones || '',
       respuestas: JSON.stringify(gembaRespuestas),
-      fotos: gembaFotos,
-      pdfBase64: pdfBase64
+      detalleSecciones: JSON.stringify(r.detallePorSeccion || []),
+      fotos: gembaFotos
     };
+  }
+
+  function descargarBlobBase64(base64DataUri, nombreArchivo){
+    const link = document.createElement('a');
+    link.href = base64DataUri;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async function descargarGembaPdf(schema, r){
+    const btn = document.getElementById('gembaPdfBtn');
+    const msg = document.getElementById('gembaEmailMsg');
+    btn.disabled = true;
+    btn.textContent = 'Generando PDF…';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(buildGembaPayload(schema, r, 'descargarPdf'))
+      });
+      const data = await res.json();
+      if(data.ok && data.pdfBase64){
+        const nombreArchivo = `Gemba_${schema.nombre.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`;
+        descargarBlobBase64(data.pdfBase64, nombreArchivo);
+      } else {
+        msg.textContent = '⚠️ No se pudo generar el PDF.';
+        msg.className = 'ingest-msg err';
+      }
+    } catch(err){
+      msg.textContent = '⚠️ No se pudo conectar con el servidor para generar el PDF.';
+      msg.className = 'ingest-msg err';
+    }
+    btn.disabled = false;
+    btn.textContent = '⬇ Descargar PDF';
+  }
+
+  async function enviarGembaPorCorreo(schema, r){
+    const btn = document.getElementById('gembaEmailBtn');
+    const msg = document.getElementById('gembaEmailMsg');
+    btn.disabled = true;
+    btn.textContent = 'Generando PDF y enviando…';
+    msg.textContent = '';
+    msg.className = 'ingest-msg';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(buildGembaPayload(schema, r, 'email'))
+      });
+      const data = await res.json();
+      if(data.ok){
+        msg.textContent = '✓ Correo enviado con el PDF y las fotos adjuntas.';
+        msg.className = 'ingest-msg ok';
+      } else {
+        msg.textContent = '⚠️ ' + (data.error || 'No se pudo enviar el correo.');
+        msg.className = 'ingest-msg err';
+      }
+    } catch(err){
+      msg.textContent = '⚠️ No se pudo generar o enviar el PDF. Revisa tu conexión.';
+      msg.className = 'ingest-msg err';
+    }
+    btn.disabled = false;
+    btn.textContent = '✉️ Enviar por correo';
+  }
+
+  async function guardarGembaEnBackend(schema, r){
+    const payload = buildGembaPayload(schema, r, 'guardar');
     try{
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
