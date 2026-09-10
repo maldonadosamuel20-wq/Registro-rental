@@ -2802,7 +2802,16 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   let gembaChartInstance = null;
   function renderGraficoNotas(filas){
     const selectEl = document.getElementById('dashFiltroMes');
-    if(!selectEl) return;
+    const canvas = document.getElementById('dashChartNotas');
+    if(!selectEl || !canvas) return;
+
+    if(typeof Chart === 'undefined'){
+      selectEl.innerHTML = '';
+      const wrap = canvas.parentElement;
+      if(wrap) wrap.innerHTML = '<div class="resumen-empty">No se pudo cargar la librería de gráficos (revisa la conexión a internet o si tu red bloquea cdnjs.cloudflare.com). El resto del Dashboard funciona igual.</div>';
+      return;
+    }
+
     const meses = [...new Set(filas.map(r=>r.mes).filter(Boolean))].sort();
     if(!meses.length){
       selectEl.innerHTML = '<option value="">Sin datos</option>';
@@ -2967,7 +2976,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     try{
       const res = await fetch(APPS_SCRIPT_URL + '?action=historial_gemba');
       const data = await res.json();
-      if(!data.ok){ area.innerHTML = '<div class="resumen-empty">No se pudo cargar el dashboard.</div>'; return; }
+      if(!data.ok){
+        area.innerHTML = '<div class="resumen-empty">No se pudo cargar el dashboard.' +
+          (data.error ? '<br><span style="font-size:11px;color:var(--ink-soft);">Detalle técnico: ' + escapeAttr(data.error) + '</span>' : '') +
+          '</div>';
+        return;
+      }
 
       const eo = (data.eo || []).map(r => ({...r, area: r.turno}));
       const conf = (data.confirmacion || []).map(r => ({...r, area: r.area}));
@@ -3014,29 +3028,38 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         document.getElementById('dashResumenTexto').innerHTML =
           `<strong>${totalGembas}</strong> Gemba(s) realizados · Nota general promedio: <strong style="color:${colorPorNota(notaGeneral)};">${notaGeneral.toFixed(1)} / 7.0</strong>`;
 
-        renderGraficoNotas(filas);
-        document.getElementById('dashPivotArea').innerHTML = renderPivotTrimestre(filas);
+        try{ renderGraficoNotas(filas); }
+        catch(e){ console.warn('Dashboard: error en el gráfico', e); const c = document.getElementById('dashChartNotas'); if(c && c.parentElement) c.parentElement.innerHTML = '<div class="resumen-empty">No se pudo dibujar el gráfico.</div>'; }
 
-        const porMes = promedioNota(filas, r => r.mes);
-        const porTrimestre = promedioNota(filas, r => r.anio && r.trimestre ? r.anio + ' ' + r.trimestre : '');
-        const porSemestre = promedioNota(filas, r => r.anio && r.semestre ? r.anio + ' ' + r.semestre : '');
-        const porAnio = promedioNota(filas, r => r.anio);
-        const porArea = promedioNota(filas, r => r.area);
+        try{ document.getElementById('dashPivotArea').innerHTML = renderPivotTrimestre(filas); }
+        catch(e){ console.warn('Dashboard: error en la tabla pivote', e); document.getElementById('dashPivotArea').innerHTML = '<div class="resumen-empty">No se pudo generar la tabla.</div>'; }
 
-        document.getElementById('dashTablasArea').innerHTML =
-          renderDashboardTabla('Nota promedio por mes', porMes) +
-          renderDashboardTabla('Nota promedio por trimestre', porTrimestre) +
-          renderDashboardTabla('Nota promedio por semestre', porSemestre) +
-          renderDashboardTabla('Nota promedio por año completo', porAnio) +
-          renderDashboardTabla('Nota promedio por Turno / Área', porArea);
+        try{
+          const porMes = promedioNota(filas, r => r.mes);
+          const porTrimestre = promedioNota(filas, r => r.anio && r.trimestre ? r.anio + ' ' + r.trimestre : '');
+          const porSemestre = promedioNota(filas, r => r.anio && r.semestre ? r.anio + ' ' + r.semestre : '');
+          const porAnio = promedioNota(filas, r => r.anio);
+          const porArea = promedioNota(filas, r => r.area);
 
-        renderHistorialGembas(filas);
+          document.getElementById('dashTablasArea').innerHTML =
+            renderDashboardTabla('Nota promedio por mes', porMes) +
+            renderDashboardTabla('Nota promedio por trimestre', porTrimestre) +
+            renderDashboardTabla('Nota promedio por semestre', porSemestre) +
+            renderDashboardTabla('Nota promedio por año completo', porAnio) +
+            renderDashboardTabla('Nota promedio por Turno / Área', porArea);
+        } catch(e){ console.warn('Dashboard: error en las tablas de promedio', e); }
+
+        try{ renderHistorialGembas(filas); }
+        catch(e){ console.warn('Dashboard: error en el historial', e); document.getElementById('dashHistorialArea').innerHTML = '<div class="resumen-empty">No se pudo cargar el historial.</div>'; }
       }
 
       document.getElementById('dashFiltroTipo').addEventListener('change', (e)=> render(e.target.value));
       render('todos');
     } catch(err){
-      area.innerHTML = '<div class="resumen-empty">⚠️ No se pudo conectar con el servidor para cargar el dashboard.</div>';
+      area.innerHTML =
+        '<div class="resumen-empty">⚠️ No se pudo conectar con el servidor para cargar el dashboard.<br>' +
+        '<span style="font-size:11px;color:var(--ink-soft);">Detalle técnico: ' + escapeAttr(err && err.message ? err.message : String(err)) + '</span></div>';
+      console.error('Dashboard: fallo general', err);
     }
   }
 
