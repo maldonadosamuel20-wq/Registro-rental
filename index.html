@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro de ciclo de rental — Operación logística</title>
+<title>Operación Excelencia Operacional</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -51,8 +51,109 @@
   .brandmark p{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
 
   /* Section shell reused across the page */
+  .hero-banner{
+    position:relative;overflow:hidden;border-radius:var(--radius);margin-bottom:20px;
+    background:linear-gradient(120deg, var(--steel) 0%, var(--steel-2) 55%, #2A3F4D 100%);
+    padding:26px 28px 20px;color:#fff;
+  }
+  .hero-banner-content h2{
+    font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin:0 0 4px;
+  }
+  .hero-banner-content p{font-size:13px;color:#D8E0E5;margin:0;}
+  .hero-track{
+    position:relative;height:52px;margin-top:18px;border-top:1px solid rgba(255,255,255,.15);
+    display:flex;align-items:center;justify-content:space-evenly;
+  }
+  .hero-icon{
+    font-size:24px;opacity:.55;animation:heroFloat 3.2s ease-in-out infinite;
+  }
+  @keyframes heroFloat{
+    0%, 100% { transform:translateY(0); }
+    50% { transform:translateY(-6px); }
+  }
+  .hero-truck{
+    position:absolute;left:104%;bottom:6px;font-size:28px;
+    animation:heroDrive 9s linear infinite;
+  }
+  @keyframes heroDrive{
+    0% { left:104%; }
+    100% { left:-40px; }
+  }
+  @media (max-width:520px){
+    .hero-banner-content h2{font-size:21px;}
+    .hero-icon{font-size:19px;}
+  }
+
+  .app-nav-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px;
+  }
+  .app-nav-card{
+    display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;
+    background:var(--panel);border:1.5px solid var(--line-strong);border-radius:var(--radius);
+    padding:16px 18px;cursor:pointer;font-family:inherit;transition:border-color .15s, background .15s;
+  }
+  .app-nav-card:hover{border-color:var(--steel-2);}
+  .app-nav-card.active{background:var(--steel);border-color:var(--steel);}
+  .app-nav-card.active .app-nav-label{color:#fff;}
+  .app-nav-card.active .app-nav-desc{color:#D8E0E5;}
+  .app-nav-icon{font-size:26px;line-height:1;margin-bottom:4px;}
+  .app-nav-label{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;color:var(--ink);}
+  .app-nav-desc{font-size:11.5px;color:var(--ink-soft);}
+
+  .gemba-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media (max-width:640px){.gemba-type-grid{grid-template-columns:1fr;}}
+  .gemba-type-card{
+    border:1px solid var(--line-strong);border-radius:var(--radius);padding:18px;cursor:pointer;
+    background:var(--panel);transition:border-color .12s;
+  }
+  .gemba-type-card:hover{border-color:var(--steel);}
+  .gemba-type-card.disabled{opacity:.5;cursor:not-allowed;}
+  .gemba-type-card h4{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;margin:0 0 4px;}
+  .gemba-type-card p{font-size:12.5px;color:var(--ink-soft);margin:0;}
+
+  .gemba-progress-sticky{
+    position:sticky;top:0;z-index:5;background:var(--panel);border:1px solid var(--line);
+    border-radius:6px;padding:12px 16px;margin:14px 0 8px;box-shadow:0 2px 8px rgba(0,0,0,.05);
+  }
+  .gemba-progress-bar-track{height:8px;border-radius:4px;background:var(--lock-soft);overflow:hidden;}
+  .gemba-progress-bar-fill{height:100%;background:var(--steel);border-radius:4px;transition:width .2s;}
+  .gemba-progress-text{font-size:12px;color:var(--ink-soft);margin-top:6px;font-weight:600;}
+
+  .gemba-section-title{
+    font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;margin:26px 0 4px;
+    padding-bottom:8px;border-bottom:1px solid var(--line);
+  }
+  .gemba-section-help{
+    font-size:12px;color:var(--ink-soft);background:#FAFAF7;border:1px solid var(--line);
+    border-radius:3px;padding:8px 12px;margin-bottom:14px;
+  }
+  .gemba-q{border-bottom:1px solid var(--line);padding:14px 0;}
+  .gemba-q:last-child{border-bottom:none;}
+  .gemba-q-label{font-size:14px;font-weight:500;margin-bottom:6px;}
+  .gemba-q-help{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+  .gemba-options{display:flex;gap:8px;flex-wrap:wrap;}
+  .gemba-opt{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;
+    border:1.5px solid var(--line-strong);background:#fff;color:var(--ink);cursor:pointer;
+  }
+  .gemba-opt.selected.ok{background:var(--green-soft);border-color:var(--green);color:var(--green);}
+  .gemba-opt.selected.bad{background:var(--flag-soft);border-color:var(--flag);color:var(--flag);}
+  .gemba-opt.selected.na{background:var(--lock-soft);border-color:var(--lock);color:var(--lock);}
+
+  .gemba-stars{display:flex;gap:4px;flex-wrap:wrap;}
+  .gemba-star{font-size:28px;line-height:1;cursor:pointer;color:var(--line-strong);user-select:none;}
+  .gemba-star.filled{color:var(--amber);}
+  .gemba-star-value{font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:600;}
+
+  .gemba-result-card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 22px;margin-bottom:16px;}
+  .gemba-score-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  .gemba-score-big{font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:700;line-height:1;}
+  .gemba-scale-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+  @media (max-width:640px){.gemba-scale-grid{grid-template-columns:repeat(2,1fr);}}
+  .gemba-scale-item{padding:8px 10px;border-radius:6px;text-align:center;font-size:11.5px;}
+
   .flow-buttons{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:10px;}
-  @media (max-width:600px){.flow-buttons{grid-template-columns:1fr;}}
+  @media (max-width:480px){.flow-buttons{grid-template-columns:1fr;}}
 
   .flow-substats{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
   @media (max-width:600px){.flow-substats{grid-template-columns:1fr;}}
@@ -539,6 +640,7 @@
   }
   .zoomable{cursor:zoom-in;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 <div class="sheet">
@@ -553,11 +655,43 @@
         </svg>
       </div>
       <div>
-        <h1>Registro de ciclo de rental</h1>
-        <p>Control fotográfico de salida, entrega y retorno · Operación logística</p>
+        <h1>Operación Excelencia Operacional</h1>
+        <p>Plataforma de gestión operativa</p>
       </div>
     </div>
   </header>
+
+  <!-- Banner -->
+  <div class="hero-banner">
+    <div class="hero-banner-content">
+      <h2>Excelencia en cada operación</h2>
+      <p>Rental, Gembas y toda la gestión operativa, en un solo lugar</p>
+    </div>
+    <div class="hero-track">
+      <span class="hero-icon" style="animation-delay:.2s;">📦</span>
+      <span class="hero-icon" style="animation-delay:.6s;">🏗️</span>
+      <span class="hero-icon" style="animation-delay:1s;">📋</span>
+      <span class="hero-icon" style="animation-delay:1.4s;">🔧</span>
+      <span class="hero-icon" style="animation-delay:1.8s;">📦</span>
+      <div class="hero-truck">🚚</div>
+    </div>
+  </div>
+
+  <!-- Menú de navegación entre módulos -->
+  <nav class="app-nav-grid" id="appNavGrid">
+    <button class="app-nav-card" id="navRentalBtn" type="button">
+      <span class="app-nav-icon">📦</span>
+      <span class="app-nav-label">Registro Rental</span>
+      <span class="app-nav-desc">Salida, entrega y retorno con fotos</span>
+    </button>
+    <button class="app-nav-card" id="navGembaBtn" type="button">
+      <span class="app-nav-icon">📋</span>
+      <span class="app-nav-label">Gembas</span>
+      <span class="app-nav-desc">Auditorías operacionales y notas</span>
+    </button>
+  </nav>
+
+  <div id="viewRental" style="display:none;">
 
   <!-- Acceso rápido a los dos flujos operativos -->
   <div class="flow-buttons">
@@ -895,6 +1029,22 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   </div>
 
+  </div><!-- fin #viewRental -->
+
+  <div id="viewGembas" style="display:none;">
+    <section class="section-card">
+      <div class="sku-section-head">
+        <h3 style="margin-bottom:0;">Gemba Walk</h3>
+        <button class="btn ghost" id="gembaDashboardBtn" type="button">📊 Ver Dashboard</button>
+      </div>
+      <div class="sub">Selecciona el tipo de Gemba a realizar.</div>
+      <div class="gemba-type-grid" id="gembaTypeGrid"></div>
+    </section>
+
+    <div id="gembaDashboardArea" style="display:none;"></div>
+    <div id="gembaFormArea"></div>
+  </div><!-- fin #viewGembas -->
+
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
 
@@ -1077,7 +1227,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       return;
     }
     mStagedWrap.style.display = 'block';
-    mSubmitBtn.textContent = `Cargar pedido (${manualStaged.length} línea${manualStaged.length===1?'':'s'})`;
+    const sufijoLinea = manualStaged.length===1 ? '' : 's';
+    mSubmitBtn.textContent = `Cargar pedido (${manualStaged.length} línea${sufijoLinea})`;
     mStagedTable.innerHTML = `
       <div class="staged-row head"><span>Pedido</span><span>SKU</span><span>Descripción</span><span>Cliente</span><span>Dirección</span><span>Tipo</span><span></span></div>
       ${manualStaged.map((r,i)=>`
@@ -1107,7 +1258,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       return;
     }
     manualStaged.push({pedido, sku, desc, cliente, direccion, tipo});
-    mMsg.textContent = `Línea agregada. Sigue agregando o presiona "Cargar pedido" cuando termines.`;
+    mMsg.textContent = 'Línea agregada. Sigue agregando o presiona "Cargar pedido" cuando termines.';
     mMsg.className = 'ingest-msg ok';
     document.getElementById('mSku').value = '';
     document.getElementById('mDesc').value = '';
@@ -1235,7 +1386,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     }
 
     bulkSummary.innerHTML = `<div class="ok-line">${ok} SKU cargados en ${pedidosSet.size} pedido(s).</div>` +
-      (errors.length ? `<div class="err-list">${errors.join('<br>')}</div>` : '');
+      (errors.length ? '<div class="err-list">' + errors.join('<br>') + '</div>' : '');
 
     if(ok > 0) bulkText.value = '';
 
@@ -1367,7 +1518,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const estado = st.fields.estado || '';
     const bits = [who, estado].filter(Boolean).join(' · ');
     let out = bits || 'Sin datos adicionales';
-    if(st.fields.obs) out += ` — ${st.fields.obs.length > 70 ? st.fields.obs.slice(0,70)+'…' : st.fields.obs}`;
+    if(st.fields.obs){
+      const obsTexto = st.fields.obs.length > 70 ? st.fields.obs.slice(0,70)+'…' : st.fields.obs;
+      out += ' — ' + obsTexto;
+    }
     return out;
   }
 
@@ -1418,7 +1572,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <tr class="pedido-row">
           <td data-toggle="${escapeAttr(pedido)}"><strong>${pedido}</strong></td>
           <td class="sku-count-cell">
-            <button class="table-plus" type="button" data-toggle-btn="${escapeAttr(pedido)}" aria-label="Ver SKU del pedido">${expanded ? '−' : '+'}</button>
+            <button class="table-plus" type="button" data-toggle-btn="${escapeAttr(pedido)}" aria-label="Ver SKU del pedido">${expanded ? "−" : "+"}</button>
             <span>${matchingCodes.length}</span>
           </td>
           <td data-toggle="${escapeAttr(pedido)}">${tipoPedidoLabel}</td>
@@ -1465,7 +1619,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <th>Pedido</th><th>SKU</th><th>Tipo</th><th>Fecha de creación</th>
         <th>Entrega</th><th>Recepción</th><th>Retiro</th><th>Recepción CD</th>
       </tr>
-      ${rowsHtml.join('')}
+      ${rowsHtml.join("")}
     `;
 
     resumenTable.querySelectorAll('[data-toggle-btn]').forEach(btn=>{
@@ -1540,7 +1694,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           <div class="pt-header-top">
             <div class="rt-info">
               <div class="rt-pedido">Pedido ${pedido}</div>
-              <div class="rt-meta">${matchingCodes.length} SKU · ${completos} completos${clientes.length ? ' · ' + clientes.join(', ') : ''} · Creado ${pedidoCreado}</div>
+              <div class="rt-meta">${matchingCodes.length} SKU · ${completos} completos${clientes.length ? " · " + clientes.join(", ") : ""} · Creado ${pedidoCreado}</div>
               <div class="pt-progress-row">
                 <div class="pt-progress-bar"><div class="pt-progress-fill" style="width:${pctAvance}%"></div></div>
                 <span class="pt-progress-pct">${pctAvance}%</span>
@@ -1592,15 +1746,22 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         ticket.innerHTML = `
           <div class="rt-header">
             <div class="rt-info">
-              <div class="rt-idline">${pedido} · ${sku.uid || 'sin ID'} · ${tipoLabel} · Creado ${creado}</div>
+              <div class="rt-idline">${pedido} · ${sku.uid || "sin ID"} · ${tipoLabel} · Creado ${creado}</div>
               <div class="rt-pedido">SKU ${code}</div>
-              <div class="rt-meta">${metaBits || 'Sin cliente/dirección registrados'}</div>
+              <div class="rt-meta">${metaBits || "Sin cliente/dirección registrados"}</div>
               <div class="rt-dates">
-                ${rel.map(i=>`<span>${ticketLabels[i]}: <strong>${sku.stages[i].done ? formatDate(sku.stages[i].timestamp) : 'Pendiente'}</strong></span>`).join('')}
+                ${rel.map(i=>{
+                  const valorEtapa = sku.stages[i].done ? formatDate(sku.stages[i].timestamp) : "Pendiente";
+                  return "<span>" + ticketLabels[i] + ": <strong>" + valorEtapa + "</strong></span>";
+                }).join("")}
               </div>
             </div>
             <div class="rt-stages">
-              ${rel.map(i=>`<span class="rt-stage ${sku.stages[i].done ? 'done' : ''}">${sku.stages[i].done ? '✓ ' : ''}${ticketLabels[i]}</span>`).join('')}
+              ${rel.map(i=>{
+                const claseDone = sku.stages[i].done ? "done" : "";
+                const check = sku.stages[i].done ? "✓ " : "";
+                return "<span class=\"rt-stage " + claseDone + "\">" + check + ticketLabels[i] + "</span>";
+              }).join("")}
             </div>
             <span class="rt-chevron">▾</span>
           </div>
@@ -1712,11 +1873,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       card.className = 'sku-card';
       card.innerHTML = `
         <div class="sku-code">${code}</div>
-        <div class="sku-uid">${sku.uid || ''} · ${tipoLabel}</div>
-        <div class="sku-desc">${sku.base.descripcion || 'Sin descripción'}</div>
-        <div class="sku-client">${sku.base.cliente || ''}</div>
-        <div class="sku-progress-bar"><div class="sku-progress-fill ${complete ? 'complete' : ''}" style="width:${(done/rel.length)*100}%"></div></div>
-        <div class="sku-status">${complete ? 'Ciclo completo' : done === 0 ? 'Sin iniciar' : `${done} de ${rel.length} etapas`}</div>
+        <div class="sku-uid">${sku.uid || ""} · ${tipoLabel}</div>
+        <div class="sku-desc">${sku.base.descripcion || "Sin descripción"}</div>
+        <div class="sku-client">${sku.base.cliente || ""}</div>
+        <div class="sku-progress-bar"><div class="sku-progress-fill ${complete ? "complete" : ""}" style="width:${(done/rel.length)*100}%"></div></div>
+        <div class="sku-status">${complete ? "Ciclo completo" : done === 0 ? "Sin iniciar" : `${done} de ${rel.length} etapas`}</div>
         <div class="sku-card-actions">
           <button class="sku-edit-btn" type="button" data-edit="${code}">✎ Editar</button>
           <button class="sku-delete-btn" type="button" data-delete="${code}">🗑 Eliminar</button>
@@ -1741,7 +1902,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     skuWorkspace.style.display = 'block';
     const sku = currentOrder.skus[code];
     const tipoLabel = sku.tipo === 'retiro' ? '🔄 Retiro' : '📦 Entrega';
-    workspaceTitle.innerHTML = `${code} <span class="muted">· Pedido ${currentOrder.pedido}${sku.uid ? ' · ID ' + sku.uid : ''} · ${tipoLabel}</span>`;
+    const sufijoId = sku.uid ? ' · ID ' + sku.uid : '';
+    workspaceTitle.innerHTML = `${code} <span class="muted">· Pedido ${currentOrder.pedido}${sufijoId} · ${tipoLabel}</span>`;
     renderAll();
   }
 
@@ -2324,7 +2486,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       renderResumen();
       if(currentOrder) renderSkuList();
       const now = new Date();
-      syncStatusEl.textContent = `Sincronizado ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      syncStatusEl.textContent = 'Sincronizado ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
     } catch(err){
       syncStatusEl.textContent = 'No se pudo conectar con Google Sheets.';
     }
@@ -2332,6 +2494,811 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   document.getElementById('syncBtn').addEventListener('click', loadHistorialFromBackend);
   loadHistorialFromBackend();
+
+  /* =====================================================================
+     MÓDULO: Navegación entre Registro Rental y Gembas
+  ===================================================================== */
+  const viewRental = document.getElementById('viewRental');
+  const viewGembas = document.getElementById('viewGembas');
+  document.getElementById('navRentalBtn').addEventListener('click', ()=>{
+    viewRental.style.display = 'block';
+    viewGembas.style.display = 'none';
+    document.getElementById('navRentalBtn').classList.add('active');
+    document.getElementById('navGembaBtn').classList.remove('active');
+  });
+  document.getElementById('navGembaBtn').addEventListener('click', ()=>{
+    viewRental.style.display = 'none';
+    viewGembas.style.display = 'block';
+    document.getElementById('navGembaBtn').classList.add('active');
+    document.getElementById('navRentalBtn').classList.remove('active');
+    renderGembaTypeGrid();
+    cargarListasGemba();
+  });
+
+  /* =====================================================================
+     MÓDULO: Gemba Walk (formularios, nota, PDF, guardado en Sheets)
+  ===================================================================== */
+
+  // Esquema del Gemba "Excelencia Operacional (EO)". El de "Confirmación de estándar"
+  // se agrega de la misma forma en GEMBA_FORMS.confirmacion cuando esté disponible.
+  const GEMBA_FORMS = {
+    eo: {
+      id: 'eo',
+      nombre: 'Excelencia Operacional (EO)',
+      descripcion: 'Evalúa limpieza, seguridad, estándares, recursos y participación del equipo.',
+      secciones: [
+        {
+          titulo: '1. Información General',
+          campos: [
+            {id:'auditor', tipo:'texto', label:'Auditor / Equipo', requerido:true},
+            {id:'turno', tipo:'editableselect', campoServidor:'turno', defaults:['Inbound','Picking','Despacho','Logística Inversa'], label:'Turno / Área', requerido:true},
+            {id:'lider', tipo:'texto', label:'Líder del Turno', requerido:true}
+          ]
+        },
+        {
+          titulo: 'Clasificación, Orden y Limpieza',
+          campos: [
+            {id:'q4', tipo:'conforme', label:'¿Los materiales, equipos e información necesarios para ejecutar la tarea están disponibles, correctamente identificados y ubicados en el lugar definido?'},
+            {id:'q5', tipo:'conforme', label:'¿El equipo mantiene el área limpia y ordenada durante y al cierre del turno — retirando residuos generados por la propia operación sin esperar intervención de otra área?', ayuda:'Verifica: piso libre de film, cartones y residuos propios del proceso. El estado del área al cierre refleja la disciplina del equipo, no la de limpieza externa.'},
+            {id:'q6', tipo:'conforme', label:'¿Papeleros definidos, rotulados y ubicados según el plano del sector?'},
+            {id:'q7', tipo:'conforme', label:'¿Zonas de tránsito delimitadas y respetadas?'},
+            {id:'q8', tipo:'conforme', label:'¿Zonas de Transpaletas delimitada y respetada?'},
+            {id:'q9', tipo:'conforme', label:'¿Zonas de Pallets delimitada y respetada?'},
+            {id:'q10', tipo:'conforme', label:'¿Zonas de Films delimitada y respetada?'},
+            {id:'q11', tipo:'conforme', label:'¿Zonas de Otros insumos delimitada y respetada?', ayuda:'Verifica: Otros insumos cartones, zunchos, esquineros, etiquetas, film burbuja, etc.'},
+            {id:'c1', tipo:'comentario', label:'Comentarios Generales', ayuda:'Agregar todas la observaciones identificadas'}
+          ]
+        },
+        {
+          titulo: '2. Seguridad y calidad',
+          campos: [
+            {id:'q13', tipo:'conforme', label:'¿Las señaléticas de emergencia y de evacuación están visibles?', requerido:true},
+            {id:'q14', tipo:'conforme', label:'¿Los extintores están despejados sin obstrucciones que impidan su uso en caso de emergencia?', requerido:true},
+            {id:'q15', tipo:'conforme', label:'¿La red húmeda y paneles eléctricos están despejados sin obstrucciones que impidan su uso en caso de emergencia?', requerido:true},
+            {id:'q16', tipo:'conforme', label:'Procedimientos de Seguridad: ¿Las puertas de los andenes que no están en operación se encuentran totalmente cerradas y con sus respectivos seguros puestos?', requerido:true},
+            {id:'q17', tipo:'conforme', label:'Productos: ¿Hay productos almacenados directamente en piso sin Pallets?', requerido:true},
+            {id:'q18', tipo:'conforme', label:'¿Se cumplen las normas de seguridad EPP?', requerido:true},
+            {id:'q19', tipo:'conforme', label:'¿Se ha realizado la charla de seguridad semanal?', requerido:true},
+            {id:'q20', tipo:'conforme', label:'¿El producto no conforme se encuentra identificado y marcada en su zona?', requerido:true},
+            {id:'c2', tipo:'comentario', label:'Comentarios Seguridad y Calidad', ayuda:'Agregar todas la observaciones identificadas como riesgo', requerido:true}
+          ]
+        },
+        {
+          titulo: '3. Cumplimiento de Normas y Estándares Operacionales',
+          ayudaSeccion: 'EQUIPO OPERACIONAL — Tenga a mano el instructivo de trabajo (IT) del proceso y el Plan de acción del Gemba anterior.',
+          campos: [
+            {id:'q22', tipo:'conforme', label:'Objetivos y KPIs: ¿Conoces los indicadores del área de trabajo? Comenta cuáles.', requerido:true},
+            {id:'q23', tipo:'conforme', label:'¿Los equipos de movimiento en operación (transpaletas, grúas) cuentan con su mantenimiento preventivo al día y sin alertas de falla pendientes de resolución?', requerido:true},
+            {id:'q24', tipo:'conforme', label:'Instructivos y Entrenamientos: ¿Conoces cuál es tu instructivo de trabajo y dónde lo puedes revisar?', requerido:true},
+            {id:'q25', tipo:'conforme', label:'Diálogos de desempeño: ¿En la semana anterior recibiste tu diálogo de desempeño formal?', requerido:true}
+          ]
+        },
+        {
+          titulo: '4. Participación activa del equipo',
+          campos: [
+            {id:'q26', tipo:'conforme', label:'¿Conoces la metodología 5S?'},
+            {id:'q27', tipo:'conforme', label:'¿Conoces la metodología Kaizen?'}
+          ]
+        },
+        {
+          titulo: '5. Desperdicios y oportunidades de mejora',
+          campos: [
+            {id:'plan', tipo:'textarea', label:'Plan de acción', requerido:true},
+            {id:'fotos', tipo:'fotos', label:'Foto (evidencia)', requerido:true}
+          ]
+        }
+      ]
+    },
+    confirmacion: {
+      id: 'confirmacion',
+      nombre: 'Confirmación de Estándar',
+      descripcion: 'El Gemba es la clave para impulsar la Mejora Continua en nuestra operación. Visitar el lugar donde ocurre el trabajo nos permite ver, aprender y mejorar juntos.',
+      secciones: [
+        {
+          titulo: '1. Información General',
+          campos: [
+            {id:'equipo', tipo:'texto', label:'Equipo (Personas que acompañan el Gemba)', requerido:true},
+            {id:'usuario', tipo:'texto', label:'Usuario', requerido:true},
+            {id:'area', tipo:'editableselect', campoServidor:'area', label:'Área', requerido:true},
+            {id:'proceso', tipo:'editableselect', campoServidor:'proceso', label:'Proceso', requerido:true},
+            {id:'instructivo', tipo:'texto', label:'Nombre del Instructivo de Trabajo', requerido:true},
+            {id:'observaciones', tipo:'textarea', label:'Observaciones', requerido:true},
+            {id:'recomendaciones', tipo:'textarea', label:'Recomendaciones', requerido:true},
+            {id:'evidencia', tipo:'fotos', label:'Agregar evidencia (fotos)', requerido:true},
+            {id:'calificacion', tipo:'estrellas', label:'Calificación del Proceso', max:10, requerido:true}
+          ]
+        }
+      ]
+    }
+  };
+
+  // Listas compartidas (Turno, Área, Proceso): viven en la hoja "Listas_Gemba", visibles para todos
+  let gembaListasRemotas = { turno: [], area: [], proceso: [] };
+  let gembaListasCargadas = false;
+
+  async function cargarListasGemba(){
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=listas_gemba');
+      const data = await res.json();
+      if(data.ok){
+        gembaListasRemotas = data.listas;
+        gembaListasCargadas = true;
+      }
+    } catch(err){
+      console.warn('No se pudieron cargar las listas compartidas de Gemba:', err);
+    }
+  }
+
+  function getEditableOpciones(campoServidor, defaults){
+    const remotas = gembaListasRemotas[campoServidor] || [];
+    return [...new Set([...(defaults||[]), ...remotas])];
+  }
+
+  async function addEditableOpcionRemota(campoServidor, valor){
+    if(!gembaListasRemotas[campoServidor]) gembaListasRemotas[campoServidor] = [];
+    if(!gembaListasRemotas[campoServidor].includes(valor)) gembaListasRemotas[campoServidor].push(valor);
+    try{
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ modulo: 'lista_gemba', campo: campoServidor, valor: valor })
+      });
+      showToast('✓ ' + valor + ' guardado — ya está disponible para todos', 'ok');
+    } catch(err){
+      console.warn('No se pudo guardar la nueva opción en Sheets:', err);
+      showToast('⚠️ ' + valor + ' se ve aquí, pero no se pudo guardar en Sheets (sin conexión con el servidor)', 'error');
+    }
+  }
+
+  function renderEditableOptions(selectEl, campoServidor, defaults, selected){
+    const opciones = getEditableOpciones(campoServidor, defaults);
+    selectEl.innerHTML = `<option value="">Selecciona la respuesta</option>` +
+      opciones.map(o=>{
+        const claseSel = o===selected ? 'selected' : '';
+        return '<option value="' + escapeAttr(o) + '" ' + claseSel + '>' + o + '</option>';
+      }).join('') +
+      `<option value="__add__">+ Agregar nueva opción…</option>`;
+  }
+
+  let gembaActivo = null;      // id del gemba seleccionado (ej. 'eo')
+  let gembaRespuestas = {};    // { campoId: valor }
+  let gembaFotos = [];         // fotos comprimidas en base64
+
+  /* ---------- Dashboard de Gembas (mes, trimestre, semestre, año, área) ---------- */
+  let gembaDashboardVisible = false;
+
+  document.getElementById('gembaDashboardBtn').addEventListener('click', ()=>{
+    gembaDashboardVisible = !gembaDashboardVisible;
+    const dashArea = document.getElementById('gembaDashboardArea');
+    const formArea = document.getElementById('gembaFormArea');
+    const typeGrid = document.getElementById('gembaTypeGrid').closest('.section-card');
+    dashArea.style.display = gembaDashboardVisible ? 'block' : 'none';
+    document.getElementById('gembaDashboardBtn').textContent = gembaDashboardVisible ? '← Volver a Gembas' : '📊 Ver Dashboard';
+    typeGrid.style.display = gembaDashboardVisible ? 'none' : 'block';
+    formArea.style.display = gembaDashboardVisible ? 'none' : 'block';
+    if(gembaDashboardVisible) cargarDashboardGemba();
+  });
+
+  function promedioNota(rows, keyFn){
+    const grupos = {};
+    rows.forEach(r=>{
+      const k = keyFn(r);
+      if(!k) return;
+      if(!grupos[k]) grupos[k] = {suma:0, cuenta:0};
+      grupos[k].suma += Number(r.nota) || 0;
+      grupos[k].cuenta++;
+    });
+    return Object.keys(grupos).sort().map(k=>({
+      label: k,
+      promedio: Math.round((grupos[k].suma/grupos[k].cuenta)*10)/10,
+      cantidad: grupos[k].cuenta
+    }));
+  }
+
+  function colorPorNota(n){
+    if(n < 3) return '#B44B36';
+    if(n < 5) return '#8A5D14';
+    if(n < 6.5) return '#78350F';
+    return '#4C7A5E';
+  }
+
+  function renderDashboardTabla(titulo, datos){
+    return `
+      <div class="section-card" style="margin-bottom:14px;">
+        <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 12px;">${titulo}</h4>
+        ${datos.length === 0 ? "<div class=\"resumen-empty\">Sin datos suficientes todavía.</div>" : datos.map(d=>{
+          const pct = Math.max(0, Math.min(100, Math.round((d.promedio/7)*100)));
+          const color = colorPorNota(d.promedio);
+          return `
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px;">
+                <span>${escapeAttr(d.label)} <span style="color:var(--ink-soft);">(${d.cantidad})</span></span>
+                <strong style="color:${color};">${d.promedio.toFixed(1)} / 7.0</strong>
+              </div>
+              <div class="pt-progress-bar" style="background:#E7E8E1;"><div class="pt-progress-fill" style="width:${pct}%;background:${color};"></div></div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  async function cargarDashboardGemba(){
+    const area = document.getElementById('gembaDashboardArea');
+    area.innerHTML = '<div class="resumen-empty">Cargando dashboard…</div>';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=historial_gemba');
+      const data = await res.json();
+      if(!data.ok){ area.innerHTML = '<div class="resumen-empty">No se pudo cargar el dashboard.</div>'; return; }
+
+      const eo = (data.eo || []).map(r => ({...r, area: r.turno}));
+      const conf = (data.confirmacion || []).map(r => ({...r, area: r.area}));
+
+      area.innerHTML = `
+        <div class="section-card">
+          <div class="sku-section-head">
+            <h3 style="margin-bottom:0;">Dashboard de Gembas</h3>
+            <select class="gemba-input" id="dashFiltroTipo" style="max-width:220px;">
+              <option value="todos">Todos los Gemba</option>
+              <option value="eo">Excelencia Operacional</option>
+              <option value="confirmacion">Confirmación de Estándar</option>
+            </select>
+          </div>
+          <div class="sub" id="dashResumenTexto"></div>
+        </div>
+        <div id="dashTablasArea"></div>
+      `;
+
+      function render(filtro){
+        const filas = filtro === 'eo' ? eo : filtro === 'confirmacion' ? conf : [...eo, ...conf];
+        const totalGembas = filas.length;
+        const notaGeneral = totalGembas ? Math.round((filas.reduce((s,r)=>s+Number(r.nota||0),0)/totalGembas)*10)/10 : 0;
+        document.getElementById('dashResumenTexto').innerHTML =
+          `<strong>${totalGembas}</strong> Gemba(s) realizados · Nota general promedio: <strong style="color:${colorPorNota(notaGeneral)};">${notaGeneral.toFixed(1)} / 7.0</strong>`;
+
+        const porMes = promedioNota(filas, r => r.mes);
+        const porTrimestre = promedioNota(filas, r => r.anio && r.trimestre ? r.anio + ' ' + r.trimestre : '');
+        const porSemestre = promedioNota(filas, r => r.anio && r.semestre ? r.anio + ' ' + r.semestre : '');
+        const porAnio = promedioNota(filas, r => r.anio);
+        const porArea = promedioNota(filas, r => r.area);
+
+        document.getElementById('dashTablasArea').innerHTML =
+          renderDashboardTabla('Nota promedio por mes', porMes) +
+          renderDashboardTabla('Nota promedio por trimestre', porTrimestre) +
+          renderDashboardTabla('Nota promedio por semestre', porSemestre) +
+          renderDashboardTabla('Nota promedio por año completo', porAnio) +
+          renderDashboardTabla('Nota promedio por Turno / Área', porArea);
+      }
+
+      document.getElementById('dashFiltroTipo').addEventListener('change', (e)=> render(e.target.value));
+      render('todos');
+    } catch(err){
+      area.innerHTML = '<div class="resumen-empty">⚠️ No se pudo conectar con el servidor para cargar el dashboard.</div>';
+    }
+  }
+
+  function renderGembaTypeGrid(){
+    const grid = document.getElementById('gembaTypeGrid');
+    const tarjetas = [
+      { id:'eo', nombre: GEMBA_FORMS.eo.nombre, desc: GEMBA_FORMS.eo.descripcion, disponible:true },
+      { id:'confirmacion', nombre: GEMBA_FORMS.confirmacion ? GEMBA_FORMS.confirmacion.nombre : 'Confirmación de estándar',
+        desc: GEMBA_FORMS.confirmacion ? GEMBA_FORMS.confirmacion.descripcion : 'Próximamente — falta cargar el listado de preguntas.',
+        disponible: !!GEMBA_FORMS.confirmacion }
+    ];
+    grid.innerHTML = tarjetas.map(t => `
+      <div class="gemba-type-card ${t.disponible ? "" : "disabled"}" data-gemba-type="${t.id}">
+        <h4>${t.nombre}</h4>
+        <p>${t.desc}</p>
+      </div>
+    `).join('');
+    grid.querySelectorAll('.gemba-type-card:not(.disabled)').forEach(card=>{
+      card.addEventListener('click', ()=> startGemba(card.dataset.gembaType));
+    });
+  }
+
+  async function startGemba(tipoId){
+    const schema = GEMBA_FORMS[tipoId];
+    if(!schema) return;
+    if(!gembaListasCargadas) await cargarListasGemba();
+    gembaActivo = tipoId;
+    gembaRespuestas = {};
+    gembaFotos = [];
+    renderGembaForm(schema);
+    document.getElementById('gembaFormArea').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function renderGembaForm(schema){
+    const area = document.getElementById('gembaFormArea');
+    let html = `<section class="section-card"><h3>${schema.nombre}</h3><div class="sub">${schema.descripcion}</div>
+      <div class="gemba-progress-sticky">
+        <div class="gemba-progress-bar-track"><div class="gemba-progress-bar-fill" id="gembaProgressFill" style="width:0%;"></div></div>
+        <div class="gemba-progress-text" id="gembaProgressText">0 de 0 preguntas respondidas · Nota actual: —</div>
+      </div>`;
+
+    schema.secciones.forEach(sec=>{
+      html += `<div class="gemba-section-title">${sec.titulo}</div>`;
+      if(sec.ayudaSeccion) html += `<div class="gemba-section-help">${sec.ayudaSeccion}</div>`;
+      sec.campos.forEach(campo=>{
+        html += `<div class="gemba-q" data-campo="${campo.id}">`;
+        const marcaRequerido = campo.requerido ? ' <span style="color:var(--flag);">*</span>' : '';
+        html += `<div class="gemba-q-label">${campo.label}${marcaRequerido}</div>`;
+        if(campo.ayuda) html += `<div class="gemba-q-help">→ ${campo.ayuda}</div>`;
+
+        if(campo.tipo === 'texto'){
+          html += `<input type="text" class="gemba-input" data-field="${campo.id}">`;
+        } else if(campo.tipo === 'editableselect'){
+          html += `<select class="gemba-input gemba-editableselect" data-field="${campo.id}"></select>`;
+        } else if(campo.tipo === 'select'){
+          html += `<select class="gemba-input" data-field="${campo.id}"><option value="">Selecciona la respuesta</option>${campo.opciones.map(o=>`<option value="${o}">${o}</option>`).join('')}</select>`;
+        } else if(campo.tipo === 'textarea' || campo.tipo === 'comentario'){
+          html += `<textarea class="gemba-input" data-field="${campo.id}" rows="3"></textarea>`;
+        } else if(campo.tipo === 'conforme'){
+          html += `<div class="gemba-options" data-field="${campo.id}">
+            <button type="button" class="gemba-opt" data-val="conforme">Conforme</button>
+            <button type="button" class="gemba-opt" data-val="no_conforme">No Conforme</button>
+            <button type="button" class="gemba-opt" data-val="no_aplica">No Aplica</button>
+          </div>`;
+        } else if(campo.tipo === 'estrellas'){
+          const max = campo.max || 10;
+          html += `<div class="gemba-stars" data-field="${campo.id}" data-max="${max}">`;
+          for(let i=1;i<=max;i++) html += `<span class="gemba-star" data-star="${i}">☆</span>`;
+          html += `</div><div class="gemba-star-value" id="starValue_${campo.id}">Sin calificar</div>`;
+        } else if(campo.tipo === 'fotos'){
+          html += `<div class="photobox" id="gembaPhotobox" style="min-height:120px;"></div><input type="file" id="gembaPhotoInput" accept="image/*" capture="environment" multiple style="display:none;">`;
+        }
+        html += `</div>`;
+      });
+    });
+
+    html += `
+      <div class="ingest-actions" style="margin-top:20px;">
+        <button class="btn primary" id="gembaSubmitBtn">Finalizar y calcular nota →</button>
+        <span class="ingest-msg" id="gembaMsg"></span>
+      </div>
+    </section>
+    <div id="gembaResultArea"></div>`;
+
+    area.innerHTML = html;
+
+    // Mapa rápido de campo id -> definición del campo (para leer campoServidor/defaults/max)
+    const campoById = {};
+    schema.secciones.forEach(sec => sec.campos.forEach(c => { campoById[c.id] = c; }));
+
+    // Listas desplegables editables (Turno/Área, Área, Proceso, etc.) — compartidas vía Sheets
+    area.querySelectorAll('.gemba-editableselect').forEach(sel=>{
+      const campo = campoById[sel.dataset.field];
+      renderEditableOptions(sel, campo.campoServidor, campo.defaults, gembaRespuestas[campo.id] || '');
+    });
+
+    // Opciones Conforme/No Conforme/No Aplica
+    area.querySelectorAll('.gemba-options').forEach(group=>{
+      group.querySelectorAll('.gemba-opt').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const field = group.dataset.field;
+          gembaRespuestas[field] = btn.dataset.val;
+          group.querySelectorAll('.gemba-opt').forEach(b=>{
+            b.classList.remove('selected','ok','bad','na');
+          });
+          btn.classList.add('selected', btn.dataset.val === 'conforme' ? 'ok' : (btn.dataset.val === 'no_conforme' ? 'bad' : 'na'));
+          updateGembaProgress(schema);
+        });
+      });
+    });
+
+    // Calificación por estrellas
+    area.querySelectorAll('.gemba-stars').forEach(group=>{
+      const field = group.dataset.field;
+      const max = parseInt(group.dataset.max);
+      group.querySelectorAll('.gemba-star').forEach(star=>{
+        star.addEventListener('click', ()=>{
+          const val = parseInt(star.dataset.star);
+          gembaRespuestas[field] = val;
+          group.querySelectorAll('.gemba-star').forEach(s=>{
+            const activo = parseInt(s.dataset.star) <= val;
+            s.textContent = activo ? '★' : '☆';
+            s.classList.toggle('filled', activo);
+          });
+          const valueEl = document.getElementById('starValue_' + field);
+          if(valueEl) valueEl.textContent = `${val} / ${max}`;
+          updateGembaProgress(schema);
+        });
+      });
+    });
+
+    // Texto / select / textarea / listas editables
+    area.querySelectorAll('input.gemba-input, select.gemba-input, textarea.gemba-input').forEach(el=>{
+      el.addEventListener('input', ()=>{
+        gembaRespuestas[el.dataset.field] = el.value;
+        updateGembaProgress(schema);
+      });
+      el.addEventListener('change', ()=>{
+        if(el.classList.contains('gemba-editableselect') && el.value === '__add__'){
+          const campo = campoById[el.dataset.field];
+          const nueva = prompt('Escribe la nueva opción para "' + campo.label + '":');
+          if(nueva && nueva.trim()){
+            const valor = nueva.trim();
+            const campoServidor = campo.campoServidor;
+            if(!gembaListasRemotas[campoServidor]) gembaListasRemotas[campoServidor] = [];
+            if(!gembaListasRemotas[campoServidor].includes(valor)) gembaListasRemotas[campoServidor].push(valor);
+            renderEditableOptions(el, campoServidor, campo.defaults, valor);
+            gembaRespuestas[el.dataset.field] = valor;
+            addEditableOpcionRemota(campoServidor, valor); // se guarda en Sheets en segundo plano
+          } else {
+            renderEditableOptions(el, campo.campoServidor, campo.defaults, gembaRespuestas[el.dataset.field] || '');
+          }
+        } else {
+          gembaRespuestas[el.dataset.field] = el.value;
+        }
+        updateGembaProgress(schema);
+      });
+    });
+
+    // Fotos
+    renderGembaPhotobox();
+    const gembaPhotoInput = document.getElementById('gembaPhotoInput');
+    gembaPhotoInput.addEventListener('change', async (e)=>{
+      const files = Array.from(e.target.files || []);
+      for(const file of files){
+        const dataUrl = await new Promise(res=>{
+          const reader = new FileReader();
+          reader.onload = ev => res(ev.target.result);
+          reader.readAsDataURL(file);
+        });
+        const compressed = await compressImage(dataUrl);
+        gembaFotos.push(compressed);
+      }
+      renderGembaPhotobox();
+      gembaPhotoInput.value = '';
+    });
+
+    document.getElementById('gembaSubmitBtn').addEventListener('click', ()=> finalizarGemba(schema));
+    updateGembaProgress(schema);
+  }
+
+  function updateGembaProgress(schema){
+    const fill = document.getElementById('gembaProgressFill');
+    const text = document.getElementById('gembaProgressText');
+    if(!fill || !text) return;
+    let totalPreguntas = 0, respondidas = 0;
+    schema.secciones.forEach(sec=>{
+      sec.campos.forEach(campo=>{
+        if(campo.tipo === 'fotos') return; // las fotos se cuentan aparte, no como "pregunta"
+        totalPreguntas++;
+        const val = gembaRespuestas[campo.id];
+        if(val !== undefined && val !== null && val !== '') respondidas++;
+      });
+    });
+    const pct = totalPreguntas ? Math.round((respondidas/totalPreguntas)*100) : 0;
+    fill.style.width = pct + '%';
+    const r = calcularNotaGemba(schema);
+    const notaTxt = r.totalEvaluados > 0 ? r.nota.toFixed(1) + ' / 7.0' : '—';
+    const detalle = (r.conformes || r.noConformes || r.noAplica)
+      ? ` · ${r.conformes} conformes · ${r.noConformes} no conformes · ${r.noAplica} no aplica`
+      : (r.estrellas !== null ? ` · Calificación: ${r.estrellas} / ${r.estrellasMax} ★` : '');
+    text.textContent = `${respondidas} de ${totalPreguntas} campos respondidos (${pct}%) · Nota actual: ${notaTxt}${detalle}`;
+  }
+
+  function renderGembaPhotobox(){
+    const box = document.getElementById('gembaPhotobox');
+    if(!box) return;
+    box.innerHTML = '';
+    gembaFotos.forEach((src, idx)=>{
+      const thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      thumb.innerHTML = `<img class="zoomable" src="${escapeAttr(src)}" data-src="${escapeAttr(src)}"><button class="rm-btn" type="button">×</button>`;
+      thumb.querySelector('.rm-btn').addEventListener('click', ()=>{ gembaFotos.splice(idx,1); renderGembaPhotobox(); });
+      box.appendChild(thumb);
+    });
+    const addTile = document.createElement('div');
+    addTile.className = 'photo-add-tile';
+    addTile.innerHTML = `<span class="plus">+</span><span class="add-label">Agregar foto</span>`;
+    addTile.addEventListener('click', ()=> document.getElementById('gembaPhotoInput').click());
+    box.appendChild(addTile);
+  }
+
+  function calcularNotaGemba(schema){
+    let conformes = 0, noConformes = 0, noAplica = 0;
+    let estrellas = null, estrellasMax = 10;
+    const detallePorSeccion = [];
+    schema.secciones.forEach(sec=>{
+      const items = [];
+      sec.campos.forEach(campo=>{
+        if(campo.tipo === 'conforme'){
+          const val = gembaRespuestas[campo.id];
+          if(val === 'conforme') conformes++;
+          else if(val === 'no_conforme') noConformes++;
+          else if(val === 'no_aplica') noAplica++;
+          items.push({label: campo.label, val: val || 'sin_responder'});
+        } else if(campo.tipo === 'estrellas'){
+          estrellasMax = campo.max || 10;
+          if(gembaRespuestas[campo.id]) estrellas = Number(gembaRespuestas[campo.id]);
+        }
+      });
+      if(items.length) detallePorSeccion.push({titulo: sec.titulo, items});
+    });
+
+    let totalEvaluados, nota;
+    if(conformes + noConformes > 0){
+      totalEvaluados = conformes + noConformes;
+      nota = Math.round((conformes / totalEvaluados) * 7 * 10) / 10;
+    } else if(estrellas !== null){
+      totalEvaluados = 1;
+      nota = Math.round((estrellas / estrellasMax) * 7 * 10) / 10;
+    } else {
+      totalEvaluados = 0;
+      nota = 0;
+    }
+
+    let estado, colorClass;
+    if(nota < 3){ estado = 'Crítico'; colorClass = 'crit'; }
+    else if(nota < 5){ estado = 'Deficiente'; colorClass = 'defi'; }
+    else if(nota < 6.5){ estado = 'En desarrollo'; colorClass = 'dev'; }
+    else { estado = 'Conforme'; colorClass = 'ok'; }
+    return { conformes, noConformes, noAplica, totalEvaluados, nota, estado, colorClass, detallePorSeccion, estrellas, estrellasMax };
+  }
+
+  async function finalizarGemba(schema){
+    // Validación básica de campos requeridos
+    const faltantes = [];
+    schema.secciones.forEach(sec=>{
+      sec.campos.forEach(campo=>{
+        if(campo.requerido){
+          const val = gembaRespuestas[campo.id];
+          if(campo.tipo === 'fotos'){
+            if(gembaFotos.length === 0) faltantes.push(campo.label);
+          } else if(!val){
+            faltantes.push(campo.label);
+          }
+        }
+      });
+    });
+    if(faltantes.length){
+      document.getElementById('gembaMsg').textContent = 'Faltan campos obligatorios: ' + faltantes.slice(0,3).join(', ') + (faltantes.length > 3 ? '…' : '');
+      document.getElementById('gembaMsg').className = 'ingest-msg err';
+      return;
+    }
+
+    const resultado = calcularNotaGemba(schema);
+    mostrarResultadoGemba(schema, resultado);
+    document.getElementById('gembaResultArea').scrollIntoView({behavior:'smooth', block:'start'});
+
+    // Genera el PDF (ya con el reporte renderizado en pantalla) y guarda todo en segundo plano,
+    // sin bloquear la vista de resultado
+    guardarGembaEnBackend(schema, resultado);
+  }
+
+  function mostrarResultadoGemba(schema, r){
+    const area = document.getElementById('gembaResultArea');
+    const colorMap = {
+      crit: {bg:'#F3E0DB', fg:'#B44B36'},
+      defi: {bg:'#F6E4C4', fg:'#8A5D14'},
+      dev:  {bg:'#FEF3C7', fg:'#78350F'},
+      ok:   {bg:'#E1EBE3', fg:'#4C7A5E'}
+    };
+    const c = colorMap[r.colorClass];
+
+    let pct, cumplimientoTexto;
+    if(r.conformes || r.noConformes){
+      pct = r.totalEvaluados > 0 ? Math.round((r.conformes/r.totalEvaluados)*100) : 0;
+      cumplimientoTexto = `${r.conformes} conformes / ${r.totalEvaluados} ítems evaluados (${r.noAplica} no aplica)`;
+    } else if(r.estrellas !== null){
+      pct = Math.round((r.estrellas/r.estrellasMax)*100);
+      cumplimientoTexto = `Calificación: ${r.estrellas} / ${r.estrellasMax} ★`;
+    } else {
+      pct = 0; cumplimientoTexto = 'Sin datos';
+    }
+
+    const metaBits = [];
+    ['auditor','equipo','usuario'].forEach(k=>{ if(gembaRespuestas[k]) metaBits.push(gembaRespuestas[k]); });
+    ['turno','area'].forEach(k=>{ if(gembaRespuestas[k]) metaBits.push(gembaRespuestas[k]); });
+    if(gembaRespuestas.proceso) metaBits.push(gembaRespuestas.proceso);
+    if(gembaRespuestas.lider) metaBits.push('Líder: ' + gembaRespuestas.lider);
+
+    const seccionesHtml = r.detallePorSeccion.map(sec => `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;color:#1C2530;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #D7D9CE;">${sec.titulo}</div>
+      <div style="background:#FAFAF7;border:1px solid #D7D9CE;border-radius:4px;padding:12px 16px;">
+        ${sec.items.map(it => {
+          const label = it.val === "conforme" ? "Conforme" : it.val === "no_conforme" ? "No conforme" : it.val === "no_aplica" ? "No aplica" : "Sin responder";
+          const badgeColors = it.val === "conforme" ? {bg:"#E1EBE3", fg:"#4C7A5E"} : it.val === "no_conforme" ? {bg:"#F3E0DB", fg:"#B44B36"} : {bg:"#E7E8E1", fg:"#9CA093"};
+          return `<div style="display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #EEF0EA;font-size:13px;color:#1C2530;">
+            <span>${it.label}</span><span style="font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;background:${badgeColors.bg};color:${badgeColors.fg};white-space:nowrap;">${label}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    `).join('');
+
+    // Muestra cualquier campo de texto largo (Plan de acción, Observaciones, Recomendaciones, etc.)
+    const textFieldsHtml = [];
+    schema.secciones.forEach(sec=>{
+      sec.campos.forEach(campo=>{
+        if((campo.tipo === 'textarea' || campo.tipo === 'comentario') && gembaRespuestas[campo.id]){
+          textFieldsHtml.push(`
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;color:#1C2530;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #D7D9CE;">${campo.label}</div>
+            <div style="background:#FAFAF7;border:1px solid #D7D9CE;border-radius:4px;padding:14px 16px;white-space:pre-wrap;font-size:13px;color:#1C2530;">${escapeAttr(gembaRespuestas[campo.id])}</div>
+          `);
+        }
+      });
+    });
+
+    area.innerHTML = `
+      <section style="background:#FFFFFF;border:1px solid #D7D9CE;border-radius:4px;padding:24px;font-family:Arial,Helvetica,sans-serif;" id="gembaReportPrintArea">
+        <div style="background:#FFFFFF;border:1px solid #D7D9CE;border-radius:6px;padding:18px 20px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+            <div>
+              <div style="font-size:12.5px;color:#4B5563;margin-bottom:4px;">Nota general — ${schema.nombre}</div>
+              <div style="display:flex;align-items:baseline;gap:10px;">
+                <span style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:700;color:${c.fg};line-height:1;">${r.nota}</span>
+                <span style="font-size:16px;color:#4B5563;">/ 7.0</span>
+                <span style="font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:20px;background:${c.bg};color:${c.fg};">${r.estado}</span>
+              </div>
+              <div style="font-size:12px;color:#4B5563;margin-top:6px;">${metaBits.map(escapeAttr).join(" · ") || "—"}</div>
+            </div>
+            <div style="min-width:200px;">
+              <div style="font-size:11px;color:#4B5563;margin-bottom:4px;">Cumplimiento: ${pct}%</div>
+              <div style="height:6px;border-radius:3px;background:#E7E8E1;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${c.fg};border-radius:3px;"></div></div>
+              <div style="font-size:11px;color:#4B5563;margin-top:4px;">${cumplimientoTexto}</div>
+            </div>
+          </div>
+        </div>
+        ${seccionesHtml}
+        ${textFieldsHtml.join("")}
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:600;color:#1C2530;margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid #D7D9CE;">Escala de evaluación</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <div style="padding:8px 10px;border-radius:6px;text-align:center;font-size:11.5px;background:#F3E0DB;color:#B44B36;"><strong>0 – 2.9</strong><br>Crítico</div>
+          <div style="padding:8px 10px;border-radius:6px;text-align:center;font-size:11.5px;background:#F6E4C4;color:#8A5D14;"><strong>3.0 – 4.9</strong><br>Deficiente</div>
+          <div style="padding:8px 10px;border-radius:6px;text-align:center;font-size:11.5px;background:#FEF3C7;color:#78350F;"><strong>5.0 – 6.4</strong><br>En desarrollo</div>
+          <div style="padding:8px 10px;border-radius:6px;text-align:center;font-size:11.5px;background:#E1EBE3;color:#4C7A5E;"><strong>6.5 – 7.0</strong><br>Conforme</div>
+        </div>
+      </section>
+      <div class="ingest-actions">
+        <button class="btn primary" id="gembaPdfBtn">⬇ Descargar PDF</button>
+        <button class="btn primary" id="gembaEmailBtn">✉️ Enviar por correo</button>
+        <button class="btn ghost" id="gembaDashFromResultBtn">📊 Ver en el Dashboard</button>
+        <button class="btn ghost" id="gembaNewBtn">+ Nuevo Gemba</button>
+      </div>
+      <div class="ingest-msg" id="gembaEmailMsg" style="margin-top:8px;"></div>
+    `;
+
+    document.getElementById('gembaPdfBtn').addEventListener('click', ()=> descargarGembaPdf(schema, r));
+    document.getElementById('gembaEmailBtn').addEventListener('click', ()=> enviarGembaPorCorreo(schema, r));
+    document.getElementById('gembaDashFromResultBtn').addEventListener('click', ()=>{
+      document.getElementById('gembaFormArea').innerHTML = '';
+      gembaActivo = null;
+      document.getElementById('gembaDashboardBtn').click();
+    });
+    document.getElementById('gembaNewBtn').addEventListener('click', ()=>{
+      document.getElementById('gembaFormArea').innerHTML = '';
+      gembaActivo = null;
+    });
+  }
+
+  function esperarPintado(){
+    return new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+  }
+
+  async function generarGembaPdfBase64(){
+    const el = document.getElementById('gembaReportPrintArea');
+    await esperarPintado();
+    return html2pdf().set({
+      margin: 10,
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY, windowWidth: el.scrollWidth, windowHeight: el.scrollHeight },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).outputPdf('datauristring');
+  }
+
+  async function descargarGembaPdf(schema, r){
+    const el = document.getElementById('gembaReportPrintArea');
+    const nombreSchemaLimpio = schema.nombre.replace(/\s+/g,'_');
+    const nombreArchivo = `Gemba_${nombreSchemaLimpio}_${new Date().toISOString().slice(0,10)}.pdf`;
+    await esperarPintado();
+    html2pdf().set({
+      margin: 10,
+      filename: nombreArchivo,
+      html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: -window.scrollY, windowWidth: el.scrollWidth, windowHeight: el.scrollHeight },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(el).save();
+  }
+
+  async function enviarGembaPorCorreo(schema, r){
+    const btn = document.getElementById('gembaEmailBtn');
+    const msg = document.getElementById('gembaEmailMsg');
+    btn.disabled = true;
+    btn.textContent = 'Generando PDF…';
+    msg.textContent = '';
+    msg.className = 'ingest-msg';
+    try{
+      const pdfBase64 = await generarGembaPdfBase64();
+      btn.textContent = 'Enviando correo…';
+      const payload = {
+        modulo: 'gemba',
+        accion: 'email',
+        tipoGemba: schema.nombre,
+        tipoGembaId: schema.id,
+        auditor: gembaRespuestas.auditor || gembaRespuestas.equipo || '',
+        usuario: gembaRespuestas.usuario || '',
+        turno: gembaRespuestas.turno || gembaRespuestas.area || '',
+        proceso: gembaRespuestas.proceso || '',
+        instructivo: gembaRespuestas.instructivo || '',
+        lider: gembaRespuestas.lider || '',
+        nota: r.nota,
+        estado: r.estado,
+        conformes: r.conformes,
+        noConformes: r.noConformes,
+        noAplica: r.noAplica,
+        totalEvaluados: r.totalEvaluados,
+        estrellas: r.estrellas,
+        estrellasMax: r.estrellasMax,
+        planAccion: gembaRespuestas.plan || '',
+        observaciones: gembaRespuestas.observaciones || '',
+        recomendaciones: gembaRespuestas.recomendaciones || '',
+        respuestas: JSON.stringify(gembaRespuestas),
+        fotos: gembaFotos,
+        pdfBase64: pdfBase64
+      };
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(data.ok){
+        msg.textContent = '✓ Correo enviado con el PDF y las fotos adjuntas.';
+        msg.className = 'ingest-msg ok';
+      } else {
+        msg.textContent = '⚠️ ' + (data.error || 'No se pudo enviar el correo.');
+        msg.className = 'ingest-msg err';
+      }
+    } catch(err){
+      msg.textContent = '⚠️ No se pudo generar o enviar el PDF. Revisa tu conexión.';
+      msg.className = 'ingest-msg err';
+    }
+    btn.disabled = false;
+    btn.textContent = '✉️ Enviar por correo';
+  }
+
+  async function guardarGembaEnBackend(schema, r){
+    let pdfBase64 = '';
+    try{
+      pdfBase64 = await generarGembaPdfBase64();
+    } catch(err){
+      console.warn('No se pudo generar el PDF para guardar en Drive:', err);
+    }
+    const payload = {
+      modulo: 'gemba',
+      accion: 'guardar',
+      tipoGemba: schema.nombre,
+      tipoGembaId: schema.id,
+      auditor: gembaRespuestas.auditor || gembaRespuestas.equipo || '',
+      usuario: gembaRespuestas.usuario || '',
+      turno: gembaRespuestas.turno || gembaRespuestas.area || '',
+      proceso: gembaRespuestas.proceso || '',
+      instructivo: gembaRespuestas.instructivo || '',
+      lider: gembaRespuestas.lider || '',
+      nota: r.nota,
+      estado: r.estado,
+      conformes: r.conformes,
+      noConformes: r.noConformes,
+      noAplica: r.noAplica,
+      totalEvaluados: r.totalEvaluados,
+      estrellas: r.estrellas,
+      estrellasMax: r.estrellasMax,
+      planAccion: gembaRespuestas.plan || '',
+      observaciones: gembaRespuestas.observaciones || '',
+      recomendaciones: gembaRespuestas.recomendaciones || '',
+      respuestas: JSON.stringify(gembaRespuestas),
+      fotos: gembaFotos,
+      pdfBase64: pdfBase64
+    };
+    try{
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch(err){
+      console.warn('No se pudo guardar el Gemba en Sheets:', err);
+    }
+  }
 
   // Redimensiona y comprime una imagen para evitar errores por archivos muy pesados
   function compressImage(dataUrl, maxDim, quality){
