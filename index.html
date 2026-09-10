@@ -3001,6 +3001,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const detallePorSeccion = [];
     schema.secciones.forEach(sec=>{
       const items = [];
+      const notas = [];
       sec.campos.forEach(campo=>{
         if(campo.tipo === 'conforme'){
           const val = gembaRespuestas[campo.id];
@@ -3011,9 +3012,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         } else if(campo.tipo === 'estrellas'){
           estrellasMax = campo.max || 10;
           if(gembaRespuestas[campo.id]) estrellas = Number(gembaRespuestas[campo.id]);
+        } else if(campo.tipo === 'comentario'){
+          const val = (gembaRespuestas[campo.id] || '').trim();
+          if(val) notas.push(val);
         }
       });
-      if(items.length) detallePorSeccion.push({titulo: sec.titulo, items});
+      if(items.length || notas.length) detallePorSeccion.push({titulo: sec.titulo, items, notas});
     });
 
     let totalEvaluados, nota;
