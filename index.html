@@ -2800,13 +2800,22 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   // Gráfico de líneas en SVG puro (sin librerías externas, no depende de ningún CDN):
   // una línea por Área, con selector de granularidad Mes / Trimestre / Semestre / Año.
   const GEMBA_CHART_COLORS = ['#2F4858','#B44B36','#4C7A5E','#8A5D14','#46697D','#78350F','#9C6B98','#1D4E4E'];
+  const MESES_ABREV = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-  function construirSeriesPorArea(filas, periodoFn){
-    const periodos = [...new Set(filas.map(periodoFn).filter(Boolean))].sort();
+  function formatearMesLabel(valor){
+    const m = String(valor).match(/^(\d{4})-(\d{2})$/);
+    if(!m) return valor;
+    const idx = parseInt(m[2], 10) - 1;
+    return (MESES_ABREV[idx] || m[2]) + ' ' + m[1];
+  }
+
+  function construirSeriesPorArea(filas, periodoFn, labelFn){
+    const periodosRaw = [...new Set(filas.map(periodoFn).filter(Boolean))].sort();
+    const periodos = labelFn ? periodosRaw.map(labelFn) : periodosRaw;
     const areas = [...new Set(filas.map(r=>r.area).filter(Boolean))].sort();
     const series = areas.map(area=>({
       area,
-      valores: periodos.map(p=>{
+      valores: periodosRaw.map(p=>{
         const subset = filas.filter(r=> r.area === area && periodoFn(r) === p);
         if(!subset.length) return null;
         return Math.round((subset.reduce((s,r)=>s+Number(r.nota||0),0)/subset.length)*10)/10;
@@ -2876,14 +2885,123 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       semestre: r => (r.anio && r.semestre) ? r.anio + ' ' + r.semestre : '',
       anio: r => r.anio
     };
+    const labelFns = { mes: formatearMesLabel };
 
     function dibujar(gran){
-      const { periodos, series } = construirSeriesPorArea(filas, periodoFns[gran] || periodoFns.mes);
+      const { periodos, series } = construirSeriesPorArea(filas, periodoFns[gran] || periodoFns.mes, labelFns[gran]);
       cont.innerHTML = renderGraficoAreaSVG(periodos, series);
     }
 
     selectEl.onchange = ()=> dibujar(selectEl.value);
     dibujar(selectEl.value || 'mes');
+  }
+
+  // Segundo gráfico: barras con las Áreas en el eje inferior, para un período puntual
+  // (un mes, un trimestre, un semestre o un año), elegido con botones tipo "pill".
+  function renderEtiquetaEjeX(texto, cx, y){
+    const palabras = String(texto).split(' ');
+    const lineas = [];
+    let actual = '';
+    palabras.forEach(p=>{
+      const prueba = actual ? actual + ' ' + p : p;
+      if(prueba.length > 13 && actual){ lineas.push(actual); actual = p; }
+      else actual = prueba;
+    });
+    if(actual) lineas.push(actual);
+    return lineas.slice(0,2).map((l,i)=> `<text x="${cx.toFixed(1)}" y="${(y + i*11).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="middle">${escapeAttr(l)}</text>`).join('');
+  }
+
+  function renderBarrasAreasSVG(porArea){
+    if(!porArea.length) return '<div class="resumen-empty">Sin datos para este período.</div>';
+    const width = 680, height = 270;
+    const padL = 30, padR = 16, padT = 22, padB = 46;
+    const plotW = width - padL - padR;
+    const plotH = height - padT - padB;
+    const maxY = 7;
+    const n = porArea.length;
+    const bandW = plotW / n;
+    const barW = Math.min(52, bandW * 0.55);
+    const yFor = v => padT + plotH - (v / maxY) * plotH;
+
+    let gridLines = '';
+    for(let g = 0; g <= 7; g++){
+      const y = yFor(g);
+      gridLines += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width - padR}" y2="${y.toFixed(1)}" stroke="#E5E5E0" stroke-width="1"/>`;
+      gridLines += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="end">${g}</text>`;
+    }
+
+    let barras = '', valores = '', labels = '';
+    porArea.forEach((d,i)=>{
+      const cx = padL + bandW*i + bandW/2;
+      const x = cx - barW/2;
+      const y = yFor(d.promedio);
+      const h = (padT + plotH) - y;
+      const color = colorPorNota(d.promedio);
+      barras += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,0).toFixed(1)}" rx="3" fill="${color}"><title>${escapeAttr(d.label)}: ${d.promedio}</title></rect>`;
+      valores += `<text x="${cx.toFixed(1)}" y="${(y - 5).toFixed(1)}" font-size="10.5" fill="${color}" text-anchor="middle" font-weight="700">${d.promedio.toFixed(1)}</text>`;
+      labels += renderEtiquetaEjeX(d.label, cx, height - padB + 14);
+    });
+
+    return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block;" preserveAspectRatio="xMidYMid meet">
+      ${gridLines}
+      ${barras}
+      ${valores}
+      ${labels}
+    </svg>`;
+  }
+
+  function renderGraficoBarrasAreas(filas){
+    const granSelect = document.getElementById('dashBarGranularidad');
+    const pillsCont = document.getElementById('dashPeriodoPills');
+    const chartCont = document.getElementById('dashBarAreasChart');
+    if(!granSelect || !pillsCont || !chartCont) return;
+
+    const periodoFns = {
+      mes: r => r.mes,
+      trimestre: r => (r.anio && r.trimestre) ? r.anio + ' ' + r.trimestre : '',
+      semestre: r => (r.anio && r.semestre) ? r.anio + ' ' + r.semestre : '',
+      anio: r => r.anio
+    };
+    const labelFns = {
+      mes: formatearMesLabel,
+      trimestre: v => v,
+      semestre: v => v,
+      anio: v => v + ' completo'
+    };
+
+    function pintarPills(gran){
+      const fn = periodoFns[gran] || periodoFns.mes;
+      const labelFn = labelFns[gran] || (v=>v);
+      const valores = [...new Set(filas.map(fn).filter(Boolean))].sort();
+
+      if(!valores.length){
+        pillsCont.innerHTML = '';
+        chartCont.innerHTML = '<div class="resumen-empty">Sin datos suficientes todavía.</div>';
+        return;
+      }
+
+      pillsCont.innerHTML = valores.map(v=>
+        `<button type="button" class="periodo-pill" data-valor="${escapeAttr(v)}" style="padding:5px 12px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:11.5px;cursor:pointer;font-family:inherit;">${escapeAttr(labelFn(v))}</button>`
+      ).join('');
+
+      const botones = [...pillsCont.querySelectorAll('.periodo-pill')];
+      function seleccionar(valor){
+        botones.forEach(b=>{
+          const activo = b.dataset.valor === valor;
+          b.style.background = activo ? 'var(--steel)' : '#fff';
+          b.style.color = activo ? '#fff' : 'var(--ink)';
+          b.style.borderColor = activo ? 'var(--steel)' : 'var(--line)';
+        });
+        const filtradas = filas.filter(r=> fn(r) === valor);
+        const porArea = promedioNota(filtradas, r=>r.area);
+        chartCont.innerHTML = renderBarrasAreasSVG(porArea);
+      }
+      botones.forEach(b=> b.addEventListener('click', ()=> seleccionar(b.dataset.valor)));
+      seleccionar(valores[valores.length - 1]);
+    }
+
+    granSelect.onchange = ()=> pintarPills(granSelect.value);
+    pintarPills(granSelect.value || 'mes');
   }
 
   // Convierte 'dd-MM-yyyy HH:mm' a timestamp, para poder ordenar el historial de más nuevo a más antiguo
@@ -3044,6 +3162,20 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         </div>
 
         <div class="section-card" style="margin-bottom:14px;">
+          <div class="sku-section-head">
+            <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Comparativa por Área</h4>
+            <select class="gemba-input" id="dashBarGranularidad" style="max-width:150px;">
+              <option value="mes">Por mes</option>
+              <option value="trimestre" selected>Por trimestre</option>
+              <option value="semestre">Por semestre</option>
+              <option value="anio">Por año</option>
+            </select>
+          </div>
+          <div id="dashPeriodoPills" style="display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 12px;"></div>
+          <div id="dashBarAreasChart"></div>
+        </div>
+
+        <div class="section-card" style="margin-bottom:14px;">
           <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 12px;">Nota promedio por Área y Trimestre</h4>
           <div id="dashPivotArea"></div>
         </div>
@@ -3066,6 +3198,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
         try{ renderGraficoDashboard(filas); }
         catch(e){ console.warn('Dashboard: error en el gráfico', e); const c = document.getElementById('dashChartArea'); if(c) c.innerHTML = '<div class="resumen-empty">No se pudo dibujar el gráfico.</div>'; }
+
+        try{ renderGraficoBarrasAreas(filas); }
+        catch(e){ console.warn('Dashboard: error en el gráfico de barras', e); const c = document.getElementById('dashBarAreasChart'); if(c) c.innerHTML = '<div class="resumen-empty">No se pudo dibujar el gráfico.</div>'; }
 
         try{ document.getElementById('dashPivotArea').innerHTML = renderPivotTrimestre(filas); }
         catch(e){ console.warn('Dashboard: error en la tabla pivote', e); document.getElementById('dashPivotArea').innerHTML = '<div class="resumen-empty">No se pudo generar la tabla.</div>'; }
