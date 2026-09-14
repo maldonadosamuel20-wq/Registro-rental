@@ -6,7 +6,6 @@
 <title>Operación Excelencia Operacional</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
     --bg:#EEF0EA;
@@ -2798,61 +2797,93 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     `;
   }
 
-  // Gráfico de barras (Chart.js): nota promedio por Área, filtrable por mes
-  let gembaChartInstance = null;
-  function renderGraficoNotas(filas){
-    const selectEl = document.getElementById('dashFiltroMes');
-    const canvas = document.getElementById('dashChartNotas');
-    if(!selectEl || !canvas) return;
+  // Gráfico de líneas en SVG puro (sin librerías externas, no depende de ningún CDN):
+  // una línea por Área, con selector de granularidad Mes / Trimestre / Semestre / Año.
+  const GEMBA_CHART_COLORS = ['#2F4858','#B44B36','#4C7A5E','#8A5D14','#46697D','#78350F','#9C6B98','#1D4E4E'];
 
-    if(typeof Chart === 'undefined'){
-      selectEl.innerHTML = '';
-      const wrap = canvas.parentElement;
-      if(wrap) wrap.innerHTML = '<div class="resumen-empty">No se pudo cargar la librería de gráficos (revisa la conexión a internet o si tu red bloquea cdnjs.cloudflare.com). El resto del Dashboard funciona igual.</div>';
-      return;
+  function construirSeriesPorArea(filas, periodoFn){
+    const periodos = [...new Set(filas.map(periodoFn).filter(Boolean))].sort();
+    const areas = [...new Set(filas.map(r=>r.area).filter(Boolean))].sort();
+    const series = areas.map(area=>({
+      area,
+      valores: periodos.map(p=>{
+        const subset = filas.filter(r=> r.area === area && periodoFn(r) === p);
+        if(!subset.length) return null;
+        return Math.round((subset.reduce((s,r)=>s+Number(r.nota||0),0)/subset.length)*10)/10;
+      })
+    }));
+    return { periodos, series };
+  }
+
+  function renderGraficoAreaSVG(periodos, series){
+    if(!periodos.length || !series.length){
+      return '<div class="resumen-empty">Sin datos suficientes todavía.</div>';
     }
+    const width = 680, height = 260;
+    const padL = 30, padR = 16, padT = 16, padB = 34;
+    const plotW = width - padL - padR;
+    const plotH = height - padT - padB;
+    const maxY = 7;
+    const xStep = periodos.length > 1 ? plotW / (periodos.length - 1) : 0;
+    const yFor = v => padT + plotH - (v / maxY) * plotH;
+    const xFor = i => padL + (periodos.length > 1 ? i * xStep : plotW / 2);
 
-    const meses = [...new Set(filas.map(r=>r.mes).filter(Boolean))].sort();
-    if(!meses.length){
-      selectEl.innerHTML = '<option value="">Sin datos</option>';
-      if(gembaChartInstance){ gembaChartInstance.destroy(); gembaChartInstance = null; }
-      return;
+    let gridLines = '';
+    for(let g = 0; g <= 7; g++){
+      const y = yFor(g);
+      gridLines += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width - padR}" y2="${y.toFixed(1)}" stroke="#E5E5E0" stroke-width="1"/>`;
+      gridLines += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="end">${g}</text>`;
     }
-    const valorPrevio = selectEl.value;
-    selectEl.innerHTML = meses.map(m=>`<option value="${m}">${m}</option>`).join('');
-    selectEl.value = meses.includes(valorPrevio) ? valorPrevio : meses[meses.length - 1];
+    const xLabels = periodos.map((p,i)=> `<text x="${xFor(i).toFixed(1)}" y="${height - padB + 16}" font-size="9" fill="#4B5563" text-anchor="middle">${escapeAttr(p)}</text>`).join('');
 
-    function dibujar(mes){
-      const filtradas = filas.filter(r=>r.mes === mes);
-      const porArea = promedioNota(filtradas, r=>r.area);
-      const canvas = document.getElementById('dashChartNotas');
-      if(!canvas) return;
-      if(gembaChartInstance){ gembaChartInstance.destroy(); }
-      gembaChartInstance = new Chart(canvas.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: porArea.map(d=>d.label),
-          datasets: [{
-            label: 'Nota promedio',
-            data: porArea.map(d=>d.promedio),
-            backgroundColor: porArea.map(d=>colorPorNota(d.promedio)),
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            title: { display: true, text: 'Notas por Turno / Área — ' + mes, font: { size: 13 } }
-          },
-          scales: { y: { beginAtZero: true, max: 7, ticks: { stepSize: 1 } } }
-        }
+    let paths = '', puntos = '';
+    series.forEach((s, si)=>{
+      const color = GEMBA_CHART_COLORS[si % GEMBA_CHART_COLORS.length];
+      let d = '';
+      s.valores.forEach((v,i)=>{
+        if(v == null) return;
+        const x = xFor(i), y = yFor(v);
+        d += (d ? 'L' : 'M') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+        puntos += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="${color}"><title>${escapeAttr(s.area)}: ${v}</title></circle>`;
       });
+      if(d) paths += `<path d="${d.trim()}" fill="none" stroke="${color}" stroke-width="2"/>`;
+    });
+
+    const leyenda = series.map((s,si)=>{
+      const color = GEMBA_CHART_COLORS[si % GEMBA_CHART_COLORS.length];
+      return `<span style="display:inline-flex;align-items:center;gap:5px;margin:0 14px 6px 0;font-size:11.5px;color:var(--ink-soft);"><span style="width:10px;height:10px;border-radius:2px;background:${color};display:inline-block;"></span>${escapeAttr(s.area)}</span>`;
+    }).join('');
+
+    return `
+      <div style="display:flex;flex-wrap:wrap;margin-bottom:6px;">${leyenda}</div>
+      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block;" preserveAspectRatio="xMidYMid meet">
+        ${gridLines}
+        ${paths}
+        ${puntos}
+        ${xLabels}
+      </svg>
+    `;
+  }
+
+  function renderGraficoDashboard(filas){
+    const selectEl = document.getElementById('dashGranularidad');
+    const cont = document.getElementById('dashChartArea');
+    if(!selectEl || !cont) return;
+
+    const periodoFns = {
+      mes: r => r.mes,
+      trimestre: r => (r.anio && r.trimestre) ? r.anio + ' ' + r.trimestre : '',
+      semestre: r => (r.anio && r.semestre) ? r.anio + ' ' + r.semestre : '',
+      anio: r => r.anio
+    };
+
+    function dibujar(gran){
+      const { periodos, series } = construirSeriesPorArea(filas, periodoFns[gran] || periodoFns.mes);
+      cont.innerHTML = renderGraficoAreaSVG(periodos, series);
     }
 
     selectEl.onchange = ()=> dibujar(selectEl.value);
-    dibujar(selectEl.value);
+    dibujar(selectEl.value || 'mes');
   }
 
   // Convierte 'dd-MM-yyyy HH:mm' a timestamp, para poder ordenar el historial de más nuevo a más antiguo
@@ -3002,9 +3033,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="section-card" style="margin-bottom:14px;">
           <div class="sku-section-head">
             <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Notas por Turno / Área</h4>
-            <select class="gemba-input" id="dashFiltroMes" style="max-width:150px;"></select>
+            <select class="gemba-input" id="dashGranularidad" style="max-width:150px;">
+              <option value="mes">Por mes</option>
+              <option value="trimestre">Por trimestre</option>
+              <option value="semestre">Por semestre</option>
+              <option value="anio">Por año</option>
+            </select>
           </div>
-          <div style="height:260px;"><canvas id="dashChartNotas"></canvas></div>
+          <div id="dashChartArea"></div>
         </div>
 
         <div class="section-card" style="margin-bottom:14px;">
@@ -3028,8 +3064,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         document.getElementById('dashResumenTexto').innerHTML =
           `<strong>${totalGembas}</strong> Gemba(s) realizados · Nota general promedio: <strong style="color:${colorPorNota(notaGeneral)};">${notaGeneral.toFixed(1)} / 7.0</strong>`;
 
-        try{ renderGraficoNotas(filas); }
-        catch(e){ console.warn('Dashboard: error en el gráfico', e); const c = document.getElementById('dashChartNotas'); if(c && c.parentElement) c.parentElement.innerHTML = '<div class="resumen-empty">No se pudo dibujar el gráfico.</div>'; }
+        try{ renderGraficoDashboard(filas); }
+        catch(e){ console.warn('Dashboard: error en el gráfico', e); const c = document.getElementById('dashChartArea'); if(c) c.innerHTML = '<div class="resumen-empty">No se pudo dibujar el gráfico.</div>'; }
 
         try{ document.getElementById('dashPivotArea').innerHTML = renderPivotTrimestre(filas); }
         catch(e){ console.warn('Dashboard: error en la tabla pivote', e); document.getElementById('dashPivotArea').innerHTML = '<div class="resumen-empty">No se pudo generar la tabla.</div>'; }
