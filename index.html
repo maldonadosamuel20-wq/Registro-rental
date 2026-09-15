@@ -1119,6 +1119,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <div class="section-card">
       <div class="sku-section-head">
         <h3 style="margin-bottom:0;">Tickets — Seguimiento Supply Chain</h3>
+        <div id="tkIdentidadIndicador" style="font-size:12px;color:var(--ink-soft);"></div>
       </div>
       <div class="sub">Reporta un problema o revisa el estado de cualquier ticket ya creado.</div>
 
@@ -1215,6 +1216,24 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <div class="modal-actions">
       <button class="btn ghost" id="editCancelBtn" type="button">Cancelar</button>
       <button class="btn primary" id="editSaveBtn" type="button">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="tkIdentidadModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Identifícate</h3>
+    </div>
+    <div class="modal-body">
+      <div class="sub" style="margin-bottom:12px;">Para que quede registrado quién comenta, reasigna o resuelve cada ticket. Solo lo pedimos una vez por navegador.</div>
+      <div class="field"><label>Nombre</label><input type="text" id="tkIdentidadNombre" placeholder="Tu nombre completo"></div>
+      <div class="field"><label>Correo corporativo</label><input type="email" id="tkIdentidadCorreo" placeholder="tu.nombre@imegaventus.cl"></div>
+      <div class="field"><label>Área a la que perteneces</label><select id="tkIdentidadArea"></select></div>
+      <div class="ingest-msg" id="tkIdentidadMsg"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" id="tkIdentidadGuardarBtn" type="button">Continuar</button>
     </div>
   </div>
 </div>
@@ -4012,28 +4031,143 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   ===================================================================== */
 
   let tkConfig = { categorias: [], areasReporta: [], areasResponsable: [], sla: {} };
-  let tkTicketsData = { tickets: [], comentarios: [], reasignaciones: [] };
+  let tkTicketsData = { tickets: [], comentarios: [], reasignaciones: [], historialEstados: [] };
   let tkEvidenciaNuevo = [];
   let tkEvidenciaSeguimiento = [];
   let tkModuloIniciado = false;
   let tkTicketAbiertoId = null;
 
+  // ---------- Identidad (quién está usando la ticketera en este navegador) ----------
+  const TK_DOMINIO_CORPORATIVO = 'imegaventus.cl';
+  let tkUsuarioActual = null; // { nombre, correo }
+
+  function tkCargarIdentidadGuardada(){
+    try{
+      const raw = localStorage.getItem('tk_identidad');
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      if(obj && obj.nombre && obj.correo) return obj;
+    } catch(e){ /* localStorage no disponible o dato corrupto */ }
+    return null;
+  }
+
+  function tkValidarCorreoCorporativo(correo){
+    return new RegExp('@' + TK_DOMINIO_CORPORATIVO.replace('.', '\\.') + '$', 'i').test(correo.trim());
+  }
+
+  function tkMostrarIndicadorIdentidad(){
+    const el = document.getElementById('tkIdentidadIndicador');
+    if(!el) return;
+    if(tkUsuarioActual){
+      el.innerHTML = `👤 Actuando como: <strong>${escapeAttr(tkUsuarioActual.nombre)}</strong> (${escapeAttr(tkUsuarioActual.correo)}${tkUsuarioActual.area ? ' · ' + escapeAttr(tkUsuarioActual.area) : ''}) · <a href="#" id="tkCambiarIdentidadLink" style="color:var(--steel-2);">cambiar</a>`;
+      const link = document.getElementById('tkCambiarIdentidadLink');
+      if(link) link.addEventListener('click', (e)=>{ e.preventDefault(); tkAbrirModalIdentidad(); });
+    } else {
+      el.textContent = '';
+    }
+  }
+
+  // Muestra el modal de identidad. No se puede cerrar sin completar nombre + correo
+  // corporativo válido — es obligatorio para poder usar la ticketera.
+  function tkAbrirModalIdentidad(){
+    const modal = document.getElementById('tkIdentidadModal');
+    const nombreInput = document.getElementById('tkIdentidadNombre');
+    const correoInput = document.getElementById('tkIdentidadCorreo');
+    const areaSelect = document.getElementById('tkIdentidadArea');
+    const msg = document.getElementById('tkIdentidadMsg');
+
+    areaSelect.innerHTML = tkOpcionesSelect(tkConfig.areasReporta, false);
+    if(tkUsuarioActual){
+      nombreInput.value = tkUsuarioActual.nombre;
+      correoInput.value = tkUsuarioActual.correo;
+      if(tkUsuarioActual.area) areaSelect.value = tkUsuarioActual.area;
+    }
+    msg.textContent = '';
+    modal.classList.add('open');
+
+    // Mientras escribe el correo, si ya está registrado le autocompletamos nombre y área
+    correoInput.onblur = async ()=>{
+      const correo = correoInput.value.trim();
+      if(!tkValidarCorreoCorporativo(correo)) return;
+      try{
+        const res = await fetch(APPS_SCRIPT_URL + '?action=buscar_usuario&correo=' + encodeURIComponent(correo));
+        const data = await res.json();
+        if(data.ok && data.usuario){
+          if(data.usuario.nombre && !nombreInput.value.trim()) nombreInput.value = data.usuario.nombre;
+          if(data.usuario.area) areaSelect.value = data.usuario.area;
+          msg.style.color = 'var(--green)';
+          msg.textContent = 'Ya te habías registrado antes — completamos tus datos.';
+        }
+      } catch(e){ /* si falla, simplemente no autocompleta, no bloquea nada */ }
+    };
+
+    document.getElementById('tkIdentidadGuardarBtn').onclick = async ()=>{
+      const nombre = nombreInput.value.trim();
+      const correo = correoInput.value.trim();
+      const area = areaSelect.value;
+      if(!nombre){ msg.style.color = 'var(--flag)'; msg.textContent = 'Escribe tu nombre.'; return; }
+      if(!tkValidarCorreoCorporativo(correo)){
+        msg.style.color = 'var(--flag)';
+        msg.textContent = 'Usa tu correo corporativo (@' + TK_DOMINIO_CORPORATIVO + ').';
+        return;
+      }
+      if(!area){ msg.style.color = 'var(--flag)'; msg.textContent = 'Elige tu área.'; return; }
+      msg.style.color = 'var(--ink-soft)';
+      msg.textContent = 'Verificando…';
+      let nombreFinal = nombre, areaFinal = area;
+      try{
+        const res = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ modulo: 'ticket', accion: 'validar_usuario', correo, nombre, area })
+        });
+        const data = await res.json();
+        if(data.ok && !data.esNuevo){
+          if(data.nombre) nombreFinal = data.nombre; // ya existía en la Sheet — ese nombre manda, por consistencia
+          if(data.area) areaFinal = data.area;
+        }
+      } catch(e){
+        // Si el servidor no responde, igual dejamos avanzar con el dato local para no bloquear el uso
+      }
+      tkUsuarioActual = { nombre: nombreFinal, correo, area: areaFinal };
+      try{ localStorage.setItem('tk_identidad', JSON.stringify(tkUsuarioActual)); } catch(e){ /* sigue funcionando en memoria igual */ }
+      modal.classList.remove('open');
+      tkMostrarIndicadorIdentidad();
+      // Si el formulario de Nuevo Ticket ya está en pantalla, se refresca con los datos nuevos
+      if(document.getElementById('tkAreaReporta')) tkRenderFormNuevo();
+    };
+  }
+
+  // Nombre a registrar como autor de la acción (comentario, reasignación). Si por algún
+  // motivo no hay identidad guardada, igual deja avanzar mostrando que quedó sin identificar.
+  function tkNombreActor(){
+    return tkUsuarioActual ? (tkUsuarioActual.nombre + ' (' + tkUsuarioActual.correo + ')') : 'Usuario sin identificar';
+  }
+
   async function inicializarModuloTickets(){
-    if(tkModuloIniciado) { cargarTickets(); return; }
-    tkModuloIniciado = true;
+    const primeraVez = !tkModuloIniciado;
+    if(primeraVez){
+      tkModuloIniciado = true;
+      document.querySelectorAll('.tk-tab-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> tkCambiarTab(btn.dataset.tktab));
+      });
+      document.getElementById('tkVolverListaBtn').addEventListener('click', ()=> tkCambiarTab('lista'));
+      ['tkFiltroAreaReporta','tkFiltroAreaResponsable','tkFiltroEstado','tkFiltroPrioridad'].forEach(id=>{
+        document.getElementById(id).addEventListener('change', tkRenderLista);
+      });
+      document.getElementById('tkBuscarId').addEventListener('input', tkRenderLista);
+      await tkCargarConfig();
+    }
 
-    document.querySelectorAll('.tk-tab-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=> tkCambiarTab(btn.dataset.tktab));
-    });
-    document.getElementById('tkVolverListaBtn').addEventListener('click', ()=> tkCambiarTab('lista'));
-    ['tkFiltroAreaReporta','tkFiltroAreaResponsable','tkFiltroEstado','tkFiltroPrioridad'].forEach(id=>{
-      document.getElementById(id).addEventListener('change', tkRenderLista);
-    });
-    document.getElementById('tkBuscarId').addEventListener('input', tkRenderLista);
+    tkUsuarioActual = tkCargarIdentidadGuardada();
+    tkMostrarIndicadorIdentidad();
+    if(!tkUsuarioActual) tkAbrirModalIdentidad();
 
-    await tkCargarConfig();
-    tkRenderFormNuevo();
-    await cargarTickets();
+    if(primeraVez){
+      tkRenderFormNuevo();
+      await cargarTickets();
+    } else {
+      cargarTickets();
+    }
   }
 
   function tkCambiarTab(nombre){
@@ -4085,7 +4219,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const res = await fetch(APPS_SCRIPT_URL + '?action=tickets');
       const data = await res.json();
       if(!data.ok){ area.innerHTML = '<div class="resumen-empty">No se pudo cargar los tickets.</div>'; return; }
-      tkTicketsData = { tickets: data.tickets||[], comentarios: data.comentarios||[], reasignaciones: data.reasignaciones||[] };
+      tkTicketsData = { tickets: data.tickets||[], comentarios: data.comentarios||[], reasignaciones: data.reasignaciones||[], historialEstados: data.historialEstados||[] };
       tkLlenarFiltros();
       tkRenderLista();
     } catch(e){
@@ -4208,11 +4342,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="tk-form-section-title"><span class="tk-form-section-num">1</span><h4>¿Quién reporta?</h4></div>
         <div class="tk-form-section-sub">Tus datos, para que el área responsable sepa a quién avisarle sobre el avance.</div>
 
-        <div class="field"><label>Área que reporta</label><select class="gemba-input" id="tkAreaReporta">${tkOpcionesSelect(tkConfig.areasReporta)}</select></div>
+        <div class="field"><label>Área que reporta</label><select class="gemba-input" id="tkAreaReporta" ${tkUsuarioActual && tkUsuarioActual.area ? 'disabled style="background:#F4F4EF;"' : ''}>${tkOpcionesSelect(tkConfig.areasReporta)}</select></div>
 
         <div class="row-2">
-          <div class="field"><label>Nombre</label><input type="text" class="gemba-input" id="tkReportaNombre" placeholder="Tu nombre"></div>
-          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkReportaCorreo" placeholder="tu.correo@empresa.cl"></div>
+          <div class="field"><label>Nombre</label><input type="text" class="gemba-input" id="tkReportaNombre" placeholder="Tu nombre" value="${tkUsuarioActual ? escapeAttr(tkUsuarioActual.nombre) : ''}" ${tkUsuarioActual ? 'readonly style="background:#F4F4EF;"' : ''}></div>
+          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkReportaCorreo" placeholder="tu.correo@empresa.cl" value="${tkUsuarioActual ? escapeAttr(tkUsuarioActual.correo) : ''}" ${tkUsuarioActual ? 'readonly style="background:#F4F4EF;"' : ''}></div>
         </div>
       </div>
 
@@ -4264,6 +4398,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     // Selects editables (categoría, ambas áreas): opción "+ Agregar nueva opción..."
     tkConectarSelectEditable('tkCategoria', 'categoria', tkConfig.categorias);
     tkConectarSelectEditable('tkAreaReporta', 'area_reporta', tkConfig.areasReporta);
+    if(tkUsuarioActual && tkUsuarioActual.area){
+      document.getElementById('tkAreaReporta').value = tkUsuarioActual.area;
+    }
     tkConectarSelectEditable('tkAreaResponsable', 'area_responsable', tkConfig.areasResponsable);
 
     // Chips de prioridad
@@ -4412,21 +4549,24 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const sla = tkSlaSemaforo(t);
     const esFinal = t.estado === 'Resuelto' || t.estado === 'Cerrado';
 
-    // Arma la bitácora cronológica: creación + comentarios + reasignaciones
+    // Arma la bitácora cronológica: creación + comentarios + reasignaciones + cambios de estado
     const eventos = [];
     eventos.push({ fecha: tkParseFecha(t.fechaCreacion), sistema: true, autor: 'Sistema', texto: `Ticket creado y asignado a ${t.areaResponsable}.` });
     tkTicketsData.comentarios.filter(c=> c.idTicket === t.id).forEach(c=>{
       eventos.push({ fecha: tkParseFecha(c.fecha), sistema: false, autor: c.autor, texto: c.comentario, evidencia: c.evidencia });
     });
     tkTicketsData.reasignaciones.filter(r=> r.idTicket === t.id).forEach(r=>{
-      eventos.push({ fecha: tkParseFecha(r.fecha), sistema: true, autor: 'Sistema', texto: `Reasignado de ${r.areaOrigen} a ${r.areaDestino}${r.motivo ? ' — ' + r.motivo : ''} (por ${r.reasignadoPor}).` });
+      eventos.push({
+        fecha: tkParseFecha(r.fecha), sistema: true, autor: r.reasignadoPor || 'Sistema',
+        texto: `↔ Reasignado: ${r.areaOrigen} → ${r.areaDestino}${r.motivo ? ' — ' + r.motivo : ''}`
+      });
     });
-    if(t.escaladoSubgerente === 'Sí'){
-      eventos.push({ fecha: null, sistema: true, autor: 'Sistema', texto: '⚠ SLA de resolución vencido. Escalado automáticamente a Subgerente.' });
-    }
-    if(t.escaladoGerente === 'Sí'){
-      eventos.push({ fecha: null, sistema: true, autor: 'Sistema', texto: '⚠ Sigue sin resolverse. Escalado automáticamente a Gerente.' });
-    }
+    (tkTicketsData.historialEstados || []).filter(h=> h.idTicket === t.id).forEach(h=>{
+      eventos.push({
+        fecha: tkParseFecha(h.fecha), sistema: true, autor: h.realizadoPor || 'Sistema',
+        texto: `Cambió el estado a "${h.estado}".`
+      });
+    });
     eventos.sort((a,b)=> (a.fecha||0) - (b.fecha||0));
 
     cont.innerHTML = `
@@ -4535,7 +4675,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       try{
         await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
-          body: JSON.stringify({ modulo: 'ticket', accion: 'reasignar', idTicket: t.id, areaDestino, reasignadoPor: t.reportadoPorNombre, motivo })
+          body: JSON.stringify({ modulo: 'ticket', accion: 'reasignar', idTicket: t.id, areaDestino, reasignadoPor: tkNombreActor(), motivo })
         });
         await cargarTickets();
         tkRenderDetalle();
@@ -4547,7 +4687,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const t = tkTicketsData.tickets.find(x=> x.id === tkTicketAbiertoId);
     if(!t) return;
     try{
-      await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ modulo: 'ticket', accion: 'actualizar_estado', idTicket: t.id, estado }) });
+      await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ modulo: 'ticket', accion: 'actualizar_estado', idTicket: t.id, estado, realizadoPor: tkNombreActor() }) });
       await cargarTickets();
       tkRenderDetalle();
     } catch(e){ alert('No se pudo actualizar el estado.'); }
@@ -4563,7 +4703,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     try{
       await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        body: JSON.stringify({ modulo: 'ticket', accion: 'comentar', idTicket: t.id, autor: t.reportadoPorNombre || 'Usuario', comentario: texto, evidenciaFotos: tkEvidenciaSeguimiento })
+        body: JSON.stringify({ modulo: 'ticket', accion: 'comentar', idTicket: t.id, autor: tkNombreActor(), comentario: texto, evidenciaFotos: tkEvidenciaSeguimiento })
       });
       await cargarTickets();
       tkRenderDetalle();
