@@ -639,6 +639,66 @@
     color:#fff;font-size:12.5px;background:rgba(0,0,0,0.4);padding:4px 12px;border-radius:20px;
   }
   .zoomable{cursor:zoom-in;}
+
+  /* ===== Módulo Tickets ===== */
+  .tk-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+  .tk-tab-btn{padding:9px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-soft);}
+  .tk-tab-btn.active{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .tk-pane{display:none;}
+  .tk-pane.active{display:block;}
+  .tk-form-section{border-top:1px solid var(--line);margin-top:22px;padding-top:16px;}
+  .tk-form-section:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+  .tk-form-section-title{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+  .tk-form-section-num{width:20px;height:20px;border-radius:50%;background:var(--steel);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .tk-form-section-title h4{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;margin:0;}
+  .tk-form-section-sub{font-size:11.5px;color:var(--ink-soft);margin:2px 0 0 28px;}
+  .tk-chips{display:flex;gap:8px;margin-top:4px;}
+  .tk-chip{flex:1;text-align:center;padding:9px;border-radius:var(--radius);border:1.5px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;color:var(--ink-soft);background:#fff;}
+  .tk-chip.alta{border-color:var(--flag);}
+  .tk-chip.media{border-color:var(--amber);}
+  .tk-chip.baja{border-color:var(--green);}
+  .tk-chip.selected.alta{color:var(--flag);background:var(--flag-soft);}
+  .tk-chip.selected.media{color:#8A5D14;background:var(--amber-soft);}
+  .tk-chip.selected.baja{color:var(--green);background:var(--green-soft);}
+  .badge.tk-abierto{background:var(--amber-soft);color:#8A5D14;}
+  .badge.tk-proceso{background:#DCE7EE;color:var(--steel-2);}
+  .badge.tk-escalado-sub{background:var(--flag-soft);color:var(--flag);}
+  .badge.tk-escalado-ger{background:var(--flag);color:#fff;}
+  .badge.tk-resuelto{background:var(--green-soft);color:var(--green);}
+  .badge.tk-cerrado{background:var(--lock-soft);color:var(--ink-soft);}
+  .tk-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .tk-filtros select{width:auto;font-size:12.5px;padding:7px 10px;}
+  .tk-row{border:1px solid var(--line);border-radius:var(--radius);padding:13px 14px;margin-bottom:9px;background:#fff;cursor:pointer;}
+  .tk-row:hover{border-color:var(--line-strong);}
+  .tk-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .tk-id{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:14.5px;color:var(--steel);}
+  .tk-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .tk-sla-row{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;color:var(--ink-soft);}
+  .tk-sla-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .tk-sla-dot.ok{background:var(--green);}
+  .tk-sla-dot.pronto{background:var(--amber);}
+  .tk-sla-dot.vencido{background:var(--flag);}
+  .tk-detalle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:12.5px;margin:12px 0 16px;}
+  @media (max-width:560px){ .tk-detalle-grid{grid-template-columns:1fr;} }
+  .tk-detalle-grid .k{color:var(--ink-soft);}
+  .tk-detalle-grid .v{font-weight:600;color:var(--ink);}
+  .tk-timeline{border-left:2px solid var(--line);padding-left:14px;margin:0 0 16px 4px;}
+  .tk-timeline-item{margin-bottom:14px;position:relative;}
+  .tk-timeline-item::before{content:'';position:absolute;left:-18px;top:3px;width:8px;height:8px;border-radius:50%;background:var(--steel-2);}
+  .tk-timeline-item .autor{font-size:12px;font-weight:600;color:var(--ink);}
+  .tk-timeline-item .fecha{font-size:10.5px;color:var(--ink-soft);margin-left:6px;}
+  .tk-timeline-item .texto{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .tk-timeline-item.sistema .texto{font-style:italic;}
+  .tk-timeline-item .evidencia-link{font-size:11px;color:var(--steel-2);margin-top:3px;display:block;}
+  .tk-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+  @media (max-width:640px){ .tk-kpi-grid{grid-template-columns:1fr 1fr;} }
+  .tk-kpi{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:center;}
+  .tk-kpi .num{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--steel);}
+  .tk-kpi .lbl{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .tk-kpi.alerta .num{color:var(--flag);}
+  .tk-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12.5px;}
+  .tk-bar-row .lbl{width:160px;flex-shrink:0;color:var(--ink-soft);}
+  .tk-bar-row .val{width:28px;text-align:right;font-weight:600;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -687,6 +747,11 @@
       <span class="app-nav-icon">📋</span>
       <span class="app-nav-label">Gembas</span>
       <span class="app-nav-desc">Auditorías operacionales y notas</span>
+    </button>
+    <button class="app-nav-card" id="navTicketsBtn" type="button">
+      <span class="app-nav-icon">🎫</span>
+      <span class="app-nav-label">Tickets</span>
+      <span class="app-nav-desc">Seguimiento y respuesta — Supply Chain</span>
     </button>
   </nav>
 
@@ -1043,6 +1108,61 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <div id="gembaDashboardArea" style="display:none;"></div>
     <div id="gembaFormArea"></div>
   </div><!-- fin #viewGembas -->
+
+  <div id="viewTickets" style="display:none;">
+    <div class="section-card">
+      <div class="sku-section-head">
+        <h3 style="margin-bottom:0;">Tickets — Seguimiento Supply Chain</h3>
+      </div>
+      <div class="sub">Reporta un problema o revisa el estado de cualquier ticket ya creado.</div>
+
+      <div class="tk-tabs">
+        <button class="tk-tab-btn active" data-tktab="nuevo">+ Nuevo Ticket</button>
+        <button class="tk-tab-btn" data-tktab="lista">📋 Todos los Tickets</button>
+        <button class="tk-tab-btn" data-tktab="dashboard">📊 Dashboard</button>
+      </div>
+    </div>
+
+    <!-- ============ NUEVO TICKET ============ -->
+    <div class="tk-pane active" id="tkPaneNuevo">
+      <div class="section-card" id="tkFormArea">Cargando formulario…</div>
+    </div>
+
+    <!-- ============ TODOS LOS TICKETS ============ -->
+    <div class="tk-pane" id="tkPaneLista">
+      <div class="section-card">
+        <div class="sku-section-head">
+          <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Todos los Tickets</h4>
+        </div>
+        <div class="sub" style="margin-bottom:12px;">Visibilidad completa: cualquiera puede ver el estado de cualquier ticket. Filtra o busca directo por ID.</div>
+        <input type="text" class="gemba-input" id="tkBuscarId" placeholder="🔍 Buscar por ID de ticket (ej: TCK-00042)" style="margin-bottom:10px;">
+        <div class="tk-filtros">
+          <select class="gemba-input" id="tkFiltroAreaReporta"><option value="">Área que reporta: todas</option></select>
+          <select class="gemba-input" id="tkFiltroAreaResponsable"><option value="">Área responsable: todas</option></select>
+          <select class="gemba-input" id="tkFiltroEstado">
+            <option value="">Todos los estados</option>
+            <option>Abierto</option><option>En proceso</option><option>Escalado a Subgerente</option>
+            <option>Escalado a Gerente</option><option>Resuelto</option><option>Cerrado</option>
+          </select>
+          <select class="gemba-input" id="tkFiltroPrioridad"><option value="">Toda prioridad</option><option>Alta</option><option>Media</option><option>Baja</option></select>
+        </div>
+        <div id="tkListaArea"><div class="resumen-empty">Cargando tickets…</div></div>
+      </div>
+    </div>
+
+    <!-- ============ DETALLE DE UN TICKET ============ -->
+    <div class="tk-pane" id="tkPaneDetalle">
+      <div class="section-card">
+        <button type="button" class="btn ghost" id="tkVolverListaBtn" style="margin-bottom:14px;">← Volver a la lista</button>
+        <div id="tkDetalleArea"></div>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD ============ -->
+    <div class="tk-pane" id="tkPaneDashboard">
+      <div id="tkDashboardArea"><div class="resumen-empty">Cargando dashboard…</div></div>
+    </div>
+  </div><!-- fin #viewTickets -->
 
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
@@ -2495,23 +2615,28 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   loadHistorialFromBackend();
 
   /* =====================================================================
-     MÓDULO: Navegación entre Registro Rental y Gembas
+     MÓDULO: Navegación entre Registro Rental, Gembas y Tickets
   ===================================================================== */
   const viewRental = document.getElementById('viewRental');
   const viewGembas = document.getElementById('viewGembas');
-  document.getElementById('navRentalBtn').addEventListener('click', ()=>{
-    viewRental.style.display = 'block';
-    viewGembas.style.display = 'none';
-    document.getElementById('navRentalBtn').classList.add('active');
-    document.getElementById('navGembaBtn').classList.remove('active');
-  });
+  const viewTickets = document.getElementById('viewTickets');
+  function mostrarVista(nombre){
+    viewRental.style.display = nombre === 'rental' ? 'block' : 'none';
+    viewGembas.style.display = nombre === 'gembas' ? 'block' : 'none';
+    viewTickets.style.display = nombre === 'tickets' ? 'block' : 'none';
+    document.getElementById('navRentalBtn').classList.toggle('active', nombre === 'rental');
+    document.getElementById('navGembaBtn').classList.toggle('active', nombre === 'gembas');
+    document.getElementById('navTicketsBtn').classList.toggle('active', nombre === 'tickets');
+  }
+  document.getElementById('navRentalBtn').addEventListener('click', ()=> mostrarVista('rental'));
   document.getElementById('navGembaBtn').addEventListener('click', ()=>{
-    viewRental.style.display = 'none';
-    viewGembas.style.display = 'block';
-    document.getElementById('navGembaBtn').classList.add('active');
-    document.getElementById('navRentalBtn').classList.remove('active');
+    mostrarVista('gembas');
     renderGembaTypeGrid();
     cargarListasGemba();
+  });
+  document.getElementById('navTicketsBtn').addEventListener('click', ()=>{
+    mostrarVista('tickets');
+    inicializarModuloTickets();
   });
 
   /* =====================================================================
@@ -2896,58 +3021,54 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     dibujar(selectEl.value || 'mes');
   }
 
-  // Segundo gráfico: barras con las Áreas en el eje inferior, para un período puntual
-  // (un mes, un trimestre, un semestre o un año), elegido con botones tipo "pill".
-  function renderEtiquetaEjeX(texto, cx, y){
-    const palabras = String(texto).split(' ');
-    const lineas = [];
-    let actual = '';
-    palabras.forEach(p=>{
-      const prueba = actual ? actual + ' ' + p : p;
-      if(prueba.length > 13 && actual){ lineas.push(actual); actual = p; }
-      else actual = prueba;
-    });
-    if(actual) lineas.push(actual);
-    return lineas.slice(0,2).map((l,i)=> `<text x="${cx.toFixed(1)}" y="${(y + i*11).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="middle">${escapeAttr(l)}</text>`).join('');
-  }
-
-  function renderBarrasAreasSVG(porArea){
-    if(!porArea.length) return '<div class="resumen-empty">Sin datos para este período.</div>';
-    const width = 680, height = 270;
-    const padL = 30, padR = 16, padT = 22, padB = 46;
+  // Segundo gráfico: barras con TODAS las Áreas siempre visibles en el eje inferior
+  // (tengan o no dato en el período elegido), color único y título "Notas" — igual
+  // al formato de la tabla dinámica de Excel de referencia.
+  function renderBarrasAreasSVG(areas, promedios, subtitulo){
+    if(!areas.length) return '<div class="resumen-empty">Sin datos suficientes todavía.</div>';
+    const width = 700, height = 300;
+    const padL = 32, padR = 16, padT = 30, padB = 78;
     const plotW = width - padL - padR;
     const plotH = height - padT - padB;
     const maxY = 7;
-    const n = porArea.length;
+    const n = areas.length;
     const bandW = plotW / n;
-    const barW = Math.min(52, bandW * 0.55);
+    const barW = Math.min(44, bandW * 0.5);
     const yFor = v => padT + plotH - (v / maxY) * plotH;
+    const colorBarra = '#46697D'; // un solo color para todas las barras, como en Excel
 
     let gridLines = '';
     for(let g = 0; g <= 7; g++){
       const y = yFor(g);
       gridLines += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${width - padR}" y2="${y.toFixed(1)}" stroke="#E5E5E0" stroke-width="1"/>`;
-      gridLines += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="end">${g}</text>`;
+      gridLines += `<text x="${padL - 6}" y="${(y + 3).toFixed(1)}" font-size="9" fill="#4B5563" text-anchor="end">${g.toFixed(1)}</text>`;
     }
 
     let barras = '', valores = '', labels = '';
-    porArea.forEach((d,i)=>{
-      const cx = padL + bandW*i + bandW/2;
-      const x = cx - barW/2;
-      const y = yFor(d.promedio);
-      const h = (padT + plotH) - y;
-      const color = colorPorNota(d.promedio);
-      barras += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,0).toFixed(1)}" rx="3" fill="${color}"><title>${escapeAttr(d.label)}: ${d.promedio}</title></rect>`;
-      valores += `<text x="${cx.toFixed(1)}" y="${(y - 5).toFixed(1)}" font-size="10.5" fill="${color}" text-anchor="middle" font-weight="700">${d.promedio.toFixed(1)}</text>`;
-      labels += renderEtiquetaEjeX(d.label, cx, height - padB + 14);
+    const ejeY = padT + plotH;
+    areas.forEach((area, i)=>{
+      const cx = padL + bandW * i + bandW / 2;
+      const val = promedios[area];
+      if(val != null){
+        const x = cx - barW / 2;
+        const y = yFor(val);
+        const h = ejeY - y;
+        barras += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,0).toFixed(1)}" fill="${colorBarra}"><title>${escapeAttr(area)}: ${val}</title></rect>`;
+        valores += `<text x="${cx.toFixed(1)}" y="${(y - 6).toFixed(1)}" font-size="11" fill="${colorBarra}" text-anchor="middle" font-weight="700">${val.toFixed(1)}</text>`;
+      }
+      // Etiqueta del área en diagonal (como el eje del gráfico de Excel), siempre visible
+      labels += `<text x="${cx.toFixed(1)}" y="${(ejeY + 14).toFixed(1)}" font-size="9.5" fill="#4B5563" text-anchor="end" transform="rotate(-35 ${cx.toFixed(1)} ${(ejeY + 14).toFixed(1)})">${escapeAttr(area)}</text>`;
     });
 
-    return `<svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block;" preserveAspectRatio="xMidYMid meet">
-      ${gridLines}
-      ${barras}
-      ${valores}
-      ${labels}
-    </svg>`;
+    return `
+      <div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:15px;color:var(--ink);margin-bottom:4px;">Notas${subtitulo ? ' — ' + escapeAttr(subtitulo) : ''}</div>
+      <svg viewBox="0 0 ${width} ${height}" style="width:100%;height:auto;display:block;" preserveAspectRatio="xMidYMid meet">
+        ${gridLines}
+        ${barras}
+        ${valores}
+        ${labels}
+      </svg>
+    `;
   }
 
   function renderGraficoBarrasAreas(filas){
@@ -2955,6 +3076,9 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const pillsCont = document.getElementById('dashPeriodoPills');
     const chartCont = document.getElementById('dashBarAreasChart');
     if(!granSelect || !pillsCont || !chartCont) return;
+
+    // Todas las áreas conocidas, para que aparezcan siempre en el eje aunque ese período no tengan dato
+    const areasOrden = [...new Set(filas.map(r=>r.area).filter(Boolean))].sort();
 
     const periodoFns = {
       mes: r => r.mes,
@@ -2993,8 +3117,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           b.style.borderColor = activo ? 'var(--steel)' : 'var(--line)';
         });
         const filtradas = filas.filter(r=> fn(r) === valor);
-        const porArea = promedioNota(filtradas, r=>r.area);
-        chartCont.innerHTML = renderBarrasAreasSVG(porArea);
+        const promedios = {};
+        areasOrden.forEach(area=>{
+          const subset = filtradas.filter(r=> r.area === area);
+          promedios[area] = subset.length ? Math.round((subset.reduce((s,r)=>s+Number(r.nota||0),0)/subset.length)*10)/10 : null;
+        });
+        chartCont.innerHTML = renderBarrasAreasSVG(areasOrden, promedios, labelFn(valor));
       }
       botones.forEach(b=> b.addEventListener('click', ()=> seleccionar(b.dataset.valor)));
       seleccionar(valores[valores.length - 1]);
@@ -3165,8 +3293,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           <div class="sku-section-head">
             <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Comparativa por Área</h4>
             <select class="gemba-input" id="dashBarGranularidad" style="max-width:150px;">
-              <option value="mes">Por mes</option>
-              <option value="trimestre" selected>Por trimestre</option>
+              <option value="mes" selected>Por mes</option>
+              <option value="trimestre">Por trimestre</option>
               <option value="semestre">Por semestre</option>
               <option value="anio">Por año</option>
             </select>
@@ -3855,6 +3983,576 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     }
     openLightbox(photos, idx);
   }, true);
+
+  /* =====================================================================
+     MÓDULO: Tickets (Seguimiento y Respuesta — Supply Chain)
+  ===================================================================== */
+
+  let tkConfig = { categorias: [], areasReporta: [], areasResponsable: [], sla: {} };
+  let tkTicketsData = { tickets: [], comentarios: [], reasignaciones: [] };
+  let tkEvidenciaNuevo = [];
+  let tkEvidenciaSeguimiento = [];
+  let tkModuloIniciado = false;
+  let tkTicketAbiertoId = null;
+
+  async function inicializarModuloTickets(){
+    if(tkModuloIniciado) { cargarTickets(); return; }
+    tkModuloIniciado = true;
+
+    document.querySelectorAll('.tk-tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> tkCambiarTab(btn.dataset.tktab));
+    });
+    document.getElementById('tkVolverListaBtn').addEventListener('click', ()=> tkCambiarTab('lista'));
+    ['tkFiltroAreaReporta','tkFiltroAreaResponsable','tkFiltroEstado','tkFiltroPrioridad'].forEach(id=>{
+      document.getElementById(id).addEventListener('change', tkRenderLista);
+    });
+    document.getElementById('tkBuscarId').addEventListener('input', tkRenderLista);
+
+    await tkCargarConfig();
+    tkRenderFormNuevo();
+    await cargarTickets();
+  }
+
+  function tkCambiarTab(nombre){
+    document.querySelectorAll('.tk-tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.tktab === nombre));
+    document.getElementById('tkPaneNuevo').classList.toggle('active', nombre === 'nuevo');
+    document.getElementById('tkPaneLista').classList.toggle('active', nombre === 'lista');
+    document.getElementById('tkPaneDetalle').classList.toggle('active', nombre === 'detalle');
+    document.getElementById('tkPaneDashboard').classList.toggle('active', nombre === 'dashboard');
+    if(nombre === 'dashboard') tkRenderDashboard();
+  }
+
+  async function tkCargarConfig(){
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=config_tickets');
+      const data = await res.json();
+      if(data.ok){
+        tkConfig = { categorias: data.categorias||[], areasReporta: data.areasReporta||[], areasResponsable: data.areasResponsable||[], sla: data.sla||{} };
+      }
+    } catch(e){ console.warn('Tickets: no se pudo cargar la configuración', e); }
+  }
+
+  async function cargarTickets(){
+    const area = document.getElementById('tkListaArea');
+    area.innerHTML = '<div class="resumen-empty">Cargando tickets…</div>';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=tickets');
+      const data = await res.json();
+      if(!data.ok){ area.innerHTML = '<div class="resumen-empty">No se pudo cargar los tickets.</div>'; return; }
+      tkTicketsData = { tickets: data.tickets||[], comentarios: data.comentarios||[], reasignaciones: data.reasignaciones||[] };
+      tkLlenarFiltros();
+      tkRenderLista();
+    } catch(e){
+      area.innerHTML = '<div class="resumen-empty">⚠️ No se pudo conectar con el servidor para cargar los tickets.</div>';
+    }
+  }
+
+  function tkLlenarFiltros(){
+    const areasReportaUsadas = [...new Set(tkTicketsData.tickets.map(t=>t.areaReporta).filter(Boolean))].sort();
+    const areasRespUsadas = [...new Set(tkTicketsData.tickets.map(t=>t.areaResponsable).filter(Boolean))].sort();
+    const selReporta = document.getElementById('tkFiltroAreaReporta');
+    const selResp = document.getElementById('tkFiltroAreaResponsable');
+    const valReporta = selReporta.value, valResp = selResp.value;
+    selReporta.innerHTML = '<option value="">Área que reporta: todas</option>' + areasReportaUsadas.map(a=>`<option value="${escapeAttr(a)}">${escapeAttr(a)}</option>`).join('');
+    selResp.innerHTML = '<option value="">Área responsable: todas</option>' + areasRespUsadas.map(a=>`<option value="${escapeAttr(a)}">${escapeAttr(a)}</option>`).join('');
+    selReporta.value = valReporta; selResp.value = valResp;
+  }
+
+  function tkBadgeClase(estado){
+    if(estado === 'Abierto') return 'tk-abierto';
+    if(estado === 'En proceso') return 'tk-proceso';
+    if(estado === 'Escalado a Subgerente') return 'tk-escalado-sub';
+    if(estado === 'Escalado a Gerente') return 'tk-escalado-ger';
+    if(estado === 'Resuelto') return 'tk-resuelto';
+    if(estado === 'Cerrado') return 'tk-cerrado';
+    return 'tk-abierto';
+  }
+
+  // Convierte 'dd-MM-yyyy HH:mm' a Date; null si no calza el formato
+  function tkParseFecha(str){
+    if(!str) return null;
+    const m = String(str).match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{2}):(\d{2})/);
+    if(!m) return null;
+    return new Date(+m[3], +m[2]-1, +m[1], +m[4], +m[5]);
+  }
+
+  function tkSlaSemaforo(ticket){
+    if(ticket.estado === 'Resuelto' || ticket.estado === 'Cerrado'){
+      return { clase: 'ok', texto: 'Resuelto dentro del ciclo' + (ticket.fechaResolucion ? ' — ' + ticket.fechaResolucion : '') };
+    }
+    const limite = tkParseFecha(ticket.slaResolucion);
+    if(!limite) return { clase: 'ok', texto: 'Sin SLA calculado' };
+    const diffMs = limite - new Date();
+    const horas = diffMs / 3600000;
+    if(diffMs < 0) return { clase: 'vencido', texto: 'SLA de resolución vencido — ' + (ticket.areaResponsable||'') };
+    if(horas < 4) return { clase: 'pronto', texto: 'Vence en menos de ' + Math.ceil(horas) + 'h — ' + (ticket.areaResponsable||'') };
+    const dias = Math.floor(horas/24), horasResto = Math.round(horas % 24);
+    return { clase: 'ok', texto: 'Vence en ' + (dias>0 ? dias+'d ' : '') + horasResto + 'h — ' + (ticket.areaResponsable||'') };
+  }
+
+  function tkRenderLista(){
+    const area = document.getElementById('tkListaArea');
+    const busqueda = document.getElementById('tkBuscarId').value.trim().toLowerCase();
+    const fArea = document.getElementById('tkFiltroAreaReporta').value;
+    const fResp = document.getElementById('tkFiltroAreaResponsable').value;
+    const fEstado = document.getElementById('tkFiltroEstado').value;
+    const fPrioridad = document.getElementById('tkFiltroPrioridad').value;
+
+    let filtrados = tkTicketsData.tickets.filter(t=>{
+      if(busqueda && !String(t.id).toLowerCase().includes(busqueda)) return false;
+      if(fArea && t.areaReporta !== fArea) return false;
+      if(fResp && t.areaResponsable !== fResp) return false;
+      if(fEstado && t.estado !== fEstado) return false;
+      if(fPrioridad && t.prioridad !== fPrioridad) return false;
+      return true;
+    });
+    filtrados.sort((a,b)=> (tkParseFecha(b.fechaCreacion)||0) - (tkParseFecha(a.fechaCreacion)||0));
+
+    if(!filtrados.length){
+      area.innerHTML = '<div class="resumen-empty">No hay tickets que calcen con el filtro.</div>';
+      return;
+    }
+
+    area.innerHTML = filtrados.map(t=>{
+      const sla = tkSlaSemaforo(t);
+      return `
+        <div class="tk-row" data-tkid="${escapeAttr(t.id)}">
+          <div class="tk-row-top">
+            <div>
+              <span class="tk-id">${escapeAttr(t.id)}</span>
+              <div class="tk-meta">Reporta: ${escapeAttr(t.areaReporta)} · ${escapeAttr(t.reportadoPorNombre)} · ${escapeAttr(t.pedido||'-')} · ${escapeAttr(t.categoria)}</div>
+            </div>
+            <span class="badge ${tkBadgeClase(t.estado)}">${escapeAttr(t.estado)}</span>
+          </div>
+          <div class="tk-sla-row"><span class="tk-sla-dot ${sla.clase}"></span> ${escapeAttr(sla.texto)}</div>
+        </div>`;
+    }).join('');
+
+    area.querySelectorAll('.tk-row').forEach(row=>{
+      row.addEventListener('click', ()=> tkAbrirDetalle(row.dataset.tkid));
+    });
+  }
+
+  // ---------- Formulario: Nuevo Ticket ----------
+
+  function tkOpcionesSelect(lista, extra){
+    return lista.map(v=>`<option value="${escapeAttr(v)}">${escapeAttr(v)}</option>`).join('') +
+      (extra !== false ? '<option value="__add__">+ Agregar nueva opción...</option>' : '');
+  }
+
+  function tkRenderFormNuevo(){
+    const area = document.getElementById('tkFormArea');
+    area.innerHTML = `
+      <div class="tk-form-section">
+        <div class="tk-form-section-title"><span class="tk-form-section-num">1</span><h4>¿Quién reporta?</h4></div>
+        <div class="tk-form-section-sub">Tus datos, para que el área responsable sepa a quién avisarle sobre el avance.</div>
+
+        <label>Área que reporta</label>
+        <select class="gemba-input" id="tkAreaReporta">${tkOpcionesSelect(tkConfig.areasReporta)}</select>
+
+        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label>Nombre</label><input type="text" class="gemba-input" id="tkReportaNombre" placeholder="Tu nombre"></div>
+          <div><label>Correo</label><input type="email" class="gemba-input" id="tkReportaCorreo" placeholder="tu.correo@empresa.cl"></div>
+        </div>
+      </div>
+
+      <div class="tk-form-section">
+        <div class="tk-form-section-title"><span class="tk-form-section-num">2</span><h4>Información del Cliente</h4></div>
+        <div class="tk-form-section-sub">Solo si el caso es por un reclamo de un cliente externo — es solo referencia, el cliente no recibe correos automáticos.</div>
+
+        <label>Nombre</label>
+        <input type="text" class="gemba-input" id="tkClienteNombre" placeholder="Nombre del cliente (opcional)">
+        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label>Correo</label><input type="email" class="gemba-input" id="tkClienteCorreo" placeholder="cliente@correo.com"></div>
+          <div><label>Teléfono</label><input type="tel" class="gemba-input" id="tkClienteTelefono" placeholder="+56 9 ..."></div>
+        </div>
+      </div>
+
+      <div class="tk-form-section">
+        <div class="tk-form-section-title"><span class="tk-form-section-num">3</span><h4>Información del Pedido</h4></div>
+
+        <label>N° de Pedido / Guía</label>
+        <input type="text" class="gemba-input" id="tkPedido" placeholder="Ej: PED-88213">
+
+        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div><label>Categoría del problema</label><select class="gemba-input" id="tkCategoria">${tkOpcionesSelect(tkConfig.categorias)}</select></div>
+          <div><label>Área responsable de la incidencia</label><select class="gemba-input" id="tkAreaResponsable">${tkOpcionesSelect(tkConfig.areasResponsable)}</select></div>
+        </div>
+
+        <label>Prioridad</label>
+        <div class="tk-chips" id="tkPrioridadChips">
+          <div class="tk-chip alta" data-val="Alta">Alta — resolución ${(tkConfig.sla.Alta&&tkConfig.sla.Alta.resolucion)||24}h</div>
+          <div class="tk-chip media" data-val="Media">Media — resolución ${(tkConfig.sla.Media&&tkConfig.sla.Media.resolucion)||48}h</div>
+          <div class="tk-chip baja" data-val="Baja">Baja — resolución ${(tkConfig.sla.Baja&&tkConfig.sla.Baja.resolucion)||72}h</div>
+        </div>
+
+        <label>Descripción del problema</label>
+        <textarea class="gemba-input" id="tkDescripcion" placeholder="Detalla qué pasó..."></textarea>
+
+        <label>Evidencia (opcional)</label>
+        <div class="photobox" id="tkPhotoboxNuevo" style="min-height:80px;"></div>
+        <input type="file" id="tkPhotoInputNuevo" accept="image/*" multiple style="display:none;">
+      </div>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="btn primary" id="tkCrearBtn">Crear Ticket</button>
+      </div>
+      <div id="tkCrearMsg" style="margin-top:10px;font-size:12.5px;"></div>
+    `;
+
+    // Selects editables (categoría, ambas áreas): opción "+ Agregar nueva opción..."
+    tkConectarSelectEditable('tkCategoria', 'categoria', tkConfig.categorias);
+    tkConectarSelectEditable('tkAreaReporta', 'area_reporta', tkConfig.areasReporta);
+    tkConectarSelectEditable('tkAreaResponsable', 'area_responsable', tkConfig.areasResponsable);
+
+    // Chips de prioridad
+    let prioridadSeleccionada = 'Media';
+    const chips = area.querySelectorAll('#tkPrioridadChips .tk-chip');
+    chips.forEach(c=>{
+      c.addEventListener('click', ()=>{
+        chips.forEach(x=> x.classList.remove('selected'));
+        c.classList.add('selected');
+        prioridadSeleccionada = c.dataset.val;
+      });
+    });
+    chips[1].classList.add('selected'); // Media por defecto
+
+    // Evidencia
+    tkEvidenciaNuevo = [];
+    tkRenderPhotobox(tkEvidenciaNuevo, 'tkPhotoboxNuevo', 'tkPhotoInputNuevo');
+    document.getElementById('tkPhotoInputNuevo').addEventListener('change', async (e)=>{
+      const files = Array.from(e.target.files || []);
+      for(const file of files){
+        const dataUrl = await new Promise(res=>{
+          const reader = new FileReader();
+          reader.onload = ev => res(ev.target.result);
+          reader.readAsDataURL(file);
+        });
+        tkEvidenciaNuevo.push(await compressImage(dataUrl));
+      }
+      tkRenderPhotobox(tkEvidenciaNuevo, 'tkPhotoboxNuevo', 'tkPhotoInputNuevo');
+      e.target.value = '';
+    });
+
+    document.getElementById('tkCrearBtn').addEventListener('click', ()=> tkCrearTicket(() => prioridadSeleccionada));
+  }
+
+  // Agrega el manejo de "+ Agregar nueva opción..." a un <select>, guardando la opción
+  // nueva en Sheets (Categorías / Áreas) para que quede disponible para todos después.
+  function tkConectarSelectEditable(selectId, tipoConfig, listaLocal){
+    const sel = document.getElementById(selectId);
+    sel.addEventListener('change', async ()=>{
+      if(sel.value !== '__add__') return;
+      const nueva = prompt('Escribe la nueva opción:');
+      if(nueva && nueva.trim()){
+        const valor = nueva.trim();
+        listaLocal.push(valor);
+        sel.innerHTML = tkOpcionesSelect(listaLocal);
+        sel.value = valor;
+        try{
+          await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ modulo: 'ticket', accion: 'agregar_config', tipo: tipoConfig, valor })
+          });
+        } catch(e){ /* la opción igual queda disponible localmente para este formulario */ }
+      } else {
+        sel.value = listaLocal[0] || '';
+      }
+    });
+  }
+
+  function tkRenderPhotobox(fotos, boxId, inputId){
+    const box = document.getElementById(boxId);
+    if(!box) return;
+    box.innerHTML = '';
+    fotos.forEach((src, idx)=>{
+      const thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      thumb.innerHTML = `<img class="zoomable" src="${escapeAttr(src)}" data-src="${escapeAttr(src)}"><button class="rm-btn" type="button">×</button>`;
+      thumb.querySelector('.rm-btn').addEventListener('click', ()=>{ fotos.splice(idx,1); tkRenderPhotobox(fotos, boxId, inputId); });
+      box.appendChild(thumb);
+    });
+    const addTile = document.createElement('div');
+    addTile.className = 'photo-add-tile';
+    addTile.innerHTML = `<span class="plus">+</span><span class="add-label">Agregar foto</span>`;
+    addTile.addEventListener('click', ()=> document.getElementById(inputId).click());
+    box.appendChild(addTile);
+  }
+
+  async function tkCrearTicket(getPrioridad){
+    const msg = document.getElementById('tkCrearMsg');
+    const payload = {
+      modulo: 'ticket', accion: 'crear',
+      areaReporta: document.getElementById('tkAreaReporta').value,
+      reportadoPorNombre: document.getElementById('tkReportaNombre').value.trim(),
+      reportadoPorCorreo: document.getElementById('tkReportaCorreo').value.trim(),
+      clienteNombre: document.getElementById('tkClienteNombre').value.trim(),
+      clienteCorreo: document.getElementById('tkClienteCorreo').value.trim(),
+      clienteTelefono: document.getElementById('tkClienteTelefono').value.trim(),
+      pedido: document.getElementById('tkPedido').value.trim(),
+      categoria: document.getElementById('tkCategoria').value,
+      areaResponsable: document.getElementById('tkAreaResponsable').value,
+      prioridad: getPrioridad(),
+      descripcion: document.getElementById('tkDescripcion').value.trim(),
+      evidenciaFotos: tkEvidenciaNuevo
+    };
+    if(!payload.reportadoPorNombre || !payload.reportadoPorCorreo){
+      msg.style.color = 'var(--flag)';
+      msg.textContent = 'Falta tu nombre y correo (sección 1) para poder crear el ticket.';
+      return;
+    }
+    if(!payload.descripcion){
+      msg.style.color = 'var(--flag)';
+      msg.textContent = 'Falta describir el problema (sección 3).';
+      return;
+    }
+    msg.style.color = 'var(--ink-soft)';
+    msg.textContent = 'Creando ticket…';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(data.ok){
+        msg.style.color = 'var(--green)';
+        msg.textContent = '✓ Ticket ' + data.idTicket + ' creado correctamente.';
+        tkRenderFormNuevo();
+        await cargarTickets();
+      } else {
+        msg.style.color = 'var(--flag)';
+        msg.textContent = 'No se pudo crear el ticket: ' + (data.error || 'error desconocido');
+      }
+    } catch(e){
+      msg.style.color = 'var(--flag)';
+      msg.textContent = '⚠️ No se pudo conectar con el servidor.';
+    }
+  }
+
+  // ---------- Detalle de un Ticket ----------
+
+  function tkAbrirDetalle(id){
+    tkTicketAbiertoId = id;
+    tkCambiarTab('detalle');
+    tkRenderDetalle();
+  }
+
+  function tkRenderDetalle(){
+    const cont = document.getElementById('tkDetalleArea');
+    const t = tkTicketsData.tickets.find(x=> x.id === tkTicketAbiertoId);
+    if(!t){ cont.innerHTML = '<div class="resumen-empty">Ticket no encontrado.</div>'; return; }
+
+    const sla = tkSlaSemaforo(t);
+    const esFinal = t.estado === 'Resuelto' || t.estado === 'Cerrado';
+
+    // Arma la bitácora cronológica: creación + comentarios + reasignaciones
+    const eventos = [];
+    eventos.push({ fecha: tkParseFecha(t.fechaCreacion), sistema: true, autor: 'Sistema', texto: `Ticket creado y asignado a ${t.areaResponsable}.` });
+    tkTicketsData.comentarios.filter(c=> c.idTicket === t.id).forEach(c=>{
+      eventos.push({ fecha: tkParseFecha(c.fecha), sistema: false, autor: c.autor, texto: c.comentario, evidencia: c.evidencia });
+    });
+    tkTicketsData.reasignaciones.filter(r=> r.idTicket === t.id).forEach(r=>{
+      eventos.push({ fecha: tkParseFecha(r.fecha), sistema: true, autor: 'Sistema', texto: `Reasignado de ${r.areaOrigen} a ${r.areaDestino}${r.motivo ? ' — ' + r.motivo : ''} (por ${r.reasignadoPor}).` });
+    });
+    if(t.escaladoSubgerente === 'Sí'){
+      eventos.push({ fecha: null, sistema: true, autor: 'Sistema', texto: '⚠ SLA de resolución vencido. Escalado automáticamente a Subgerente.' });
+    }
+    if(t.escaladoGerente === 'Sí'){
+      eventos.push({ fecha: null, sistema: true, autor: 'Sistema', texto: '⚠ Sigue sin resolverse. Escalado automáticamente a Gerente.' });
+    }
+    eventos.sort((a,b)=> (a.fecha||0) - (b.fecha||0));
+
+    cont.innerHTML = `
+      <div class="sku-section-head">
+        <div>
+          <span class="tk-id" style="font-size:19px;">${escapeAttr(t.id)}</span>
+          <span class="badge ${tkBadgeClase(t.estado)}" style="margin-left:8px;">${escapeAttr(t.estado)}</span>
+        </div>
+      </div>
+      <div class="tk-detalle-grid">
+        <div><span class="k">Área que reporta:</span> <span class="v">${escapeAttr(t.areaReporta)}</span></div>
+        <div><span class="k">Reportado por:</span> <span class="v">${escapeAttr(t.reportadoPorNombre)} (${escapeAttr(t.reportadoPorCorreo)})</span></div>
+        <div><span class="k">Cliente:</span> <span class="v">${escapeAttr(t.clienteNombre || '—')}</span></div>
+        <div><span class="k">Contacto cliente:</span> <span class="v">${escapeAttr(t.clienteCorreo || '—')} ${t.clienteTelefono ? '· ' + escapeAttr(t.clienteTelefono) : ''}</span></div>
+        <div><span class="k">Pedido / Guía:</span> <span class="v">${escapeAttr(t.pedido || '-')}</span></div>
+        <div><span class="k">Categoría:</span> <span class="v">${escapeAttr(t.categoria)}</span></div>
+        <div><span class="k">Prioridad:</span> <span class="v" style="color:${t.prioridad==='Alta'?'var(--flag)':t.prioridad==='Media'?'#8A5D14':'var(--green)'};">${escapeAttr(t.prioridad)}</span></div>
+        <div><span class="k">Área responsable:</span> <span class="v">${escapeAttr(t.areaResponsable)}</span></div>
+        <div><span class="k">Creado:</span> <span class="v">${escapeAttr(t.fechaCreacion)}</span></div>
+        <div><span class="k">Vence resolución:</span> <span class="v" style="color:${sla.clase==='vencido'?'var(--flag)':sla.clase==='pronto'?'#8A5D14':'var(--green)'};">${escapeAttr(t.slaResolucion)}</span></div>
+      </div>
+      <div style="font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;">
+        <strong style="color:var(--ink);">Descripción:</strong> ${escapeAttr(t.descripcion)}
+        ${t.evidencia ? '<div style="margin-top:6px;">' + String(t.evidencia).split(',').filter(Boolean).map(u=>`<a href="${escapeAttr(u.trim())}" target="_blank" rel="noopener" style="font-size:11px;color:var(--steel-2);margin-right:10px;">📎 evidencia</a>`).join('') + '</div>' : ''}
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;">
+        ${!esFinal ? `<button type="button" class="btn ghost" id="tkReasignarBtn">↔ Reasignar a otra área</button>` : ''}
+        ${!esFinal ? `<button type="button" class="btn ghost" id="tkResolverBtn">✓ Marcar como Resuelto</button>` : ''}
+        ${t.estado === 'Resuelto' ? `<button type="button" class="btn ghost" id="tkCerrarBtn">🔒 Cerrar Ticket</button>` : ''}
+      </div>
+      <div id="tkAccionArea"></div>
+
+      <h4 style="font-size:15px;margin-bottom:10px;">Seguimiento</h4>
+      <div class="tk-timeline">
+        ${eventos.map(ev=>`
+          <div class="tk-timeline-item ${ev.sistema?'sistema':''}">
+            <span class="autor">${escapeAttr(ev.autor)}</span><span class="fecha">${ev.fecha ? escapeAttr(tkFormatFecha(ev.fecha)) : ''}</span>
+            <div class="texto">${escapeAttr(ev.texto)}</div>
+            ${ev.evidencia ? String(ev.evidencia).split(',').filter(Boolean).map(u=>`<a class="evidencia-link" href="${escapeAttr(u.trim())}" target="_blank" rel="noopener">📎 evidencia adjunta</a>`).join('') : ''}
+          </div>
+        `).join('')}
+      </div>
+
+      ${!esFinal ? `
+        <label>Agregar actualización</label>
+        <textarea class="gemba-input" id="tkComentarioTexto" placeholder="Escribe una actualización, o pega el contenido de un correo recibido..."></textarea>
+        <label>Adjuntar evidencia (opcional)</label>
+        <div class="photobox" id="tkPhotoboxSeguimiento" style="min-height:80px;"></div>
+        <input type="file" id="tkPhotoInputSeguimiento" accept="image/*" multiple style="display:none;">
+        <div style="margin-top:10px;">
+          <button type="button" class="btn primary" id="tkPublicarBtn">Publicar actualización</button>
+        </div>
+        <div id="tkComentarioMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      ` : '<div class="resumen-empty">Este ticket ya está ' + t.estado.toLowerCase() + ' — no admite más actualizaciones.</div>'}
+    `;
+
+    if(!esFinal){
+      tkEvidenciaSeguimiento = [];
+      tkRenderPhotobox(tkEvidenciaSeguimiento, 'tkPhotoboxSeguimiento', 'tkPhotoInputSeguimiento');
+      document.getElementById('tkPhotoInputSeguimiento').addEventListener('change', async (e)=>{
+        const files = Array.from(e.target.files || []);
+        for(const file of files){
+          const dataUrl = await new Promise(res=>{
+            const reader = new FileReader();
+            reader.onload = ev => res(ev.target.result);
+            reader.readAsDataURL(file);
+          });
+          tkEvidenciaSeguimiento.push(await compressImage(dataUrl));
+        }
+        tkRenderPhotobox(tkEvidenciaSeguimiento, 'tkPhotoboxSeguimiento', 'tkPhotoInputSeguimiento');
+        e.target.value = '';
+      });
+      document.getElementById('tkPublicarBtn').addEventListener('click', tkPublicarComentario);
+      const reasignarBtn = document.getElementById('tkReasignarBtn');
+      if(reasignarBtn) reasignarBtn.addEventListener('click', tkMostrarFormReasignar);
+      const resolverBtn = document.getElementById('tkResolverBtn');
+      if(resolverBtn) resolverBtn.addEventListener('click', ()=> tkCambiarEstado('Resuelto'));
+    }
+    const cerrarBtn = document.getElementById('tkCerrarBtn');
+    if(cerrarBtn) cerrarBtn.addEventListener('click', ()=> tkCambiarEstado('Cerrado'));
+  }
+
+  function tkFormatFecha(d){
+    const pad = n => String(n).padStart(2,'0');
+    return pad(d.getDate())+'-'+pad(d.getMonth()+1)+'-'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+
+  function tkMostrarFormReasignar(){
+    const cont = document.getElementById('tkAccionArea');
+    cont.innerHTML = `
+      <div style="border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:16px;background:#FAFAF7;">
+        <label>Reasignar a</label>
+        <select class="gemba-input" id="tkReasignarArea">${tkOpcionesSelect(tkConfig.areasResponsable, false)}</select>
+        <label>Motivo</label>
+        <input type="text" class="gemba-input" id="tkReasignarMotivo" placeholder="Por qué se reasigna">
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button type="button" class="btn primary" id="tkConfirmarReasignarBtn">Confirmar reasignación</button>
+          <button type="button" class="btn ghost" id="tkCancelarReasignarBtn">Cancelar</button>
+        </div>
+      </div>`;
+    document.getElementById('tkCancelarReasignarBtn').addEventListener('click', ()=> cont.innerHTML = '');
+    document.getElementById('tkConfirmarReasignarBtn').addEventListener('click', async ()=>{
+      const areaDestino = document.getElementById('tkReasignarArea').value;
+      const motivo = document.getElementById('tkReasignarMotivo').value.trim();
+      const t = tkTicketsData.tickets.find(x=> x.id === tkTicketAbiertoId);
+      try{
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ modulo: 'ticket', accion: 'reasignar', idTicket: t.id, areaDestino, reasignadoPor: t.reportadoPorNombre, motivo })
+        });
+        await cargarTickets();
+        tkRenderDetalle();
+      } catch(e){ alert('No se pudo reasignar el ticket.'); }
+    });
+  }
+
+  async function tkCambiarEstado(estado){
+    const t = tkTicketsData.tickets.find(x=> x.id === tkTicketAbiertoId);
+    if(!t) return;
+    try{
+      await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify({ modulo: 'ticket', accion: 'actualizar_estado', idTicket: t.id, estado }) });
+      await cargarTickets();
+      tkRenderDetalle();
+    } catch(e){ alert('No se pudo actualizar el estado.'); }
+  }
+
+  async function tkPublicarComentario(){
+    const msg = document.getElementById('tkComentarioMsg');
+    const texto = document.getElementById('tkComentarioTexto').value.trim();
+    if(!texto){ msg.style.color = 'var(--flag)'; msg.textContent = 'Escribe algo antes de publicar.'; return; }
+    const t = tkTicketsData.tickets.find(x=> x.id === tkTicketAbiertoId);
+    msg.style.color = 'var(--ink-soft)';
+    msg.textContent = 'Publicando…';
+    try{
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ modulo: 'ticket', accion: 'comentar', idTicket: t.id, autor: t.reportadoPorNombre || 'Usuario', comentario: texto, evidenciaFotos: tkEvidenciaSeguimiento })
+      });
+      await cargarTickets();
+      tkRenderDetalle();
+    } catch(e){
+      msg.style.color = 'var(--flag)';
+      msg.textContent = '⚠️ No se pudo publicar la actualización.';
+    }
+  }
+
+  // ---------- Dashboard ----------
+
+  function tkRenderDashboard(){
+    const cont = document.getElementById('tkDashboardArea');
+    const tickets = tkTicketsData.tickets;
+    const total = tickets.length;
+    const abiertos = tickets.filter(t=> t.estado !== 'Resuelto' && t.estado !== 'Cerrado').length;
+    const escalados = tickets.filter(t=> t.estado === 'Escalado a Subgerente' || t.estado === 'Escalado a Gerente').length;
+    const resueltos = tickets.filter(t=> t.estado === 'Resuelto' || t.estado === 'Cerrado');
+    const vencidosAbiertos = tickets.filter(t=>{
+      if(t.estado === 'Resuelto' || t.estado === 'Cerrado') return false;
+      const limite = tkParseFecha(t.slaResolucion);
+      return limite && new Date() > limite;
+    }).length;
+    const cumplimiento = resueltos.length ? Math.round(((resueltos.length - tickets.filter(t=>(t.estado==='Resuelto'||t.estado==='Cerrado') && (t.escaladoSubgerente==='Sí')).length) / resueltos.length) * 100) : 100;
+
+    const porArea = {};
+    tickets.forEach(t=>{ if(t.estado!=='Resuelto' && t.estado!=='Cerrado'){ porArea[t.areaResponsable] = (porArea[t.areaResponsable]||0)+1; } });
+    const maxArea = Math.max(1, ...Object.values(porArea));
+
+    const porCategoria = {};
+    tickets.forEach(t=>{ porCategoria[t.categoria] = (porCategoria[t.categoria]||0)+1; });
+    const topCategorias = Object.entries(porCategoria).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const maxCat = Math.max(1, ...topCategorias.map(c=>c[1]));
+
+    cont.innerHTML = `
+      <div class="section-card">
+        <h3 style="margin-bottom:14px;">Dashboard de Tickets</h3>
+        <div class="tk-kpi-grid">
+          <div class="tk-kpi"><div class="num">${abiertos}</div><div class="lbl">Tickets abiertos</div></div>
+          <div class="tk-kpi"><div class="num">${cumplimiento}%</div><div class="lbl">Cumplimiento SLA</div></div>
+          <div class="tk-kpi"><div class="num">${total}</div><div class="lbl">Total histórico</div></div>
+          <div class="tk-kpi ${vencidosAbiertos>0?'alerta':''}"><div class="num">${vencidosAbiertos}</div><div class="lbl">Vencidos sin resolver</div></div>
+        </div>
+      </div>
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:12px;">Tickets abiertos por Área responsable</h4>
+        ${Object.keys(porArea).length ? Object.entries(porArea).sort((a,b)=>b[1]-a[1]).map(([area,c])=>`
+          <div class="tk-bar-row"><span class="lbl">${escapeAttr(area)}</span><div class="pt-progress-bar" style="background:#E7E8E1;"><div class="pt-progress-fill" style="width:${(c/maxArea)*100}%;background:var(--flag);"></div></div><span class="val">${c}</span></div>
+        `).join('') : '<div class="resumen-empty">Sin tickets abiertos.</div>'}
+      </div>
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:12px;">Motivos más frecuentes</h4>
+        ${topCategorias.length ? topCategorias.map(([cat,c])=>`
+          <div class="tk-bar-row"><span class="lbl">${escapeAttr(cat)}</span><div class="pt-progress-bar" style="background:#E7E8E1;"><div class="pt-progress-fill" style="width:${(c/maxCat)*100}%;background:var(--steel-2);"></div></div><span class="val">${c}</span></div>
+        `).join('') : '<div class="resumen-empty">Sin datos todavía.</div>'}
+      </div>
+    `;
+  }
 </script>
 </body>
 </html>
