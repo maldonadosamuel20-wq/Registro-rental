@@ -131,6 +131,12 @@
   .gemba-q:last-child{border-bottom:none;}
   .gemba-q-label{font-size:14px;font-weight:500;margin-bottom:6px;}
   .gemba-q-help{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+  .gemba-q input, .gemba-q select, .gemba-q textarea{
+    width:100%;box-sizing:border-box;border:1px solid var(--line-strong);border-radius:3px;padding:9px 10px;
+    font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:#fff;display:block;
+  }
+  .gemba-q input:focus, .gemba-q select:focus, .gemba-q textarea:focus{outline:none;border-color:var(--steel);}
+  .gemba-q textarea{resize:vertical;min-height:64px;}
   .gemba-options{display:flex;gap:8px;flex-wrap:wrap;}
   .gemba-opt{
     font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;
@@ -1135,7 +1141,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
           <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0;">Todos los Tickets</h4>
         </div>
         <div class="sub" style="margin-bottom:12px;">Visibilidad completa: cualquiera puede ver el estado de cualquier ticket. Filtra o busca directo por ID.</div>
-        <input type="text" class="gemba-input" id="tkBuscarId" placeholder="🔍 Buscar por ID de ticket (ej: TCK-00042)" style="margin-bottom:10px;">
+        <input type="text" class="gemba-input" id="tkBuscarId" placeholder="🔍 Buscar por ID de ticket (ej: TCK-00042)" style="width:100%;box-sizing:border-box;border:1px solid var(--line-strong);border-radius:3px;padding:9px 10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);margin-bottom:10px;">
         <div class="tk-filtros">
           <select class="gemba-input" id="tkFiltroAreaReporta"><option value="">Área que reporta: todas</option></select>
           <select class="gemba-input" id="tkFiltroAreaResponsable"><option value="">Área responsable: todas</option></select>
@@ -4147,12 +4153,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="tk-form-section-title"><span class="tk-form-section-num">1</span><h4>¿Quién reporta?</h4></div>
         <div class="tk-form-section-sub">Tus datos, para que el área responsable sepa a quién avisarle sobre el avance.</div>
 
-        <label>Área que reporta</label>
-        <select class="gemba-input" id="tkAreaReporta">${tkOpcionesSelect(tkConfig.areasReporta)}</select>
+        <div class="field"><label>Área que reporta</label><select class="gemba-input" id="tkAreaReporta">${tkOpcionesSelect(tkConfig.areasReporta)}</select></div>
 
-        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div><label>Nombre</label><input type="text" class="gemba-input" id="tkReportaNombre" placeholder="Tu nombre"></div>
-          <div><label>Correo</label><input type="email" class="gemba-input" id="tkReportaCorreo" placeholder="tu.correo@empresa.cl"></div>
+        <div class="row-2">
+          <div class="field"><label>Nombre</label><input type="text" class="gemba-input" id="tkReportaNombre" placeholder="Tu nombre"></div>
+          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkReportaCorreo" placeholder="tu.correo@empresa.cl"></div>
         </div>
       </div>
 
@@ -4160,38 +4165,39 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="tk-form-section-title"><span class="tk-form-section-num">2</span><h4>Información del Cliente</h4></div>
         <div class="tk-form-section-sub">Solo si el caso es por un reclamo de un cliente externo — es solo referencia, el cliente no recibe correos automáticos.</div>
 
-        <label>Nombre</label>
-        <input type="text" class="gemba-input" id="tkClienteNombre" placeholder="Nombre del cliente (opcional)">
-        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div><label>Correo</label><input type="email" class="gemba-input" id="tkClienteCorreo" placeholder="cliente@correo.com"></div>
-          <div><label>Teléfono</label><input type="tel" class="gemba-input" id="tkClienteTelefono" placeholder="+56 9 ..."></div>
+        <div class="field"><label>Nombre</label><input type="text" class="gemba-input" id="tkClienteNombre" placeholder="Nombre del cliente (opcional)"></div>
+        <div class="row-2">
+          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkClienteCorreo" placeholder="cliente@correo.com"></div>
+          <div class="field"><label>Teléfono</label><input type="tel" class="gemba-input" id="tkClienteTelefono" placeholder="+56 9 ..."></div>
         </div>
       </div>
 
       <div class="tk-form-section">
         <div class="tk-form-section-title"><span class="tk-form-section-num">3</span><h4>Información del Pedido</h4></div>
 
-        <label>N° de Pedido / Guía</label>
-        <input type="text" class="gemba-input" id="tkPedido" placeholder="Ej: PED-88213">
+        <div class="field"><label>N° de Pedido / Guía</label><input type="text" class="gemba-input" id="tkPedido" placeholder="Ej: PED-88213"></div>
 
-        <div class="fila-2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div><label>Categoría del problema</label><select class="gemba-input" id="tkCategoria">${tkOpcionesSelect(tkConfig.categorias)}</select></div>
-          <div><label>Área responsable de la incidencia</label><select class="gemba-input" id="tkAreaResponsable">${tkOpcionesSelect(tkConfig.areasResponsable)}</select></div>
+        <div class="row-2">
+          <div class="field"><label>Categoría del problema</label><select class="gemba-input" id="tkCategoria">${tkOpcionesSelect(tkConfig.categorias)}</select></div>
+          <div class="field"><label>Área responsable de la incidencia</label><select class="gemba-input" id="tkAreaResponsable">${tkOpcionesSelect(tkConfig.areasResponsable)}</select></div>
         </div>
 
-        <label>Prioridad</label>
-        <div class="tk-chips" id="tkPrioridadChips">
-          <div class="tk-chip alta" data-val="Alta">Alta — resolución ${(tkConfig.sla.Alta&&tkConfig.sla.Alta.resolucion)||24}h</div>
-          <div class="tk-chip media" data-val="Media">Media — resolución ${(tkConfig.sla.Media&&tkConfig.sla.Media.resolucion)||48}h</div>
-          <div class="tk-chip baja" data-val="Baja">Baja — resolución ${(tkConfig.sla.Baja&&tkConfig.sla.Baja.resolucion)||72}h</div>
+        <div class="field">
+          <label>Prioridad</label>
+          <div class="tk-chips" id="tkPrioridadChips">
+            <div class="tk-chip alta" data-val="Alta">Alta — resolución ${(tkConfig.sla.Alta&&tkConfig.sla.Alta.resolucion)||24}h</div>
+            <div class="tk-chip media" data-val="Media">Media — resolución ${(tkConfig.sla.Media&&tkConfig.sla.Media.resolucion)||48}h</div>
+            <div class="tk-chip baja" data-val="Baja">Baja — resolución ${(tkConfig.sla.Baja&&tkConfig.sla.Baja.resolucion)||72}h</div>
+          </div>
         </div>
 
-        <label>Descripción del problema</label>
-        <textarea class="gemba-input" id="tkDescripcion" placeholder="Detalla qué pasó..."></textarea>
+        <div class="field"><label>Descripción del problema</label><textarea class="gemba-input" id="tkDescripcion" placeholder="Detalla qué pasó..."></textarea></div>
 
-        <label>Evidencia (opcional)</label>
-        <div class="photobox" id="tkPhotoboxNuevo" style="min-height:80px;"></div>
-        <input type="file" id="tkPhotoInputNuevo" accept="image/*" multiple style="display:none;">
+        <div class="field">
+          <label>Evidencia (opcional)</label>
+          <div class="photobox" id="tkPhotoboxNuevo" style="min-height:80px;"></div>
+          <input type="file" id="tkPhotoInputNuevo" accept="image/*" multiple style="display:none;">
+        </div>
       </div>
 
       <div style="margin-top:18px;">
@@ -4402,11 +4408,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       </div>
 
       ${!esFinal ? `
-        <label>Agregar actualización</label>
-        <textarea class="gemba-input" id="tkComentarioTexto" placeholder="Escribe una actualización, o pega el contenido de un correo recibido..."></textarea>
-        <label>Adjuntar evidencia (opcional)</label>
-        <div class="photobox" id="tkPhotoboxSeguimiento" style="min-height:80px;"></div>
-        <input type="file" id="tkPhotoInputSeguimiento" accept="image/*" multiple style="display:none;">
+        <div class="field"><label>Agregar actualización</label><textarea class="gemba-input" id="tkComentarioTexto" placeholder="Escribe una actualización, o pega el contenido de un correo recibido..."></textarea></div>
+        <div class="field">
+          <label>Adjuntar evidencia (opcional)</label>
+          <div class="photobox" id="tkPhotoboxSeguimiento" style="min-height:80px;"></div>
+          <input type="file" id="tkPhotoInputSeguimiento" accept="image/*" multiple style="display:none;">
+        </div>
         <div style="margin-top:10px;">
           <button type="button" class="btn primary" id="tkPublicarBtn">Publicar actualización</button>
         </div>
@@ -4449,10 +4456,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const cont = document.getElementById('tkAccionArea');
     cont.innerHTML = `
       <div style="border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:16px;background:#FAFAF7;">
-        <label>Reasignar a</label>
-        <select class="gemba-input" id="tkReasignarArea">${tkOpcionesSelect(tkConfig.areasResponsable, false)}</select>
-        <label>Motivo</label>
-        <input type="text" class="gemba-input" id="tkReasignarMotivo" placeholder="Por qué se reasigna">
+        <div class="field"><label>Reasignar a</label><select class="gemba-input" id="tkReasignarArea">${tkOpcionesSelect(tkConfig.areasResponsable, false)}</select></div>
+        <div class="field"><label>Motivo</label><input type="text" class="gemba-input" id="tkReasignarMotivo" placeholder="Por qué se reasigna"></div>
         <div style="margin-top:10px;display:flex;gap:8px;">
           <button type="button" class="btn primary" id="tkConfirmarReasignarBtn">Confirmar reasignación</button>
           <button type="button" class="btn ghost" id="tkCancelarReasignarBtn">Cancelar</button>
