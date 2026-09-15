@@ -1126,6 +1126,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <button class="tk-tab-btn active" data-tktab="nuevo">+ Nuevo Ticket</button>
         <button class="tk-tab-btn" data-tktab="lista">📋 Todos los Tickets</button>
         <button class="tk-tab-btn" data-tktab="dashboard">📊 Dashboard</button>
+        <button class="tk-tab-btn" data-tktab="admin">⚙️ Administrar</button>
       </div>
     </div>
 
@@ -1167,6 +1168,22 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <!-- ============ DASHBOARD ============ -->
     <div class="tk-pane" id="tkPaneDashboard">
       <div id="tkDashboardArea"><div class="resumen-empty">Cargando dashboard…</div></div>
+    </div>
+
+    <!-- ============ ADMINISTRAR ============ -->
+    <div class="tk-pane" id="tkPaneAdmin">
+      <div class="section-card">
+        <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 4px;">Administración</h4>
+        <div class="sub" style="margin-bottom:12px;">Edita listas y la matriz de escalamiento sin tocar la Google Sheet directamente. Los cambios quedan guardados ahí igual.</div>
+        <div class="tk-tabs" id="tkAdminSubtabs">
+          <button class="tk-tab-btn active" data-tkadmin="categorias">Categorías</button>
+          <button class="tk-tab-btn" data-tkadmin="areasReporta">Área que reporta</button>
+          <button class="tk-tab-btn" data-tkadmin="areasResponsable">Área responsable</button>
+          <button class="tk-tab-btn" data-tkadmin="sla">SLA</button>
+          <button class="tk-tab-btn" data-tkadmin="responsables">Matriz de escalamiento</button>
+        </div>
+      </div>
+      <div id="tkAdminArea"></div>
     </div>
   </div><!-- fin #viewTickets -->
 
@@ -4025,17 +4042,40 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     document.getElementById('tkPaneLista').classList.toggle('active', nombre === 'lista');
     document.getElementById('tkPaneDetalle').classList.toggle('active', nombre === 'detalle');
     document.getElementById('tkPaneDashboard').classList.toggle('active', nombre === 'dashboard');
+    document.getElementById('tkPaneAdmin').classList.toggle('active', nombre === 'admin');
     if(nombre === 'dashboard') tkRenderDashboard();
+    if(nombre === 'admin') tkRenderAdmin();
   }
 
+  // Banner verde temporal (6s) arriba de la lista de tickets, ej. tras crear uno
+  function tkMostrarBannerExito(texto){
+    const cont = document.getElementById('tkPaneLista').querySelector('.section-card');
+    const anterior = cont.querySelector('.tk-banner-exito');
+    if(anterior) anterior.remove();
+    const banner = document.createElement('div');
+    banner.className = 'resumen-empty tk-banner-exito';
+    banner.style.cssText = 'background:var(--green-soft);color:var(--green);border-radius:4px;padding:10px 14px;margin-bottom:12px;font-weight:600;';
+    banner.textContent = texto;
+    cont.prepend(banner);
+    setTimeout(()=> banner.remove(), 6000);
+  }
+
+  let tkConfigError = null;
+
   async function tkCargarConfig(){
+    tkConfigError = null;
     try{
       const res = await fetch(APPS_SCRIPT_URL + '?action=config_tickets');
       const data = await res.json();
       if(data.ok){
         tkConfig = { categorias: data.categorias||[], areasReporta: data.areasReporta||[], areasResponsable: data.areasResponsable||[], sla: data.sla||{} };
+      } else {
+        tkConfigError = data.error || 'El servidor respondió sin éxito.';
       }
-    } catch(e){ console.warn('Tickets: no se pudo cargar la configuración', e); }
+    } catch(e){
+      tkConfigError = e && e.message ? e.message : String(e);
+      console.warn('Tickets: no se pudo cargar la configuración', e);
+    }
   }
 
   async function cargarTickets(){
@@ -4096,6 +4136,12 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     return { clase: 'ok', texto: 'Vence en ' + (dias>0 ? dias+'d ' : '') + horasResto + 'h — ' + (ticket.areaResponsable||'') };
   }
 
+  // Extrae el número correlativo de un ID de ticket, ej. 'TCK-00042' -> 42
+  function tkNumeroId(id){
+    const m = String(id||'').match(/(\d+)/);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+
   function tkRenderLista(){
     const area = document.getElementById('tkListaArea');
     const busqueda = document.getElementById('tkBuscarId').value.trim().toLowerCase();
@@ -4112,7 +4158,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       if(fPrioridad && t.prioridad !== fPrioridad) return false;
       return true;
     });
-    filtrados.sort((a,b)=> (tkParseFecha(b.fechaCreacion)||0) - (tkParseFecha(a.fechaCreacion)||0));
+    filtrados.sort((a,b)=> tkNumeroId(b.id) - tkNumeroId(a.id));
 
     if(!filtrados.length){
       area.innerHTML = '<div class="resumen-empty">No hay tickets que calcen con el filtro.</div>';
@@ -4148,7 +4194,16 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   function tkRenderFormNuevo(){
     const area = document.getElementById('tkFormArea');
+    const sinConfig = !tkConfig.categorias.length && !tkConfig.areasReporta.length && !tkConfig.areasResponsable.length;
+    const avisoConfig = sinConfig ? `
+      <div class="resumen-empty" style="background:var(--flag-soft);color:var(--flag);border-radius:4px;padding:12px 14px;margin-bottom:16px;">
+        ⚠️ No se pudo cargar la configuración de categorías/áreas desde la Google Sheet.
+        Verifica que <strong>TICKETS_SHEET_ID</strong> esté puesto en Code.gs y que hayas ejecutado <strong>inicializarTicketera</strong> una vez.
+        ${tkConfigError ? '<br><span style="font-size:11px;">Detalle técnico: ' + escapeAttr(tkConfigError) + '</span>' : ''}
+        <br><button type="button" class="btn ghost" id="tkReintentarConfigBtn" style="margin-top:8px;font-size:12px;padding:6px 12px;">Reintentar</button>
+      </div>` : '';
     area.innerHTML = `
+      ${avisoConfig}
       <div class="tk-form-section">
         <div class="tk-form-section-title"><span class="tk-form-section-num">1</span><h4>¿Quién reporta?</h4></div>
         <div class="tk-form-section-sub">Tus datos, para que el área responsable sepa a quién avisarle sobre el avance.</div>
@@ -4241,6 +4296,15 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     });
 
     document.getElementById('tkCrearBtn').addEventListener('click', ()=> tkCrearTicket(() => prioridadSeleccionada));
+
+    const reintentarBtn = document.getElementById('tkReintentarConfigBtn');
+    if(reintentarBtn){
+      reintentarBtn.addEventListener('click', async ()=>{
+        reintentarBtn.textContent = 'Cargando…';
+        await tkCargarConfig();
+        tkRenderFormNuevo();
+      });
+    }
   }
 
   // Agrega el manejo de "+ Agregar nueva opción..." a un <select>, guardando la opción
@@ -4318,10 +4382,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
       const data = await res.json();
       if(data.ok){
-        msg.style.color = 'var(--green)';
-        msg.textContent = '✓ Ticket ' + data.idTicket + ' creado correctamente.';
-        tkRenderFormNuevo();
         await cargarTickets();
+        tkCambiarTab('lista');
+        tkMostrarBannerExito('✓ Ticket ' + data.idTicket + ' creado correctamente.');
+        tkRenderFormNuevo(); // deja el formulario listo y vacío para la próxima vez, fuera de la vista
       } else {
         msg.style.color = 'var(--flag)';
         msg.textContent = 'No se pudo crear el ticket: ' + (data.error || 'error desconocido');
@@ -4557,6 +4621,231 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         `).join('') : '<div class="resumen-empty">Sin datos todavía.</div>'}
       </div>
     `;
+  }
+
+  // ---------- Administración ----------
+
+  let tkAdminSubtabActual = 'categorias';
+
+  function tkRenderAdmin(){
+    document.querySelectorAll('#tkAdminSubtabs .tk-tab-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        document.querySelectorAll('#tkAdminSubtabs .tk-tab-btn').forEach(b=> b.classList.remove('active'));
+        btn.classList.add('active');
+        tkAdminSubtabActual = btn.dataset.tkadmin;
+        tkRenderAdminSubtab();
+      };
+    });
+    tkRenderAdminSubtab();
+  }
+
+  function tkRenderAdminSubtab(){
+    const cont = document.getElementById('tkAdminArea');
+    if(tkAdminSubtabActual === 'categorias') return tkRenderAdminListaSimple(cont, 'Categorías de issue', 'categoria', tkConfig.categorias);
+    if(tkAdminSubtabActual === 'areasReporta') return tkRenderAdminListaSimple(cont, 'Áreas que reportan', 'area_reporta', tkConfig.areasReporta);
+    if(tkAdminSubtabActual === 'areasResponsable') return tkRenderAdminListaSimple(cont, 'Áreas responsables', 'area_responsable', tkConfig.areasResponsable);
+    if(tkAdminSubtabActual === 'sla') return tkRenderAdminSLA(cont);
+    if(tkAdminSubtabActual === 'responsables') return tkRenderAdminResponsables(cont);
+  }
+
+  // Editor genérico para Categorías / Área que reporta / Área responsable (agregar y eliminar)
+  function tkRenderAdminListaSimple(cont, titulo, tipoConfig, lista){
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;">${escapeAttr(titulo)}</h4>
+        <div id="tkAdminListaItems"></div>
+        <div class="row-2" style="margin-top:12px;align-items:end;">
+          <div class="field" style="margin-bottom:0;"><label>Nueva opción</label><input type="text" class="gemba-input" id="tkAdminNuevoValor" placeholder="Escribe y agrega..."></div>
+          <div><button type="button" class="btn primary" id="tkAdminAgregarBtn" style="width:100%;">+ Agregar</button></div>
+        </div>
+        <div id="tkAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>`;
+
+    function pintarItems(){
+      document.getElementById('tkAdminListaItems').innerHTML = lista.length ? lista.map(v=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+          <span>${escapeAttr(v)}</span>
+          <button type="button" class="btn ghost tk-admin-del" data-val="${escapeAttr(v)}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Eliminar</button>
+        </div>`).join('') : '<div class="resumen-empty">Sin opciones todavía.</div>';
+
+      cont.querySelectorAll('.tk-admin-del').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          if(!confirm('¿Eliminar "' + btn.dataset.val + '"?')) return;
+          try{
+            await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'ticket', accion:'eliminar_config', tipo: tipoConfig, valor: btn.dataset.val }) });
+          } catch(e){ /* la quitamos igual de la vista local */ }
+          const idx = lista.indexOf(btn.dataset.val);
+          if(idx !== -1) lista.splice(idx,1);
+          pintarItems();
+        });
+      });
+    }
+    pintarItems();
+
+    document.getElementById('tkAdminAgregarBtn').addEventListener('click', async ()=>{
+      const input = document.getElementById('tkAdminNuevoValor');
+      const valor = input.value.trim();
+      const msg = document.getElementById('tkAdminMsg');
+      if(!valor){ msg.style.color='var(--flag)'; msg.textContent='Escribe un valor primero.'; return; }
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'ticket', accion:'agregar_config', tipo: tipoConfig, valor }) });
+        if(!lista.includes(valor)) lista.push(valor);
+        input.value = '';
+        msg.textContent = '';
+        pintarItems();
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
+  }
+
+  // Editor de horas de SLA por prioridad
+  function tkRenderAdminSLA(cont){
+    const prioridades = ['Alta','Media','Baja'];
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;">Horas de SLA por prioridad</h4>
+        <div class="sub" style="margin-bottom:10px;">En horas hábiles (respeta el horario de oficina configurado en Code.gs).</div>
+        ${prioridades.map(p=>{
+          const conf = tkConfig.sla[p] || {primeraRespuesta:0, resolucion:0};
+          return `
+          <div class="row-2" style="margin-bottom:6px;">
+            <div class="field"><label>${p} — 1ra respuesta (h)</label><input type="number" min="0" class="gemba-input" id="tkSlaResp_${p}" value="${conf.primeraRespuesta}"></div>
+            <div class="field"><label>${p} — Resolución (h)</label><input type="number" min="0" class="gemba-input" id="tkSlaRes_${p}" value="${conf.resolucion}"></div>
+          </div>`;
+        }).join('')}
+        <button type="button" class="btn primary" id="tkGuardarSlaBtn">Guardar SLA</button>
+        <div id="tkAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>`;
+
+    document.getElementById('tkGuardarSlaBtn').addEventListener('click', async ()=>{
+      const msg = document.getElementById('tkAdminMsg');
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        for(const p of prioridades){
+          const horasRespuesta = document.getElementById('tkSlaResp_'+p).value;
+          const horasResolucion = document.getElementById('tkSlaRes_'+p).value;
+          await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'ticket', accion:'guardar_sla', prioridad: p, horasRespuesta, horasResolucion }) });
+          tkConfig.sla[p] = { primeraRespuesta: Number(horasRespuesta)||0, resolucion: Number(horasResolucion)||0 };
+        }
+        msg.style.color='var(--green)'; msg.textContent='✓ SLA actualizado.';
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
+  }
+
+  // Matriz de escalamiento: quién recibe el correo por Área + Cargo (alta, edición y baja)
+  let tkResponsablesCache = [];
+
+  async function tkRenderAdminResponsables(cont){
+    cont.innerHTML = '<div class="section-card"><div class="resumen-empty">Cargando responsables…</div></div>';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=responsables');
+      const data = await res.json();
+      tkResponsablesCache = data.ok ? (data.responsables||[]) : [];
+    } catch(e){ tkResponsablesCache = []; }
+
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:4px;">Matriz de escalamiento</h4>
+        <div class="sub" style="margin-bottom:10px;">Quién recibe el correo según Área + Cargo (Responsable al crear el ticket, Subgerente y Gerente al escalar por SLA vencido).</div>
+        <div id="tkAdminRespItems"></div>
+      </div>
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;" id="tkRespFormTitulo">Agregar persona</h4>
+        <div class="row-2">
+          <div class="field"><label>Área</label><select class="gemba-input" id="tkRespArea">${tkOpcionesSelect(tkConfig.areasResponsable, false)}</select></div>
+          <div class="field"><label>Cargo</label><select class="gemba-input" id="tkRespCargo"><option>Responsable</option><option>Subgerente</option><option>Gerente</option></select></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Nombres</label><input type="text" class="gemba-input" id="tkRespNombres"></div>
+          <div class="field"><label>Apellidos</label><input type="text" class="gemba-input" id="tkRespApellidos"></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkRespCorreo"></div>
+          <div class="field"><label>Teléfono</label><input type="tel" class="gemba-input" id="tkRespTelefono"></div>
+        </div>
+        <div class="field"><label>Activo</label><select class="gemba-input" id="tkRespActivo"><option>Sí</option><option>No</option></select></div>
+        <input type="hidden" id="tkRespOriginal">
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn primary" id="tkGuardarRespBtn">Guardar</button>
+          <button type="button" class="btn ghost" id="tkCancelarRespBtn" style="display:none;">Cancelar edición</button>
+        </div>
+        <div id="tkAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>`;
+
+    function pintarTabla(){
+      const items = document.getElementById('tkAdminRespItems');
+      if(!tkResponsablesCache.length){ items.innerHTML = '<div class="resumen-empty">Sin responsables cargados todavía.</div>'; return; }
+      items.innerHTML = tkResponsablesCache.map((r,i)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;">
+          <div>
+            <strong>${escapeAttr(r.area)} · ${escapeAttr(r.cargo)}</strong>
+            <div style="color:var(--ink-soft);">${escapeAttr(r.nombres)} ${escapeAttr(r.apellidos)} — ${escapeAttr(r.correo)}${r.activo!=='Sí'?' (inactivo)':''}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button type="button" class="btn ghost tk-resp-edit" data-idx="${i}" style="font-size:11px;padding:4px 10px;">Editar</button>
+            <button type="button" class="btn ghost tk-resp-del" data-idx="${i}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Eliminar</button>
+          </div>
+        </div>`).join('');
+
+      items.querySelectorAll('.tk-resp-edit').forEach(btn=> btn.addEventListener('click', ()=>{
+        const r = tkResponsablesCache[Number(btn.dataset.idx)];
+        document.getElementById('tkRespArea').value = r.area;
+        document.getElementById('tkRespCargo').value = r.cargo;
+        document.getElementById('tkRespNombres').value = r.nombres;
+        document.getElementById('tkRespApellidos').value = r.apellidos;
+        document.getElementById('tkRespCorreo').value = r.correo;
+        document.getElementById('tkRespTelefono').value = r.telefono;
+        document.getElementById('tkRespActivo').value = r.activo === 'Sí' ? 'Sí' : 'No';
+        document.getElementById('tkRespOriginal').value = JSON.stringify({area:r.area, cargo:r.cargo, correo:r.correo});
+        document.getElementById('tkRespFormTitulo').textContent = 'Editando persona';
+        document.getElementById('tkCancelarRespBtn').style.display = 'inline-flex';
+        document.getElementById('tkRespFormTitulo').scrollIntoView({behavior:'smooth', block:'center'});
+      }));
+      items.querySelectorAll('.tk-resp-del').forEach(btn=> btn.addEventListener('click', async ()=>{
+        const r = tkResponsablesCache[Number(btn.dataset.idx)];
+        if(!confirm('¿Eliminar a ' + r.nombres + ' ' + r.apellidos + ' (' + r.area + ' · ' + r.cargo + ')?')) return;
+        try{
+          await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'ticket', accion:'eliminar_responsable', area:r.area, cargo:r.cargo, correo:r.correo }) });
+        } catch(e){ /* la quitamos igual de la vista local */ }
+        tkResponsablesCache.splice(Number(btn.dataset.idx), 1);
+        pintarTabla();
+      }));
+    }
+    pintarTabla();
+
+    function limpiarForm(){
+      ['tkRespNombres','tkRespApellidos','tkRespCorreo','tkRespTelefono'].forEach(id=> document.getElementById(id).value = '');
+      document.getElementById('tkRespActivo').value = 'Sí';
+      document.getElementById('tkRespOriginal').value = '';
+      document.getElementById('tkRespFormTitulo').textContent = 'Agregar persona';
+      document.getElementById('tkCancelarRespBtn').style.display = 'none';
+    }
+
+    document.getElementById('tkCancelarRespBtn').addEventListener('click', limpiarForm);
+
+    document.getElementById('tkGuardarRespBtn').addEventListener('click', async ()=>{
+      const msg = document.getElementById('tkAdminMsg');
+      const payload = {
+        modulo: 'ticket', accion: 'guardar_responsable',
+        area: document.getElementById('tkRespArea').value,
+        cargo: document.getElementById('tkRespCargo').value,
+        nombres: document.getElementById('tkRespNombres').value.trim(),
+        apellidos: document.getElementById('tkRespApellidos').value.trim(),
+        correo: document.getElementById('tkRespCorreo').value.trim(),
+        telefono: document.getElementById('tkRespTelefono').value.trim(),
+        activo: document.getElementById('tkRespActivo').value
+      };
+      const originalRaw = document.getElementById('tkRespOriginal').value;
+      if(originalRaw) payload.original = JSON.parse(originalRaw);
+      if(!payload.correo || !payload.nombres){ msg.style.color='var(--flag)'; msg.textContent='Falta al menos el nombre y el correo.'; return; }
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+        msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
+        limpiarForm();
+        await tkRenderAdminResponsables(cont);
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
   }
 </script>
 </body>
