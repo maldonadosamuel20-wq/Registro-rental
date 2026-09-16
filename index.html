@@ -5135,13 +5135,13 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   const AG_DOW_MES = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
   const AG_DOW_SEMANA = ['LUN','MAR','MIÉ','JUE','VIE'];
 
-  let agConfig = { citas: [], bloqueos: [], horarios: [], historialCitas: [] };
+  let agConfig = { citas: [], bloqueos: [], horarios: [], historialCitas: [], pedidosDetalle: [] };
   let agModuloIniciado = false;
   let agFechaActual = new Date();
   let agVistaActual = 'dia';
   let agCitaAbiertaId = null;
   let agFechaHoraPreseleccionada = null;
-  let agPedidosNuevo = [];
+  let agFilasPedidos = [];
   let agAdminSubtabActual = 'horarios';
 
   async function inicializarModuloAgenda(){
@@ -5202,7 +5202,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const res = await fetch(APPS_SCRIPT_URL + '?action=citas');
       const data = await res.json();
       if(data.ok){
-        agConfig = { citas: data.citas||[], bloqueos: data.bloqueos||[], horarios: data.horarios||[], historialCitas: data.historialCitas||[] };
+        agConfig = { citas: data.citas||[], bloqueos: data.bloqueos||[], horarios: data.horarios||[], historialCitas: data.historialCitas||[], pedidosDetalle: data.pedidosDetalle||[] };
       }
     } catch(e){ console.warn('Agenda: no se pudo cargar las citas', e); }
   }
@@ -5459,6 +5459,45 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   // ---------- Formulario: Agendar cita ----------
 
+  // Tabla tipo Excel para ir agregando filas de Cliente + Pedido. Devuelve un controlador
+  // con obtenerFilas() para leer las filas con datos al momento de guardar.
+  function agCrearTablaPedidos(containerId, filasIniciales){
+    let filas = (filasIniciales && filasIniciales.length) ? filasIniciales.map(f=>({cliente:f.cliente||'', pedido:f.pedido||''})) : [{cliente:'', pedido:''}];
+
+    function render(){
+      const cont = document.getElementById(containerId);
+      cont.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 30px;gap:6px;margin-bottom:6px;font-size:11px;font-weight:600;color:var(--ink-soft);">
+          <div>Cliente</div><div>N° Pedido</div><div></div>
+        </div>
+        ${filas.map((f,i)=>`
+          <div style="display:grid;grid-template-columns:1fr 1fr 30px;gap:6px;margin-bottom:6px;align-items:center;">
+            <input type="text" class="gemba-input ag-fp-cliente" data-idx="${i}" value="${escapeAttr(f.cliente)}" placeholder="Nombre del cliente">
+            <input type="text" class="gemba-input ag-fp-pedido" data-idx="${i}" value="${escapeAttr(f.pedido)}" placeholder="N° pedido">
+            <button type="button" class="ag-fp-quitar" data-idx="${i}" title="Quitar fila" style="border:none;background:none;color:var(--flag);cursor:pointer;font-size:17px;padding:4px;">×</button>
+          </div>
+        `).join('')}
+        <button type="button" class="btn ghost" id="${containerId}AgregarFilaBtn" style="font-size:12px;margin-top:2px;">+ Agregar fila</button>
+      `;
+      cont.querySelectorAll('.ag-fp-cliente').forEach(inp=> inp.addEventListener('input', ()=>{ filas[Number(inp.dataset.idx)].cliente = inp.value; }));
+      cont.querySelectorAll('.ag-fp-pedido').forEach(inp=> inp.addEventListener('input', ()=>{ filas[Number(inp.dataset.idx)].pedido = inp.value; }));
+      cont.querySelectorAll('.ag-fp-quitar').forEach(btn=> btn.addEventListener('click', ()=>{
+        if(filas.length <= 1) filas[0] = {cliente:'', pedido:''};
+        else filas.splice(Number(btn.dataset.idx), 1);
+        render();
+      }));
+      document.getElementById(containerId + 'AgregarFilaBtn').addEventListener('click', ()=>{
+        filas.push({cliente:'', pedido:''});
+        render();
+      });
+    }
+    render();
+
+    return {
+      obtenerFilas: () => filas.filter(f=> f.cliente.trim() || f.pedido.trim()).map(f=>({cliente: f.cliente.trim(), pedido: f.pedido.trim()}))
+    };
+  }
+
   function agRenderFormAgendar(){
     const area = document.getElementById('agFormArea');
     const fechaInicial = agFechaHoraPreseleccionada ? agFechaHoraPreseleccionada.fecha : agFechaAISO(new Date());
@@ -5473,16 +5512,19 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       <div class="field"><label>Horario disponible</label><select class="gemba-input" id="agHorarioSelect"></select></div>
       <div id="agHorarioAvisoVacio" style="display:none;font-size:11.5px;color:var(--flag);margin-top:4px;">No quedan horarios libres ese día — elige otra fecha.</div>
 
-      <div class="row-2" style="margin-top:16px;">
-        <div class="field"><label>Cliente</label><input type="text" class="gemba-input" id="agCliente" placeholder="Nombre del cliente"></div>
-        <div class="field">
-          <label>N° de Pedido(s)</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" class="gemba-input" id="agPedidoNuevo" placeholder="Ej: 400245" style="flex:1;">
-            <button type="button" class="btn ghost" id="agAgregarPedidoBtn" style="flex-shrink:0;">+ Agregar</button>
-          </div>
-          <div id="agPedidosChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
-        </div>
+      <div class="field" style="margin-top:16px;">
+        <label>Cliente(s) y Pedido(s)</label>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;">
+          <thead>
+            <tr style="background:var(--lock-soft);">
+              <th style="text-align:left;padding:6px 8px;border:1px solid var(--line);font-size:12px;color:var(--ink-soft);">Cliente</th>
+              <th style="text-align:left;padding:6px 8px;border:1px solid var(--line);font-size:12px;color:var(--ink-soft);">N° Pedido</th>
+              <th style="width:34px;border:1px solid var(--line);"></th>
+            </tr>
+          </thead>
+          <tbody id="agPedidosTablaBody"></tbody>
+        </table>
+        <button type="button" class="btn ghost" id="agAgregarFilaBtn" style="font-size:12px;">+ Agregar fila</button>
       </div>
       <div class="row-2">
         <div class="field"><label>Teléfono de contacto</label><input type="tel" class="gemba-input" id="agClienteTelefono" placeholder="+56 9 ..."></div>
@@ -5525,30 +5567,27 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     refrescarHorarios();
     agFechaHoraPreseleccionada = null; // ya se usó para pre-llenar; se limpia para la próxima vez
 
-    agPedidosNuevo = [];
-    function pintarPedidos(){
-      const cont = document.getElementById('agPedidosChips');
-      cont.innerHTML = agPedidosNuevo.map((p,i)=>`
-        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--lock-soft);border-radius:20px;padding:4px 6px 4px 12px;font-size:12px;">
-          ${escapeAttr(p)}
-          <button type="button" class="ag-pedido-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 6px;">×</button>
-        </span>`).join('');
-      cont.querySelectorAll('.ag-pedido-quitar').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ agPedidosNuevo.splice(Number(btn.dataset.idx),1); pintarPedidos(); });
-      });
+    // Tabla estilo Excel: cada fila es un par Cliente + Pedido
+    agFilasPedidos = [{ cliente: '', pedido: '' }];
+    function pintarFilasPedidos(){
+      const tbody = document.getElementById('agPedidosTablaBody');
+      tbody.innerHTML = agFilasPedidos.map((f,i)=>`
+        <tr>
+          <td style="border:1px solid var(--line);padding:0;"><input type="text" class="ag-fila-cliente" data-idx="${i}" value="${escapeAttr(f.cliente)}" placeholder="Nombre del cliente" style="width:100%;border:none;padding:7px 8px;font-size:13px;background:transparent;"></td>
+          <td style="border:1px solid var(--line);padding:0;"><input type="text" class="ag-fila-pedido" data-idx="${i}" value="${escapeAttr(f.pedido)}" placeholder="Ej: 400245" style="width:100%;border:none;padding:7px 8px;font-size:13px;background:transparent;"></td>
+          <td style="border:1px solid var(--line);text-align:center;">
+            ${agFilasPedidos.length>1 ? `<button type="button" class="ag-fila-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--flag);font-size:15px;">×</button>` : ''}
+          </td>
+        </tr>`).join('');
+      tbody.querySelectorAll('.ag-fila-cliente').forEach(inp=> inp.addEventListener('input', ()=>{ agFilasPedidos[Number(inp.dataset.idx)].cliente = inp.value; }));
+      tbody.querySelectorAll('.ag-fila-pedido').forEach(inp=> inp.addEventListener('input', ()=>{ agFilasPedidos[Number(inp.dataset.idx)].pedido = inp.value; }));
+      tbody.querySelectorAll('.ag-fila-quitar').forEach(btn=> btn.addEventListener('click', ()=>{ agFilasPedidos.splice(Number(btn.dataset.idx),1); pintarFilasPedidos(); }));
     }
-    function agregarPedido(){
-      const input = document.getElementById('agPedidoNuevo');
-      const valor = input.value.trim();
-      if(!valor) return;
-      if(!agPedidosNuevo.includes(valor)) agPedidosNuevo.push(valor);
-      input.value = '';
-      pintarPedidos();
-      input.focus();
-    }
-    document.getElementById('agAgregarPedidoBtn').addEventListener('click', agregarPedido);
-    document.getElementById('agPedidoNuevo').addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){ e.preventDefault(); agregarPedido(); }
+    pintarFilasPedidos();
+    document.getElementById('agAgregarFilaBtn').addEventListener('click', ()=>{
+      const ultima = agFilasPedidos[agFilasPedidos.length-1];
+      agFilasPedidos.push({ cliente: ultima ? ultima.cliente : '', pedido: '' }); // repite el cliente anterior, como en Excel
+      pintarFilasPedidos();
     });
 
     document.getElementById('agCrearBtn').addEventListener('click', agCrearCita);
@@ -5559,14 +5598,13 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const fecha = document.getElementById('agFechaInput').value;
     const horario = document.getElementById('agHorarioSelect').value;
 
-    // Si quedó texto sin "agregar" en el campo de pedido, lo sumamos igual antes de enviar
-    const pedidoSuelto = document.getElementById('agPedidoNuevo').value.trim();
-    if(pedidoSuelto && !agPedidosNuevo.includes(pedidoSuelto)) agPedidosNuevo.push(pedidoSuelto);
+    const pedidosValidos = agFilasPedidos
+      .map(f=>({ cliente: f.cliente.trim(), pedido: f.pedido.trim() }))
+      .filter(f=> f.pedido);
 
     const payload = {
       modulo: 'agenda', accion: 'crear', fecha, horario,
-      cliente: document.getElementById('agCliente').value.trim(),
-      pedido: agPedidosNuevo.join(', '),
+      pedidos: pedidosValidos,
       clienteTelefono: document.getElementById('agClienteTelefono').value.trim(),
       clienteCorreo: document.getElementById('agClienteCorreo').value.trim(),
       observacion: document.getElementById('agObservacion').value.trim(),
@@ -5575,8 +5613,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       vendedorArea: tkUsuarioActual ? tkUsuarioActual.area : ''
     };
     if(!fecha || !horario){ msg.style.color='var(--flag)'; msg.textContent='Elige un día con horarios disponibles.'; return; }
-    if(!payload.cliente){ msg.style.color='var(--flag)'; msg.textContent='Falta el nombre del cliente.'; return; }
-    if(!agPedidosNuevo.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos un N° de pedido.'; return; }
+    if(!pedidosValidos.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos una fila con Cliente y N° de pedido.'; return; }
 
     msg.style.color='var(--ink-soft)'; msg.textContent='Agendando…';
     try{
@@ -5645,14 +5682,20 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       </div>
 
       <div style="margin-bottom:14px;">
-        <div style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Pedido(s)</div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Cliente(s) y Pedido(s)</div>
         ${puedeEditar ? `
-          <div style="display:flex;gap:6px;margin-bottom:8px;">
-            <input type="text" class="gemba-input" id="agPedidoEditNuevo" placeholder="Ej: 400245" style="flex:1;">
-            <button type="button" class="btn ghost" id="agAgregarPedidoEditBtn" style="flex-shrink:0;">+ Agregar</button>
-          </div>
-          <div id="agPedidosEditChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
-          <button type="button" class="btn ghost" id="agGuardarPedidosBtn" style="font-size:12px;">Guardar pedidos</button>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;">
+            <thead>
+              <tr style="background:var(--lock-soft);">
+                <th style="text-align:left;padding:6px 8px;border:1px solid var(--line);font-size:12px;color:var(--ink-soft);">Cliente</th>
+                <th style="text-align:left;padding:6px 8px;border:1px solid var(--line);font-size:12px;color:var(--ink-soft);">N° Pedido</th>
+                <th style="width:34px;border:1px solid var(--line);"></th>
+              </tr>
+            </thead>
+            <tbody id="agPedidosEditTablaBody"></tbody>
+          </table>
+          <button type="button" class="btn ghost" id="agAgregarFilaEditBtn" style="font-size:12px;">+ Agregar fila</button>
+          <button type="button" class="btn primary" id="agGuardarPedidosBtn" style="font-size:12px;margin-left:6px;">Guardar pedidos</button>
           <div id="agPedidosMsg" style="margin-top:6px;font-size:12px;"></div>
         ` : `<div style="font-size:13px;font-weight:600;color:var(--ink);">${escapeAttr(c.pedido||'-')}</div>`}
       </div>
@@ -5710,42 +5753,43 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         if(confirm('¿Cancelar esta cita? El horario quedará libre para agendar de nuevo.')) agCambiarEstadoCita('Cancelado');
       });
 
-      // Edición de Pedido(s): parte de lo que ya había guardado, se puede agregar o quitar
-      let agPedidosEditando = (c.pedido || '').split(',').map(p=>p.trim()).filter(Boolean);
+      // Edición de Cliente(s)+Pedido(s): precargado desde el detalle real (Detalle_Pedidos_Agenda);
+      // si es una cita vieja sin filas de detalle, arranca con el resumen como única fila.
+      const filasExistentes = (agConfig.pedidosDetalle||[]).filter(p=> p.idCita === c.id);
+      let agPedidosEditando = filasExistentes.length
+        ? filasExistentes.map(p=>({ cliente: p.cliente, pedido: p.pedido }))
+        : [{ cliente: c.cliente || '', pedido: c.pedido || '' }];
+
       function pintarPedidosEdit(){
-        const cont = document.getElementById('agPedidosEditChips');
-        cont.innerHTML = agPedidosEditando.map((p,i)=>`
-          <span style="display:inline-flex;align-items:center;gap:5px;background:var(--lock-soft);border-radius:20px;padding:4px 6px 4px 12px;font-size:12px;">
-            ${escapeAttr(p)}
-            <button type="button" class="ag-pedido-edit-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 6px;">×</button>
-          </span>`).join('');
-        cont.querySelectorAll('.ag-pedido-edit-quitar').forEach(btn=>{
-          btn.addEventListener('click', ()=>{ agPedidosEditando.splice(Number(btn.dataset.idx),1); pintarPedidosEdit(); });
-        });
+        const tbody = document.getElementById('agPedidosEditTablaBody');
+        tbody.innerHTML = agPedidosEditando.map((f,i)=>`
+          <tr>
+            <td style="border:1px solid var(--line);padding:0;"><input type="text" class="ag-fila-edit-cliente" data-idx="${i}" value="${escapeAttr(f.cliente)}" placeholder="Nombre del cliente" style="width:100%;border:none;padding:7px 8px;font-size:13px;background:transparent;"></td>
+            <td style="border:1px solid var(--line);padding:0;"><input type="text" class="ag-fila-edit-pedido" data-idx="${i}" value="${escapeAttr(f.pedido)}" placeholder="Ej: 400245" style="width:100%;border:none;padding:7px 8px;font-size:13px;background:transparent;"></td>
+            <td style="border:1px solid var(--line);text-align:center;">
+              ${agPedidosEditando.length>1 ? `<button type="button" class="ag-fila-edit-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--flag);font-size:15px;">×</button>` : ''}
+            </td>
+          </tr>`).join('');
+        tbody.querySelectorAll('.ag-fila-edit-cliente').forEach(inp=> inp.addEventListener('input', ()=>{ agPedidosEditando[Number(inp.dataset.idx)].cliente = inp.value; }));
+        tbody.querySelectorAll('.ag-fila-edit-pedido').forEach(inp=> inp.addEventListener('input', ()=>{ agPedidosEditando[Number(inp.dataset.idx)].pedido = inp.value; }));
+        tbody.querySelectorAll('.ag-fila-edit-quitar').forEach(btn=> btn.addEventListener('click', ()=>{ agPedidosEditando.splice(Number(btn.dataset.idx),1); pintarPedidosEdit(); }));
       }
       pintarPedidosEdit();
-      function agregarPedidoEdit(){
-        const input = document.getElementById('agPedidoEditNuevo');
-        const valor = input.value.trim();
-        if(!valor) return;
-        if(!agPedidosEditando.includes(valor)) agPedidosEditando.push(valor);
-        input.value = '';
+      document.getElementById('agAgregarFilaEditBtn').addEventListener('click', ()=>{
+        const ultima = agPedidosEditando[agPedidosEditando.length-1];
+        agPedidosEditando.push({ cliente: ultima ? ultima.cliente : '', pedido: '' });
         pintarPedidosEdit();
-        input.focus();
-      }
-      document.getElementById('agAgregarPedidoEditBtn').addEventListener('click', agregarPedidoEdit);
-      document.getElementById('agPedidoEditNuevo').addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter'){ e.preventDefault(); agregarPedidoEdit(); }
       });
       document.getElementById('agGuardarPedidosBtn').addEventListener('click', async ()=>{
         const msg = document.getElementById('agPedidosMsg');
-        const pedidoSuelto = document.getElementById('agPedidoEditNuevo').value.trim();
-        if(pedidoSuelto && !agPedidosEditando.includes(pedidoSuelto)) agPedidosEditando.push(pedidoSuelto);
-        if(!agPedidosEditando.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos un pedido.'; return; }
+        const pedidosValidos = agPedidosEditando
+          .map(f=>({ cliente: (f.cliente||'').trim(), pedido: (f.pedido||'').trim() }))
+          .filter(f=> f.pedido);
+        if(!pedidosValidos.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos una fila con Cliente y N° de pedido.'; return; }
         msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
         try{
           const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({
-            modulo:'agenda', accion:'actualizar_pedido', idCita: agCitaAbiertaId, pedido: agPedidosEditando.join(', '),
+            modulo:'agenda', accion:'actualizar_pedido', idCita: agCitaAbiertaId, pedidos: pedidosValidos,
             actorArea: tkUsuarioActual ? tkUsuarioActual.area : '', actorCorreo: tkUsuarioActual ? tkUsuarioActual.correo : '',
             actorNombre: tkNombreActor()
           }) });
