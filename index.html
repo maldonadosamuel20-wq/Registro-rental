@@ -5639,10 +5639,22 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       </div>
       <div class="ag-detalle-grid">
         <div><span class="k">Fecha:</span> <span class="v">${escapeAttr(c.fecha)}</span></div>
-        <div><span class="k">Pedido(s):</span> <span class="v">${escapeAttr(c.pedido||'-')}</span></div>
         <div><span class="k">Agendado por:</span> <span class="v">${escapeAttr(c.vendedorNombre)} (${escapeAttr(c.vendedorArea)})</span></div>
         <div><span class="k">Contacto cliente:</span> <span class="v">${escapeAttr(c.clienteTelefono||'-')} ${c.clienteCorreo ? '· ' + escapeAttr(c.clienteCorreo) : ''}</span></div>
         <div><span class="k">Observación:</span> <span class="v">${escapeAttr(c.observacion||'-')}</span></div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div style="font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;">Pedido(s)</div>
+        ${puedeEditar ? `
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <input type="text" class="gemba-input" id="agPedidoEditNuevo" placeholder="Ej: 400245" style="flex:1;">
+            <button type="button" class="btn ghost" id="agAgregarPedidoEditBtn" style="flex-shrink:0;">+ Agregar</button>
+          </div>
+          <div id="agPedidosEditChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+          <button type="button" class="btn ghost" id="agGuardarPedidosBtn" style="font-size:12px;">Guardar pedidos</button>
+          <div id="agPedidosMsg" style="margin-top:6px;font-size:12px;"></div>
+        ` : `<div style="font-size:13px;font-weight:600;color:var(--ink);">${escapeAttr(c.pedido||'-')}</div>`}
       </div>
 
       ${!agPuedeEditarCita(c) && !esFinal ? `<div class="resumen-empty" style="background:var(--lock-soft);color:var(--ink-soft);margin-bottom:12px;">🔒 Solo Planificación, Despacho, o quien agendó esta cita pueden editarla o cambiar su estado.</div>` : ''}
@@ -5696,6 +5708,56 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       document.getElementById('agNoShowBtn').addEventListener('click', ()=> agCambiarEstadoCita('No-show'));
       document.getElementById('agCancelarBtn').addEventListener('click', ()=>{
         if(confirm('¿Cancelar esta cita? El horario quedará libre para agendar de nuevo.')) agCambiarEstadoCita('Cancelado');
+      });
+
+      // Edición de Pedido(s): parte de lo que ya había guardado, se puede agregar o quitar
+      let agPedidosEditando = (c.pedido || '').split(',').map(p=>p.trim()).filter(Boolean);
+      function pintarPedidosEdit(){
+        const cont = document.getElementById('agPedidosEditChips');
+        cont.innerHTML = agPedidosEditando.map((p,i)=>`
+          <span style="display:inline-flex;align-items:center;gap:5px;background:var(--lock-soft);border-radius:20px;padding:4px 6px 4px 12px;font-size:12px;">
+            ${escapeAttr(p)}
+            <button type="button" class="ag-pedido-edit-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 6px;">×</button>
+          </span>`).join('');
+        cont.querySelectorAll('.ag-pedido-edit-quitar').forEach(btn=>{
+          btn.addEventListener('click', ()=>{ agPedidosEditando.splice(Number(btn.dataset.idx),1); pintarPedidosEdit(); });
+        });
+      }
+      pintarPedidosEdit();
+      function agregarPedidoEdit(){
+        const input = document.getElementById('agPedidoEditNuevo');
+        const valor = input.value.trim();
+        if(!valor) return;
+        if(!agPedidosEditando.includes(valor)) agPedidosEditando.push(valor);
+        input.value = '';
+        pintarPedidosEdit();
+        input.focus();
+      }
+      document.getElementById('agAgregarPedidoEditBtn').addEventListener('click', agregarPedidoEdit);
+      document.getElementById('agPedidoEditNuevo').addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){ e.preventDefault(); agregarPedidoEdit(); }
+      });
+      document.getElementById('agGuardarPedidosBtn').addEventListener('click', async ()=>{
+        const msg = document.getElementById('agPedidosMsg');
+        const pedidoSuelto = document.getElementById('agPedidoEditNuevo').value.trim();
+        if(pedidoSuelto && !agPedidosEditando.includes(pedidoSuelto)) agPedidosEditando.push(pedidoSuelto);
+        if(!agPedidosEditando.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos un pedido.'; return; }
+        msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+        try{
+          const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({
+            modulo:'agenda', accion:'actualizar_pedido', idCita: agCitaAbiertaId, pedido: agPedidosEditando.join(', '),
+            actorArea: tkUsuarioActual ? tkUsuarioActual.area : '', actorCorreo: tkUsuarioActual ? tkUsuarioActual.correo : '',
+            actorNombre: tkNombreActor()
+          }) });
+          const data = await res.json();
+          if(data.ok){
+            await cargarCitas();
+            msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
+            agRenderDetalle();
+          } else {
+            msg.style.color='var(--flag)'; msg.textContent = data.error || 'No se pudo guardar.';
+          }
+        } catch(e){ msg.style.color='var(--flag)'; msg.textContent='⚠️ No se pudo conectar con el servidor.'; }
       });
     }
   }
