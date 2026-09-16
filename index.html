@@ -5135,12 +5135,13 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   const AG_DOW_MES = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
   const AG_DOW_SEMANA = ['LUN','MAR','MIÉ','JUE','VIE'];
 
-  let agConfig = { citas: [], bloqueos: [], horarios: [] };
+  let agConfig = { citas: [], bloqueos: [], horarios: [], historialCitas: [] };
   let agModuloIniciado = false;
   let agFechaActual = new Date();
   let agVistaActual = 'dia';
   let agCitaAbiertaId = null;
   let agFechaHoraPreseleccionada = null;
+  let agPedidosNuevo = [];
   let agAdminSubtabActual = 'horarios';
 
   async function inicializarModuloAgenda(){
@@ -5160,6 +5161,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       });
       document.getElementById('agVolverBtn').addEventListener('click', ()=> agCambiarTab('calendario'));
     }
+
+    // El modal de identidad usa tkConfig.areasReporta (definida en el módulo Tickets) para
+    // llenar el select de "Área a la que perteneces" — si el usuario entra directo a Agenda
+    // sin haber pasado antes por Tickets, esa lista nunca se cargaba. La pedimos siempre acá.
+    if(!tkConfig.areasReporta.length) await tkCargarConfig();
 
     tkUsuarioActual = tkCargarIdentidadGuardada();
     agMostrarIndicadorIdentidad();
@@ -5196,7 +5202,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       const res = await fetch(APPS_SCRIPT_URL + '?action=citas');
       const data = await res.json();
       if(data.ok){
-        agConfig = { citas: data.citas||[], bloqueos: data.bloqueos||[], horarios: data.horarios||[] };
+        agConfig = { citas: data.citas||[], bloqueos: data.bloqueos||[], horarios: data.horarios||[], historialCitas: data.historialCitas||[] };
       }
     } catch(e){ console.warn('Agenda: no se pudo cargar las citas', e); }
   }
@@ -5469,7 +5475,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
       <div class="row-2" style="margin-top:16px;">
         <div class="field"><label>Cliente</label><input type="text" class="gemba-input" id="agCliente" placeholder="Nombre del cliente"></div>
-        <div class="field"><label>N° de Pedido</label><input type="text" class="gemba-input" id="agPedido" placeholder="Ej: 400245"></div>
+        <div class="field">
+          <label>N° de Pedido(s)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" class="gemba-input" id="agPedidoNuevo" placeholder="Ej: 400245" style="flex:1;">
+            <button type="button" class="btn ghost" id="agAgregarPedidoBtn" style="flex-shrink:0;">+ Agregar</button>
+          </div>
+          <div id="agPedidosChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+        </div>
       </div>
       <div class="row-2">
         <div class="field"><label>Teléfono de contacto</label><input type="tel" class="gemba-input" id="agClienteTelefono" placeholder="+56 9 ..."></div>
@@ -5512,6 +5525,32 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     refrescarHorarios();
     agFechaHoraPreseleccionada = null; // ya se usó para pre-llenar; se limpia para la próxima vez
 
+    agPedidosNuevo = [];
+    function pintarPedidos(){
+      const cont = document.getElementById('agPedidosChips');
+      cont.innerHTML = agPedidosNuevo.map((p,i)=>`
+        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--lock-soft);border-radius:20px;padding:4px 6px 4px 12px;font-size:12px;">
+          ${escapeAttr(p)}
+          <button type="button" class="ag-pedido-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 6px;">×</button>
+        </span>`).join('');
+      cont.querySelectorAll('.ag-pedido-quitar').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ agPedidosNuevo.splice(Number(btn.dataset.idx),1); pintarPedidos(); });
+      });
+    }
+    function agregarPedido(){
+      const input = document.getElementById('agPedidoNuevo');
+      const valor = input.value.trim();
+      if(!valor) return;
+      if(!agPedidosNuevo.includes(valor)) agPedidosNuevo.push(valor);
+      input.value = '';
+      pintarPedidos();
+      input.focus();
+    }
+    document.getElementById('agAgregarPedidoBtn').addEventListener('click', agregarPedido);
+    document.getElementById('agPedidoNuevo').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); agregarPedido(); }
+    });
+
     document.getElementById('agCrearBtn').addEventListener('click', agCrearCita);
   }
 
@@ -5519,10 +5558,15 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     const msg = document.getElementById('agCrearMsg');
     const fecha = document.getElementById('agFechaInput').value;
     const horario = document.getElementById('agHorarioSelect').value;
+
+    // Si quedó texto sin "agregar" en el campo de pedido, lo sumamos igual antes de enviar
+    const pedidoSuelto = document.getElementById('agPedidoNuevo').value.trim();
+    if(pedidoSuelto && !agPedidosNuevo.includes(pedidoSuelto)) agPedidosNuevo.push(pedidoSuelto);
+
     const payload = {
       modulo: 'agenda', accion: 'crear', fecha, horario,
       cliente: document.getElementById('agCliente').value.trim(),
-      pedido: document.getElementById('agPedido').value.trim(),
+      pedido: agPedidosNuevo.join(', '),
       clienteTelefono: document.getElementById('agClienteTelefono').value.trim(),
       clienteCorreo: document.getElementById('agClienteCorreo').value.trim(),
       observacion: document.getElementById('agObservacion').value.trim(),
@@ -5532,6 +5576,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     };
     if(!fecha || !horario){ msg.style.color='var(--flag)'; msg.textContent='Elige un día con horarios disponibles.'; return; }
     if(!payload.cliente){ msg.style.color='var(--flag)'; msg.textContent='Falta el nombre del cliente.'; return; }
+    if(!agPedidosNuevo.length){ msg.style.color='var(--flag)'; msg.textContent='Agrega al menos un N° de pedido.'; return; }
 
     msg.style.color='var(--ink-soft)'; msg.textContent='Agendando…';
     try{
@@ -5561,15 +5606,29 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     agRenderDetalle();
   }
 
+  function agPuedeEditarCita(c){
+    if(!tkUsuarioActual) return false;
+    if(['Planificación','Despacho'].includes(tkUsuarioActual.area)) return true;
+    if(tkUsuarioActual.correo && c.vendedorCorreo && tkUsuarioActual.correo.trim().toLowerCase() === String(c.vendedorCorreo).trim().toLowerCase()) return true;
+    return false;
+  }
+
   function agRenderDetalle(){
     const cont = document.getElementById('agDetalleArea');
     const c = agConfig.citas.find(x=> x.id === agCitaAbiertaId);
     if(!c){ cont.innerHTML = '<div class="resumen-empty">Cita no encontrada.</div>'; return; }
 
     const esFinal = c.estado === 'Completado' || c.estado === 'No-show' || c.estado === 'Cancelado';
+    const puedeEditar = agPuedeEditarCita(c) && !esFinal;
     const colorBadge = c.estado === 'Agendado' ? { bg:'var(--flag-soft)', fg:'var(--flag)' }
       : c.estado === 'Completado' ? { bg:'var(--green-soft)', fg:'var(--green)' }
       : { bg:'var(--lock-soft)', fg:'var(--ink-soft)' };
+
+    // Bitácora: creación + cada entrada del historial (detalle actualizado, cambios de estado)
+    const eventos = [{ fecha: c.fechaCreacion, autor: c.vendedorNombre + (c.vendedorArea?' ('+c.vendedorArea+')':''), texto: 'Cita creada.' }];
+    (agConfig.historialCitas||[]).filter(h=> h.idCita === c.id).forEach(h=>{
+      eventos.push({ fecha: h.fecha, autor: h.realizadoPor || 'Sistema', texto: h.accion + (h.detalle ? ' — ' + h.detalle : '') });
+    });
 
     cont.innerHTML = `
       <div class="sku-section-head">
@@ -5580,32 +5639,34 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       </div>
       <div class="ag-detalle-grid">
         <div><span class="k">Fecha:</span> <span class="v">${escapeAttr(c.fecha)}</span></div>
-        <div><span class="k">Pedido:</span> <span class="v">${escapeAttr(c.pedido||'-')}</span></div>
+        <div><span class="k">Pedido(s):</span> <span class="v">${escapeAttr(c.pedido||'-')}</span></div>
         <div><span class="k">Agendado por:</span> <span class="v">${escapeAttr(c.vendedorNombre)} (${escapeAttr(c.vendedorArea)})</span></div>
         <div><span class="k">Contacto cliente:</span> <span class="v">${escapeAttr(c.clienteTelefono||'-')} ${c.clienteCorreo ? '· ' + escapeAttr(c.clienteCorreo) : ''}</span></div>
         <div><span class="k">Observación:</span> <span class="v">${escapeAttr(c.observacion||'-')}</span></div>
       </div>
 
+      ${!agPuedeEditarCita(c) && !esFinal ? `<div class="resumen-empty" style="background:var(--lock-soft);color:var(--ink-soft);margin-bottom:12px;">🔒 Solo Planificación, Despacho, o quien agendó esta cita pueden editarla o cambiar su estado.</div>` : ''}
+
       <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:6px;">
         <h4 style="font-size:15px;margin-bottom:10px;">📋 Detalle operativo — Planificación</h4>
         <div class="field"><label>Entrega</label>
-          <select class="gemba-input" id="agEntrega" ${esFinal?'disabled':''}>
+          <select class="gemba-input" id="agEntrega" ${!puedeEditar?'disabled':''}>
             <option value="">Sin definir</option>
             <option value="Retiro en bodega" ${c.entrega==='Retiro en bodega'?'selected':''}>Retiro en bodega</option>
             <option value="Despacho a domicilio" ${c.entrega==='Despacho a domicilio'?'selected':''}>Despacho a domicilio</option>
           </select>
         </div>
-        <div class="field"><label>Hoja de Ruta</label><input type="text" class="gemba-input" id="agHojaRuta" value="${escapeAttr(c.hojaRuta||'')}" placeholder="N° de hoja de ruta / guía de despacho" ${esFinal?'disabled':''}></div>
+        <div class="field"><label>Hoja de Ruta</label><input type="text" class="gemba-input" id="agHojaRuta" value="${escapeAttr(c.hojaRuta||'')}" placeholder="N° de hoja de ruta / guía de despacho" ${!puedeEditar?'disabled':''}></div>
         <div class="row-2">
-          <div class="field"><label>Nombre de quien retira</label><input type="text" class="gemba-input" id="agRetiraNombre" value="${escapeAttr(c.retiraNombre||'')}" ${esFinal?'disabled':''}></div>
-          <div class="field"><label>RUT</label><input type="text" class="gemba-input" id="agRetiraRUT" value="${escapeAttr(c.retiraRUT||'')}" ${esFinal?'disabled':''}></div>
+          <div class="field"><label>Nombre de quien retira</label><input type="text" class="gemba-input" id="agRetiraNombre" value="${escapeAttr(c.retiraNombre||'')}" ${!puedeEditar?'disabled':''}></div>
+          <div class="field"><label>RUT</label><input type="text" class="gemba-input" id="agRetiraRUT" value="${escapeAttr(c.retiraRUT||'')}" ${!puedeEditar?'disabled':''}></div>
         </div>
         <div class="row-2">
-          <div class="field"><label>Patente (si retira en vehículo)</label><input type="text" class="gemba-input" id="agRetiraPatente" value="${escapeAttr(c.retiraPatente||'')}" ${esFinal?'disabled':''}></div>
-          <div class="field"><label>Almacén / Bodega</label><input type="text" class="gemba-input" id="agAlmacen" value="${escapeAttr(c.almacen||'')}" ${esFinal?'disabled':''}></div>
+          <div class="field"><label>Patente (si retira en vehículo)</label><input type="text" class="gemba-input" id="agRetiraPatente" value="${escapeAttr(c.retiraPatente||'')}" ${!puedeEditar?'disabled':''}></div>
+          <div class="field"><label>Almacén / Bodega</label><input type="text" class="gemba-input" id="agAlmacen" value="${escapeAttr(c.almacen||'')}" ${!puedeEditar?'disabled':''}></div>
         </div>
 
-        ${!esFinal ? `
+        ${puedeEditar ? `
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
             <button type="button" class="btn primary" id="agGuardarDetalleBtn">Guardar detalle</button>
             <button type="button" class="btn ghost" id="agCompletarBtn">✓ Marcar como Completado</button>
@@ -5613,11 +5674,23 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
             <button type="button" class="btn ghost" id="agCancelarBtn">Cancelar cita</button>
           </div>
           <div id="agDetalleMsg" style="margin-top:8px;font-size:12.5px;"></div>
-        ` : `<div class="resumen-empty" style="margin-top:10px;">Esta cita ya está <strong>${escapeAttr(c.estado)}</strong>${c.completadoPor ? ' — por ' + escapeAttr(c.completadoPor) : ''}.</div>`}
+        ` : esFinal ? `<div class="resumen-empty" style="margin-top:10px;">Esta cita ya está <strong>${escapeAttr(c.estado)}</strong>.</div>` : ''}
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px;">
+        <h4 style="font-size:15px;margin-bottom:10px;">Historial de cambios</h4>
+        <div class="tk-timeline">
+          ${eventos.map(ev=>`
+            <div class="tk-timeline-item">
+              <span class="autor">${escapeAttr(ev.autor)}</span><span class="fecha">${escapeAttr(ev.fecha)}</span>
+              <div class="texto">${escapeAttr(ev.texto)}</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `;
 
-    if(!esFinal){
+    if(puedeEditar){
       document.getElementById('agGuardarDetalleBtn').addEventListener('click', agGuardarDetalle);
       document.getElementById('agCompletarBtn').addEventListener('click', ()=> agCambiarEstadoCita('Completado'));
       document.getElementById('agNoShowBtn').addEventListener('click', ()=> agCambiarEstadoCita('No-show'));
@@ -5636,22 +5709,41 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       retiraNombre: document.getElementById('agRetiraNombre').value.trim(),
       retiraRUT: document.getElementById('agRetiraRUT').value.trim(),
       retiraPatente: document.getElementById('agRetiraPatente').value.trim(),
-      almacen: document.getElementById('agAlmacen').value.trim()
+      almacen: document.getElementById('agAlmacen').value.trim(),
+      actorArea: tkUsuarioActual ? tkUsuarioActual.area : '',
+      actorCorreo: tkUsuarioActual ? tkUsuarioActual.correo : '',
+      actorNombre: tkNombreActor()
     };
     msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
     try{
-      await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
-      await cargarCitas();
-      msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
-    } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+      const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(data.ok){
+        await cargarCitas();
+        msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
+        agRenderDetalle();
+      } else {
+        msg.style.color='var(--flag)'; msg.textContent = data.error || 'No se pudo guardar.';
+      }
+    } catch(e){ msg.style.color='var(--flag)'; msg.textContent='⚠️ No se pudo conectar con el servidor.'; }
   }
 
   async function agCambiarEstadoCita(estado){
     try{
-      await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'actualizar_estado', idCita: agCitaAbiertaId, estado, realizadoPor: tkNombreActor() }) });
-      await cargarCitas();
-      agRenderDetalle();
-    } catch(e){ alert('No se pudo actualizar el estado.'); }
+      const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({
+        modulo:'agenda', accion:'actualizar_estado', idCita: agCitaAbiertaId, estado,
+        realizadoPor: tkNombreActor(),
+        actorArea: tkUsuarioActual ? tkUsuarioActual.area : '',
+        actorCorreo: tkUsuarioActual ? tkUsuarioActual.correo : ''
+      }) });
+      const data = await res.json();
+      if(data.ok){
+        await cargarCitas();
+        agRenderDetalle();
+      } else {
+        alert(data.error || 'No se pudo actualizar el estado.');
+      }
+    } catch(e){ alert('⚠️ No se pudo conectar con el servidor.'); }
   }
 
   // ---------- Administración ----------
