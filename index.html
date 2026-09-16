@@ -705,6 +705,74 @@
   .tk-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12.5px;}
   .tk-bar-row .lbl{width:160px;flex-shrink:0;color:var(--ink-soft);}
   .tk-bar-row .val{width:28px;text-align:right;font-weight:600;flex-shrink:0;}
+
+  /* ===== Módulo Agenda de Retiros ===== */
+  .ag-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+  .ag-tab-btn{padding:9px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-soft);}
+  .ag-tab-btn.active{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .ag-pane{display:none;}
+  .ag-pane.active{display:block;}
+  .ag-subtab-btn{padding:9px 16px;border-radius:20px;border:1px solid var(--line);background:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-soft);}
+  .ag-subtab-btn.active{background:var(--steel);border-color:var(--steel);color:#fff;}
+  .ag-vista-pane{display:none;}
+  .ag-vista-pane.active{display:block;}
+
+  .ag-date-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .ag-date-nav .arrow{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;color:var(--ink-soft);}
+  .ag-date-nav .fecha-actual{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:600;}
+  .ag-date-nav .fecha-sub{font-size:11.5px;color:var(--ink-soft);}
+
+  .ag-leyenda{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:11.5px;color:var(--ink-soft);}
+  .ag-leyenda span{display:inline-flex;align-items:center;gap:5px;}
+  .ag-leyenda .dot{width:10px;height:10px;border-radius:3px;display:inline-block;}
+
+  .ag-slot-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+  .ag-slot-row.libre:hover{border-color:var(--green);}
+  .ag-slot-row.ocupado{background:var(--flag-soft);border-color:var(--flag);cursor:pointer;}
+  .ag-slot-row.completado{background:var(--green-soft);border-color:var(--green);cursor:pointer;}
+  .ag-slot-row.no-show{background:#EFE3DD;border-color:var(--lock);cursor:pointer;}
+  .ag-slot-row.cancelado{background:var(--lock-soft);border-color:var(--lock);cursor:pointer;text-decoration:line-through;opacity:.75;}
+  .ag-slot-row.bloqueado{background:var(--lock-soft);border-color:var(--lock);cursor:pointer;}
+  .ag-slot-hora{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;width:56px;flex-shrink:0;}
+  .ag-slot-info{flex:1;font-size:13px;}
+  .ag-slot-info .cliente{font-weight:600;}
+  .ag-slot-info .meta{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+  .ag-slot-estado{font-size:11px;font-weight:700;flex-shrink:0;}
+  .ag-slot-estado.libre-txt{color:var(--green);}
+  .ag-slot-estado.ocupado-txt{color:var(--flag);}
+  .ag-slot-estado.completado-txt{color:var(--green);}
+  .ag-slot-estado.bloqueado-txt{color:var(--lock);}
+
+  .ag-semana-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+  @media (max-width:640px){ .ag-semana-grid{grid-template-columns:1fr 1fr;} }
+  .ag-semana-dia{border:1px solid var(--line);border-radius:var(--radius);padding:8px;cursor:default;}
+  .ag-semana-dia.hoy{border-color:var(--steel);border-width:1.5px;}
+  .ag-semana-dia .encabezado{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;text-align:center;padding-bottom:6px;border-bottom:1px solid var(--line);margin-bottom:6px;cursor:pointer;}
+  .ag-semana-slot{font-size:10.5px;padding:4px 5px;border-radius:3px;margin-bottom:3px;line-height:1.3;}
+  .ag-semana-slot.libre{background:#fff;border:1px dashed var(--line);color:var(--ink-soft);cursor:pointer;}
+  .ag-semana-slot.libre:hover{border-color:var(--green);border-style:solid;}
+  .ag-semana-slot.ocupado{background:var(--flag-soft);color:var(--flag);font-weight:600;cursor:pointer;}
+  .ag-semana-slot.completado{background:var(--green-soft);color:var(--green);font-weight:600;cursor:pointer;}
+  .ag-semana-slot.bloqueado{background:var(--lock-soft);color:var(--lock);font-style:italic;}
+  .ag-semana-resumen{font-size:10px;color:var(--ink-soft);text-align:center;margin-top:6px;padding-top:6px;border-top:1px solid var(--line);}
+
+  .ag-mes-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+  .ag-mes-dow{font-size:10.5px;font-weight:700;color:var(--ink-soft);text-align:center;padding-bottom:4px;}
+  .ag-mes-celda{border:1px solid var(--line);border-radius:var(--radius);min-height:64px;padding:6px;cursor:pointer;}
+  .ag-mes-celda:hover{border-color:var(--steel-2);}
+  .ag-mes-celda.otro-mes{opacity:.35;cursor:default;}
+  .ag-mes-celda.hoy{border-color:var(--steel);border-width:1.5px;}
+  .ag-mes-celda .num{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;}
+  .ag-mes-ocupacion{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+  .ag-mes-dot{width:6px;height:6px;border-radius:50%;}
+  .ag-mes-dot.ocupado{background:var(--flag);}
+  .ag-mes-dot.libre{background:var(--green);}
+  .ag-mes-full{font-size:9px;color:var(--flag);font-weight:700;margin-top:4px;}
+
+  .ag-detalle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;font-size:12.5px;margin:12px 0 16px;}
+  @media (max-width:560px){ .ag-detalle-grid{grid-template-columns:1fr;} }
+  .ag-detalle-grid .k{color:var(--ink-soft);}
+  .ag-detalle-grid .v{font-weight:600;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -758,6 +826,11 @@
       <span class="app-nav-icon">🎫</span>
       <span class="app-nav-label">Tickets</span>
       <span class="app-nav-desc">Seguimiento y respuesta — Supply Chain</span>
+    </button>
+    <button class="app-nav-card" id="navAgendaBtn" type="button">
+      <span class="app-nav-icon">📅</span>
+      <span class="app-nav-label">Agenda de Retiros</span>
+      <span class="app-nav-desc">Horarios y coordinación con clientes</span>
     </button>
   </nav>
 
@@ -1187,6 +1260,60 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       <div id="tkAdminArea"></div>
     </div>
   </div><!-- fin #viewTickets -->
+
+  <div id="viewAgenda" style="display:none;">
+    <div class="section-card">
+      <div class="sku-section-head">
+        <h3 style="margin-bottom:0;">Agenda de Retiros</h3>
+        <div id="agIdentidadIndicador" style="font-size:12px;color:var(--ink-soft);"></div>
+      </div>
+      <div class="sub">Coordina y consulta los horarios de retiro de clientes.</div>
+
+      <div class="ag-tabs">
+        <button class="ag-tab-btn active" data-agtab="calendario">📅 Calendario</button>
+        <button class="ag-tab-btn" data-agtab="agendar">+ Agendar cita</button>
+        <button class="ag-tab-btn" data-agtab="admin">⚙️ Administrar</button>
+      </div>
+    </div>
+
+    <!-- ============ CALENDARIO ============ -->
+    <div class="ag-pane active" id="agPaneCalendario">
+      <div class="section-card">
+        <div class="ag-tabs" id="agVistaSwitch">
+          <button class="ag-subtab-btn active" data-agvista="dia">Día</button>
+          <button class="ag-subtab-btn" data-agvista="semana">Semana</button>
+          <button class="ag-subtab-btn" data-agvista="mes">Mes</button>
+        </div>
+        <div id="agVistaArea"><div class="resumen-empty">Cargando calendario…</div></div>
+      </div>
+    </div>
+
+    <!-- ============ AGENDAR CITA ============ -->
+    <div class="ag-pane" id="agPaneAgendar">
+      <div class="section-card" id="agFormArea">Cargando formulario…</div>
+    </div>
+
+    <!-- ============ DETALLE DE UNA CITA ============ -->
+    <div class="ag-pane" id="agPaneDetalle">
+      <div class="section-card">
+        <button type="button" class="btn ghost" id="agVolverBtn" style="margin-bottom:14px;">← Volver al calendario</button>
+        <div id="agDetalleArea"></div>
+      </div>
+    </div>
+
+    <!-- ============ ADMINISTRAR ============ -->
+    <div class="ag-pane" id="agPaneAdmin">
+      <div class="section-card">
+        <h4 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:600;margin:0 0 4px;">Administración</h4>
+        <div class="sub" style="margin-bottom:12px;">Horarios del día y bloqueos puntuales — se editan aquí o directo en la Google Sheet.</div>
+        <div class="ag-tabs" id="agAdminSubtabs">
+          <button class="ag-subtab-btn active" data-agadmin="horarios">Horarios del día</button>
+          <button class="ag-subtab-btn" data-agadmin="bloqueos">Bloquear horario puntual</button>
+        </div>
+      </div>
+      <div id="agAdminArea"></div>
+    </div>
+  </div><!-- fin #viewAgenda -->
 
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
@@ -2657,18 +2784,21 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   loadHistorialFromBackend();
 
   /* =====================================================================
-     MÓDULO: Navegación entre Registro Rental, Gembas y Tickets
+     MÓDULO: Navegación entre Registro Rental, Gembas, Tickets y Agenda
   ===================================================================== */
   const viewRental = document.getElementById('viewRental');
   const viewGembas = document.getElementById('viewGembas');
   const viewTickets = document.getElementById('viewTickets');
+  const viewAgenda = document.getElementById('viewAgenda');
   function mostrarVista(nombre){
     viewRental.style.display = nombre === 'rental' ? 'block' : 'none';
     viewGembas.style.display = nombre === 'gembas' ? 'block' : 'none';
     viewTickets.style.display = nombre === 'tickets' ? 'block' : 'none';
+    viewAgenda.style.display = nombre === 'agenda' ? 'block' : 'none';
     document.getElementById('navRentalBtn').classList.toggle('active', nombre === 'rental');
     document.getElementById('navGembaBtn').classList.toggle('active', nombre === 'gembas');
     document.getElementById('navTicketsBtn').classList.toggle('active', nombre === 'tickets');
+    document.getElementById('navAgendaBtn').classList.toggle('active', nombre === 'agenda');
   }
   document.getElementById('navRentalBtn').addEventListener('click', ()=> mostrarVista('rental'));
   document.getElementById('navGembaBtn').addEventListener('click', ()=>{
@@ -2679,6 +2809,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   document.getElementById('navTicketsBtn').addEventListener('click', ()=>{
     mostrarVista('tickets');
     inicializarModuloTickets();
+  });
+  document.getElementById('navAgendaBtn').addEventListener('click', ()=>{
+    mostrarVista('agenda');
+    inicializarModuloAgenda();
   });
 
   /* =====================================================================
@@ -4134,6 +4268,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       tkMostrarIndicadorIdentidad();
       // Si el formulario de Nuevo Ticket ya está en pantalla, se refresca con los datos nuevos
       if(document.getElementById('tkAreaReporta')) tkRenderFormNuevo();
+      if(typeof agMostrarIndicadorIdentidad === 'function') agMostrarIndicadorIdentidad();
+      if(document.getElementById('agFechaInput')) agRenderFormAgendar();
     };
   }
 
@@ -4984,6 +5120,655 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
         limpiarForm();
         await tkRenderAdminResponsables(cont);
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
+  }
+
+  /* =====================================================================
+     MÓDULO: Agenda de Retiros
+     Reutiliza el mismo sistema de identidad de Tickets (tkUsuarioActual,
+     tkCargarIdentidadGuardada, tkAbrirModalIdentidad, tkNombreActor).
+  ===================================================================== */
+
+  const AG_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const AG_DOW_MES = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  const AG_DOW_SEMANA = ['LUN','MAR','MIÉ','JUE','VIE'];
+
+  let agConfig = { citas: [], bloqueos: [], horarios: [] };
+  let agModuloIniciado = false;
+  let agFechaActual = new Date();
+  let agVistaActual = 'dia';
+  let agCitaAbiertaId = null;
+  let agFechaHoraPreseleccionada = null;
+  let agAdminSubtabActual = 'horarios';
+
+  async function inicializarModuloAgenda(){
+    const primeraVez = !agModuloIniciado;
+    if(primeraVez){
+      agModuloIniciado = true;
+      document.querySelectorAll('#viewAgenda .ag-tab-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=> agCambiarTab(btn.dataset.agtab));
+      });
+      document.querySelectorAll('#agVistaSwitch .ag-subtab-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          document.querySelectorAll('#agVistaSwitch .ag-subtab-btn').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          agVistaActual = btn.dataset.agvista;
+          agRenderVistaCalendario();
+        });
+      });
+      document.getElementById('agVolverBtn').addEventListener('click', ()=> agCambiarTab('calendario'));
+    }
+
+    tkUsuarioActual = tkCargarIdentidadGuardada();
+    agMostrarIndicadorIdentidad();
+    if(!tkUsuarioActual) tkAbrirModalIdentidad();
+
+    await cargarCitas();
+    agRenderVistaCalendario();
+    agRenderFormAgendar();
+  }
+
+  function agCambiarTab(nombre){
+    document.querySelectorAll('#viewAgenda .ag-tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.agtab === nombre));
+    document.getElementById('agPaneCalendario').classList.toggle('active', nombre === 'calendario');
+    document.getElementById('agPaneAgendar').classList.toggle('active', nombre === 'agendar');
+    document.getElementById('agPaneDetalle').classList.toggle('active', nombre === 'detalle');
+    document.getElementById('agPaneAdmin').classList.toggle('active', nombre === 'admin');
+    if(nombre === 'admin') agRenderAdmin();
+  }
+
+  function agMostrarIndicadorIdentidad(){
+    const el = document.getElementById('agIdentidadIndicador');
+    if(!el) return;
+    if(tkUsuarioActual){
+      el.innerHTML = `👤 Actuando como: <strong>${escapeAttr(tkUsuarioActual.nombre)}</strong> (${escapeAttr(tkUsuarioActual.correo)}${tkUsuarioActual.area ? ' · ' + escapeAttr(tkUsuarioActual.area) : ''}) · <a href="#" id="agCambiarIdentidadLink" style="color:var(--steel-2);">cambiar</a>`;
+      const link = document.getElementById('agCambiarIdentidadLink');
+      if(link) link.addEventListener('click', (e)=>{ e.preventDefault(); tkAbrirModalIdentidad(); });
+    } else {
+      el.textContent = '';
+    }
+  }
+
+  async function cargarCitas(){
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=citas');
+      const data = await res.json();
+      if(data.ok){
+        agConfig = { citas: data.citas||[], bloqueos: data.bloqueos||[], horarios: data.horarios||[] };
+      }
+    } catch(e){ console.warn('Agenda: no se pudo cargar las citas', e); }
+  }
+
+  function agMostrarBannerExito(texto){
+    const cont = document.getElementById('agPaneCalendario').querySelector('.section-card');
+    const anterior = cont.querySelector('.ag-banner-exito');
+    if(anterior) anterior.remove();
+    const banner = document.createElement('div');
+    banner.className = 'resumen-empty ag-banner-exito';
+    banner.style.cssText = 'background:var(--green-soft);color:var(--green);border-radius:4px;padding:10px 14px;margin-bottom:12px;font-weight:600;';
+    banner.textContent = texto;
+    cont.prepend(banner);
+    setTimeout(()=> banner.remove(), 6000);
+  }
+
+  // ---------- Helpers de fecha/horario ----------
+
+  function agFechaAISO(d){
+    const pad = n => String(n).padStart(2,'0');
+    return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  }
+  function agFechaDesdeISO(iso){
+    const [y,m,d] = iso.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+  function agFormatoFechaLarga(d){
+    const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + AG_MESES[d.getMonth()];
+  }
+  function agHorarioAMinutos(h){
+    const partes = String(h).split(':').map(Number);
+    return (partes[0]||0)*60 + (partes[1]||0);
+  }
+  function agHorariosOrdenados(){
+    return [...agConfig.horarios].sort((a,b)=> agHorarioAMinutos(a) - agHorarioAMinutos(b));
+  }
+  function agLunesDeSemana(d){
+    const copia = new Date(d);
+    const dia = copia.getDay();
+    const diff = dia === 0 ? -6 : 1 - dia;
+    copia.setDate(copia.getDate() + diff);
+    copia.setHours(0,0,0,0);
+    return copia;
+  }
+  // Cita activa (no Cancelada) en esa Fecha+Horario, si existe
+  function agCitaEnHorario(fechaISO, horario){
+    return agConfig.citas.find(c => c.fecha === fechaISO && c.horario === horario && c.estado !== 'Cancelado') || null;
+  }
+  function agBloqueoEnHorario(fechaISO, horario){
+    return agConfig.bloqueos.find(b => b.fecha === fechaISO && b.horario === horario) || null;
+  }
+  function agHorariosLibresPara(fechaISO){
+    return agHorariosOrdenados().filter(h => !agCitaEnHorario(fechaISO, h) && !agBloqueoEnHorario(fechaISO, h));
+  }
+  function agIrAVistaDia(fechaISO){
+    agFechaActual = agFechaDesdeISO(fechaISO);
+    agVistaActual = 'dia';
+    document.querySelectorAll('#agVistaSwitch .ag-subtab-btn').forEach(b=> b.classList.toggle('active', b.dataset.agvista === 'dia'));
+    agRenderVistaCalendario();
+  }
+  function agIrAAgendar(fecha, horario){
+    agFechaHoraPreseleccionada = { fecha, horario };
+    agCambiarTab('agendar');
+    agRenderFormAgendar();
+  }
+
+  // ---------- Vista Calendario (Día / Semana / Mes) ----------
+
+  function agRenderVistaCalendario(){
+    if(agVistaActual === 'semana') agRenderVistaSemana();
+    else if(agVistaActual === 'mes') agRenderVistaMes();
+    else agRenderVistaDia();
+  }
+
+  function agRenderVistaDia(){
+    const cont = document.getElementById('agVistaArea');
+    const fechaISO = agFechaAISO(agFechaActual);
+    const horarios = agHorariosOrdenados();
+
+    let html = `
+      <div class="ag-date-nav">
+        <button class="arrow" id="agDiaAnteriorBtn">←</button>
+        <div style="text-align:center;">
+          <div class="fecha-actual">${escapeAttr(agFormatoFechaLarga(agFechaActual))}</div>
+          <div class="fecha-sub">${agFechaActual.getFullYear()}</div>
+        </div>
+        <button class="arrow" id="agDiaSiguienteBtn">→</button>
+      </div>
+      <div class="ag-leyenda">
+        <span><span class="dot" style="background:#fff;border:1px solid var(--green);"></span> Libre</span>
+        <span><span class="dot" style="background:var(--flag-soft);border:1px solid var(--flag);"></span> Ocupado</span>
+        <span><span class="dot" style="background:var(--green-soft);border:1px solid var(--green);"></span> Completado</span>
+        <span><span class="dot" style="background:var(--lock-soft);border:1px solid var(--lock);"></span> Bloqueado</span>
+      </div>`;
+
+    if(!horarios.length){
+      html += '<div class="resumen-empty">No hay horarios configurados — ve a Administrar → Horarios del día.</div>';
+    } else {
+      horarios.forEach(h=>{
+        const cita = agCitaEnHorario(fechaISO, h);
+        const bloqueo = !cita ? agBloqueoEnHorario(fechaISO, h) : null;
+        if(cita){
+          const clase = cita.estado === 'Completado' ? 'completado' : cita.estado === 'No-show' ? 'no-show' : 'ocupado';
+          html += `
+            <div class="ag-slot-row ${clase}" data-agcitaid="${escapeAttr(cita.id)}">
+              <div class="ag-slot-hora">${escapeAttr(h)}</div>
+              <div class="ag-slot-info"><span class="cliente">${escapeAttr(cita.cliente)}</span><div class="meta">Pedido ${escapeAttr(cita.pedido||'-')} · ${escapeAttr(cita.vendedorNombre)} (${escapeAttr(cita.vendedorArea)})</div></div>
+              <div class="ag-slot-estado ocupado-txt">${escapeAttr(cita.estado)}</div>
+            </div>`;
+        } else if(bloqueo){
+          html += `
+            <div class="ag-slot-row bloqueado">
+              <div class="ag-slot-hora">${escapeAttr(h)}</div>
+              <div class="ag-slot-info"><span class="cliente">Bloqueado</span><div class="meta">${escapeAttr(bloqueo.motivo)}</div></div>
+              <div class="ag-slot-estado bloqueado-txt">Bloqueado</div>
+            </div>`;
+        } else {
+          html += `
+            <div class="ag-slot-row libre" data-agfecha="${escapeAttr(fechaISO)}" data-aghorario="${escapeAttr(h)}">
+              <div class="ag-slot-hora">${escapeAttr(h)}</div>
+              <div class="ag-slot-info" style="color:var(--ink-soft);">Disponible</div>
+              <div class="ag-slot-estado libre-txt">+ Agendar</div>
+            </div>`;
+        }
+      });
+    }
+
+    cont.innerHTML = html;
+    document.getElementById('agDiaAnteriorBtn').addEventListener('click', ()=>{ agFechaActual.setDate(agFechaActual.getDate()-1); agRenderVistaDia(); });
+    document.getElementById('agDiaSiguienteBtn').addEventListener('click', ()=>{ agFechaActual.setDate(agFechaActual.getDate()+1); agRenderVistaDia(); });
+    cont.querySelectorAll('.ag-slot-row.libre').forEach(el=> el.addEventListener('click', ()=> agIrAAgendar(el.dataset.agfecha, el.dataset.aghorario)));
+    cont.querySelectorAll('.ag-slot-row[data-agcitaid]').forEach(el=> el.addEventListener('click', ()=> agAbrirDetalle(el.dataset.agcitaid)));
+  }
+
+  function agRenderVistaSemana(){
+    const cont = document.getElementById('agVistaArea');
+    const lunes = agLunesDeSemana(agFechaActual);
+    const horarios = agHorariosOrdenados();
+    const dias = [];
+    for(let i=0;i<5;i++){ const d = new Date(lunes); d.setDate(d.getDate()+i); dias.push(d); }
+    const viernes = dias[4];
+    const hoyISO = agFechaAISO(new Date());
+
+    let html = `
+      <div class="ag-date-nav">
+        <button class="arrow" id="agSemanaAnteriorBtn">←</button>
+        <div style="text-align:center;">
+          <div class="fecha-actual">${lunes.getDate()} – ${viernes.getDate()} de ${AG_MESES[viernes.getMonth()]}</div>
+          <div class="fecha-sub">${viernes.getFullYear()}</div>
+        </div>
+        <button class="arrow" id="agSemanaSiguienteBtn">→</button>
+      </div>
+      <div class="ag-leyenda">
+        <span><span class="dot" style="background:#fff;border:1px solid var(--green);"></span> Libre</span>
+        <span><span class="dot" style="background:var(--flag-soft);border:1px solid var(--flag);"></span> Ocupado</span>
+        <span><span class="dot" style="background:var(--lock-soft);border:1px solid var(--lock);"></span> Bloqueado</span>
+      </div>
+      <div class="ag-semana-grid">`;
+
+    dias.forEach((d,idx)=>{
+      const fechaISO = agFechaAISO(d);
+      const esHoy = fechaISO === hoyISO;
+      let slotsHtml = '';
+      horarios.slice(0,4).forEach(h=>{
+        const cita = agCitaEnHorario(fechaISO, h);
+        const bloqueo = !cita ? agBloqueoEnHorario(fechaISO, h) : null;
+        if(cita) slotsHtml += `<div class="ag-semana-slot ocupado" data-agcitaid="${escapeAttr(cita.id)}">${escapeAttr(h)} ${escapeAttr(cita.cliente)}</div>`;
+        else if(bloqueo) slotsHtml += `<div class="ag-semana-slot bloqueado">${escapeAttr(h)} bloqueado</div>`;
+        else slotsHtml += `<div class="ag-semana-slot libre" data-agfecha="${escapeAttr(fechaISO)}" data-aghorario="${escapeAttr(h)}">${escapeAttr(h)} libre</div>`;
+      });
+      let totalOcupados = 0;
+      horarios.forEach(h=>{ if(agCitaEnHorario(fechaISO,h)) totalOcupados++; });
+
+      html += `
+        <div class="ag-semana-dia ${esHoy?'hoy':''}">
+          <div class="encabezado" data-agfecha="${escapeAttr(fechaISO)}">${AG_DOW_SEMANA[idx]} <span class="num">${d.getDate()}</span></div>
+          ${slotsHtml}
+          <div class="ag-semana-resumen">${totalOcupados} de ${horarios.length} ocupados</div>
+        </div>`;
+    });
+    html += '</div>';
+
+    cont.innerHTML = html;
+    document.getElementById('agSemanaAnteriorBtn').addEventListener('click', ()=>{ agFechaActual.setDate(agFechaActual.getDate()-7); agRenderVistaSemana(); });
+    document.getElementById('agSemanaSiguienteBtn').addEventListener('click', ()=>{ agFechaActual.setDate(agFechaActual.getDate()+7); agRenderVistaSemana(); });
+    cont.querySelectorAll('.ag-semana-slot.libre').forEach(el=> el.addEventListener('click', ()=> agIrAAgendar(el.dataset.agfecha, el.dataset.aghorario)));
+    cont.querySelectorAll('.ag-semana-slot[data-agcitaid]').forEach(el=> el.addEventListener('click', ()=> agAbrirDetalle(el.dataset.agcitaid)));
+    cont.querySelectorAll('.encabezado').forEach(el=> el.addEventListener('click', ()=> agIrAVistaDia(el.dataset.agfecha)));
+  }
+
+  function agRenderVistaMes(){
+    const cont = document.getElementById('agVistaArea');
+    const anio = agFechaActual.getFullYear();
+    const mes = agFechaActual.getMonth();
+    const primerDia = new Date(anio, mes, 1);
+    const ultimoDia = new Date(anio, mes+1, 0);
+    const horarios = agHorariosOrdenados();
+    const hoyISO = agFechaAISO(new Date());
+
+    let inicioOffset = primerDia.getDay() - 1;
+    if(inicioOffset < 0) inicioOffset = 6;
+
+    const celdas = [];
+    for(let i=0;i<inicioOffset;i++){ const d = new Date(anio, mes, 1-(inicioOffset-i)); celdas.push({fecha:d, otroMes:true}); }
+    for(let dia=1; dia<=ultimoDia.getDate(); dia++){ celdas.push({fecha:new Date(anio, mes, dia), otroMes:false}); }
+    while(celdas.length % 7 !== 0){ const u = celdas[celdas.length-1].fecha; const d = new Date(u); d.setDate(d.getDate()+1); celdas.push({fecha:d, otroMes:true}); }
+
+    let html = `
+      <div class="ag-date-nav">
+        <button class="arrow" id="agMesAnteriorBtn">←</button>
+        <div style="text-align:center;">
+          <div class="fecha-actual">${AG_MESES[mes].charAt(0).toUpperCase()+AG_MESES[mes].slice(1)}</div>
+          <div class="fecha-sub">${anio}</div>
+        </div>
+        <button class="arrow" id="agMesSiguienteBtn">→</button>
+      </div>
+      <div class="ag-leyenda">
+        <span><span class="dot" style="background:var(--green);border-radius:50%;width:8px;height:8px;display:inline-block;"></span> Con horarios libres</span>
+        <span><span class="dot" style="background:var(--flag);border-radius:50%;width:8px;height:8px;display:inline-block;"></span> Con retiros agendados</span>
+        <span style="color:var(--flag);font-weight:700;">Completo = sin cupo</span>
+      </div>
+      <div class="ag-mes-grid">
+        ${AG_DOW_MES.map(d=>`<div class="ag-mes-dow">${d}</div>`).join('')}`;
+
+    celdas.forEach(c=>{
+      const fechaISO = agFechaAISO(c.fecha);
+      const esHoy = fechaISO === hoyISO;
+      let ocupados = 0, libres = 0;
+      if(!c.otroMes){
+        horarios.forEach(h=>{
+          const cita = agCitaEnHorario(fechaISO, h);
+          const bloqueo = !cita ? agBloqueoEnHorario(fechaISO, h) : null;
+          if(cita) ocupados++; else if(!bloqueo) libres++;
+        });
+      }
+      const completo = !c.otroMes && horarios.length>0 && libres===0;
+      const clases = ['ag-mes-celda'];
+      if(c.otroMes) clases.push('otro-mes');
+      if(esHoy) clases.push('hoy');
+      html += `<div class="${clases.join(' ')}" ${!c.otroMes && !completo ? 'data-agfecha="'+escapeAttr(fechaISO)+'"' : ''}>
+        <div class="num">${c.fecha.getDate()}</div>
+        ${!c.otroMes ? `<div class="ag-mes-ocupacion">${ocupados>0?'<span class="ag-mes-dot ocupado"></span>':''}${libres>0?'<span class="ag-mes-dot libre"></span>':''}</div>` : ''}
+        ${completo ? '<div class="ag-mes-full">Completo</div>' : ''}
+      </div>`;
+    });
+    html += '</div>';
+
+    cont.innerHTML = html;
+    document.getElementById('agMesAnteriorBtn').addEventListener('click', ()=>{ agFechaActual = new Date(anio, mes-1, 1); agRenderVistaMes(); });
+    document.getElementById('agMesSiguienteBtn').addEventListener('click', ()=>{ agFechaActual = new Date(anio, mes+1, 1); agRenderVistaMes(); });
+    cont.querySelectorAll('.ag-mes-celda[data-agfecha]').forEach(el=> el.addEventListener('click', ()=> agIrAVistaDia(el.dataset.agfecha)));
+  }
+
+  // ---------- Formulario: Agendar cita ----------
+
+  function agRenderFormAgendar(){
+    const area = document.getElementById('agFormArea');
+    const fechaInicial = agFechaHoraPreseleccionada ? agFechaHoraPreseleccionada.fecha : agFechaAISO(new Date());
+
+    area.innerHTML = `
+      <div class="sku-section-head"><h3>Agendar retiro</h3></div>
+      <div class="sub">Elige el día y luego el horario — la lista se arma sola según lo que ya está tomado.</div>
+
+      <div class="field"><label>Vendedor / Área que agenda</label><input type="text" class="gemba-input" value="${tkUsuarioActual ? escapeAttr(tkUsuarioActual.nombre + (tkUsuarioActual.area ? ' (' + tkUsuarioActual.area + ')' : '')) : ''}" disabled style="background:#F4F4EF;"></div>
+
+      <div class="field"><label>Día</label><input type="date" class="gemba-input" id="agFechaInput" value="${escapeAttr(fechaInicial)}"></div>
+      <div class="field"><label>Horario disponible</label><select class="gemba-input" id="agHorarioSelect"></select></div>
+      <div id="agHorarioAvisoVacio" style="display:none;font-size:11.5px;color:var(--flag);margin-top:4px;">No quedan horarios libres ese día — elige otra fecha.</div>
+
+      <div class="row-2" style="margin-top:16px;">
+        <div class="field"><label>Cliente</label><input type="text" class="gemba-input" id="agCliente" placeholder="Nombre del cliente"></div>
+        <div class="field"><label>N° de Pedido</label><input type="text" class="gemba-input" id="agPedido" placeholder="Ej: 400245"></div>
+      </div>
+      <div class="row-2">
+        <div class="field"><label>Teléfono de contacto</label><input type="tel" class="gemba-input" id="agClienteTelefono" placeholder="+56 9 ..."></div>
+        <div class="field"><label>Correo de contacto</label><input type="email" class="gemba-input" id="agClienteCorreo" placeholder="cliente@correo.com"></div>
+      </div>
+      <div class="field"><label>Observación (opcional)</label><textarea class="gemba-input" id="agObservacion" placeholder="Algo que Planificación deba saber..."></textarea></div>
+
+      <div class="resumen-empty" style="background:var(--amber-soft);color:#8A5D14;border-radius:4px;padding:10px 12px;margin-top:6px;">
+        📋 Entrega, Datos de quien retira, y Almacén los completa el equipo de Planificación una vez coordinado el detalle.
+      </div>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="btn primary" id="agCrearBtn">Confirmar hora</button>
+      </div>
+      <div id="agCrearMsg" style="margin-top:10px;font-size:12.5px;"></div>
+    `;
+
+    function refrescarHorarios(){
+      const fecha = document.getElementById('agFechaInput').value;
+      const libres = agHorariosLibresPara(fecha);
+      const sel = document.getElementById('agHorarioSelect');
+      const avisoVacio = document.getElementById('agHorarioAvisoVacio');
+      const crearBtn = document.getElementById('agCrearBtn');
+      if(!libres.length){
+        sel.innerHTML = '';
+        sel.disabled = true;
+        avisoVacio.style.display = 'block';
+        crearBtn.disabled = true;
+        return;
+      }
+      sel.disabled = false;
+      avisoVacio.style.display = 'none';
+      crearBtn.disabled = false;
+      sel.innerHTML = libres.map(h=>`<option value="${escapeAttr(h)}">${escapeAttr(h)}</option>`).join('');
+      if(agFechaHoraPreseleccionada && agFechaHoraPreseleccionada.fecha === fecha && libres.includes(agFechaHoraPreseleccionada.horario)){
+        sel.value = agFechaHoraPreseleccionada.horario;
+      }
+    }
+    document.getElementById('agFechaInput').addEventListener('change', refrescarHorarios);
+    refrescarHorarios();
+    agFechaHoraPreseleccionada = null; // ya se usó para pre-llenar; se limpia para la próxima vez
+
+    document.getElementById('agCrearBtn').addEventListener('click', agCrearCita);
+  }
+
+  async function agCrearCita(){
+    const msg = document.getElementById('agCrearMsg');
+    const fecha = document.getElementById('agFechaInput').value;
+    const horario = document.getElementById('agHorarioSelect').value;
+    const payload = {
+      modulo: 'agenda', accion: 'crear', fecha, horario,
+      cliente: document.getElementById('agCliente').value.trim(),
+      pedido: document.getElementById('agPedido').value.trim(),
+      clienteTelefono: document.getElementById('agClienteTelefono').value.trim(),
+      clienteCorreo: document.getElementById('agClienteCorreo').value.trim(),
+      observacion: document.getElementById('agObservacion').value.trim(),
+      vendedorNombre: tkUsuarioActual ? tkUsuarioActual.nombre : '',
+      vendedorCorreo: tkUsuarioActual ? tkUsuarioActual.correo : '',
+      vendedorArea: tkUsuarioActual ? tkUsuarioActual.area : ''
+    };
+    if(!fecha || !horario){ msg.style.color='var(--flag)'; msg.textContent='Elige un día con horarios disponibles.'; return; }
+    if(!payload.cliente){ msg.style.color='var(--flag)'; msg.textContent='Falta el nombre del cliente.'; return; }
+
+    msg.style.color='var(--ink-soft)'; msg.textContent='Agendando…';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(data.ok){
+        await cargarCitas();
+        agCambiarTab('calendario');
+        agIrAVistaDia(fecha);
+        agMostrarBannerExito('✓ Cita ' + data.idCita + ' agendada — ' + fecha + ' ' + horario + '.');
+        agRenderFormAgendar();
+      } else {
+        msg.style.color='var(--flag)';
+        msg.textContent = data.error || 'No se pudo agendar.';
+      }
+    } catch(e){
+      msg.style.color='var(--flag)';
+      msg.textContent = '⚠️ No se pudo conectar con el servidor.';
+    }
+  }
+
+  // ---------- Detalle de una cita ----------
+
+  function agAbrirDetalle(idCita){
+    agCitaAbiertaId = idCita;
+    agCambiarTab('detalle');
+    agRenderDetalle();
+  }
+
+  function agRenderDetalle(){
+    const cont = document.getElementById('agDetalleArea');
+    const c = agConfig.citas.find(x=> x.id === agCitaAbiertaId);
+    if(!c){ cont.innerHTML = '<div class="resumen-empty">Cita no encontrada.</div>'; return; }
+
+    const esFinal = c.estado === 'Completado' || c.estado === 'No-show' || c.estado === 'Cancelado';
+    const colorBadge = c.estado === 'Agendado' ? { bg:'var(--flag-soft)', fg:'var(--flag)' }
+      : c.estado === 'Completado' ? { bg:'var(--green-soft)', fg:'var(--green)' }
+      : { bg:'var(--lock-soft)', fg:'var(--ink-soft)' };
+
+    cont.innerHTML = `
+      <div class="sku-section-head">
+        <div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;">${escapeAttr(c.horario)} · ${escapeAttr(c.cliente)}</span>
+          <span class="badge" style="background:${colorBadge.bg};color:${colorBadge.fg};margin-left:8px;">${escapeAttr(c.estado)}</span>
+        </div>
+      </div>
+      <div class="ag-detalle-grid">
+        <div><span class="k">Fecha:</span> <span class="v">${escapeAttr(c.fecha)}</span></div>
+        <div><span class="k">Pedido:</span> <span class="v">${escapeAttr(c.pedido||'-')}</span></div>
+        <div><span class="k">Agendado por:</span> <span class="v">${escapeAttr(c.vendedorNombre)} (${escapeAttr(c.vendedorArea)})</span></div>
+        <div><span class="k">Contacto cliente:</span> <span class="v">${escapeAttr(c.clienteTelefono||'-')} ${c.clienteCorreo ? '· ' + escapeAttr(c.clienteCorreo) : ''}</span></div>
+        <div><span class="k">Observación:</span> <span class="v">${escapeAttr(c.observacion||'-')}</span></div>
+      </div>
+
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:6px;">
+        <h4 style="font-size:15px;margin-bottom:10px;">📋 Detalle operativo — Planificación</h4>
+        <div class="field"><label>Entrega</label>
+          <select class="gemba-input" id="agEntrega" ${esFinal?'disabled':''}>
+            <option value="">Sin definir</option>
+            <option value="Retiro en bodega" ${c.entrega==='Retiro en bodega'?'selected':''}>Retiro en bodega</option>
+            <option value="Despacho a domicilio" ${c.entrega==='Despacho a domicilio'?'selected':''}>Despacho a domicilio</option>
+          </select>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Nombre de quien retira</label><input type="text" class="gemba-input" id="agRetiraNombre" value="${escapeAttr(c.retiraNombre||'')}" ${esFinal?'disabled':''}></div>
+          <div class="field"><label>RUT</label><input type="text" class="gemba-input" id="agRetiraRUT" value="${escapeAttr(c.retiraRUT||'')}" ${esFinal?'disabled':''}></div>
+        </div>
+        <div class="row-2">
+          <div class="field"><label>Patente (si retira en vehículo)</label><input type="text" class="gemba-input" id="agRetiraPatente" value="${escapeAttr(c.retiraPatente||'')}" ${esFinal?'disabled':''}></div>
+          <div class="field"><label>Almacén / Bodega</label><input type="text" class="gemba-input" id="agAlmacen" value="${escapeAttr(c.almacen||'')}" ${esFinal?'disabled':''}></div>
+        </div>
+
+        ${!esFinal ? `
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button type="button" class="btn primary" id="agGuardarDetalleBtn">Guardar detalle</button>
+            <button type="button" class="btn ghost" id="agCompletarBtn">✓ Marcar como Completado</button>
+            <button type="button" class="btn ghost" id="agNoShowBtn" style="color:var(--flag);border-color:var(--flag);">✕ No-show</button>
+            <button type="button" class="btn ghost" id="agCancelarBtn">Cancelar cita</button>
+          </div>
+          <div id="agDetalleMsg" style="margin-top:8px;font-size:12.5px;"></div>
+        ` : `<div class="resumen-empty" style="margin-top:10px;">Esta cita ya está <strong>${escapeAttr(c.estado)}</strong>${c.completadoPor ? ' — por ' + escapeAttr(c.completadoPor) : ''}.</div>`}
+      </div>
+    `;
+
+    if(!esFinal){
+      document.getElementById('agGuardarDetalleBtn').addEventListener('click', agGuardarDetalle);
+      document.getElementById('agCompletarBtn').addEventListener('click', ()=> agCambiarEstadoCita('Completado'));
+      document.getElementById('agNoShowBtn').addEventListener('click', ()=> agCambiarEstadoCita('No-show'));
+      document.getElementById('agCancelarBtn').addEventListener('click', ()=>{
+        if(confirm('¿Cancelar esta cita? El horario quedará libre para agendar de nuevo.')) agCambiarEstadoCita('Cancelado');
+      });
+    }
+  }
+
+  async function agGuardarDetalle(){
+    const msg = document.getElementById('agDetalleMsg');
+    const payload = {
+      modulo:'agenda', accion:'completar_detalle', idCita: agCitaAbiertaId,
+      entrega: document.getElementById('agEntrega').value,
+      retiraNombre: document.getElementById('agRetiraNombre').value.trim(),
+      retiraRUT: document.getElementById('agRetiraRUT').value.trim(),
+      retiraPatente: document.getElementById('agRetiraPatente').value.trim(),
+      almacen: document.getElementById('agAlmacen').value.trim()
+    };
+    msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+    try{
+      await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+      await cargarCitas();
+      msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
+    } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+  }
+
+  async function agCambiarEstadoCita(estado){
+    try{
+      await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'actualizar_estado', idCita: agCitaAbiertaId, estado, realizadoPor: tkNombreActor() }) });
+      await cargarCitas();
+      agRenderDetalle();
+    } catch(e){ alert('No se pudo actualizar el estado.'); }
+  }
+
+  // ---------- Administración ----------
+
+  function agRenderAdmin(){
+    document.querySelectorAll('#agAdminSubtabs .ag-subtab-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        document.querySelectorAll('#agAdminSubtabs .ag-subtab-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        agAdminSubtabActual = btn.dataset.agadmin;
+        agRenderAdminSubtab();
+      };
+    });
+    agRenderAdminSubtab();
+  }
+
+  function agRenderAdminSubtab(){
+    const cont = document.getElementById('agAdminArea');
+    if(agAdminSubtabActual === 'bloqueos') agRenderAdminBloqueos(cont);
+    else agRenderAdminHorarios(cont);
+  }
+
+  function agRenderAdminHorarios(cont){
+    const horarios = agHorariosOrdenados();
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;">Horarios del día</h4>
+        <div class="sub" style="margin-bottom:10px;">Esta lista se repite todos los días.</div>
+        <div id="agAdminHorariosItems"></div>
+        <div class="row-2" style="margin-top:12px;align-items:end;">
+          <div class="field" style="margin-bottom:0;"><label>Nuevo horario</label><input type="text" class="gemba-input" id="agAdminNuevoHorario" placeholder="Ej: 16:45"></div>
+          <div><button class="btn primary" id="agAdminAgregarHorarioBtn" style="width:100%;">+ Agregar</button></div>
+        </div>
+        <div id="agAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>`;
+
+    function pintar(){
+      document.getElementById('agAdminHorariosItems').innerHTML = horarios.length ? horarios.map(h=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+          <span>${escapeAttr(h)}</span>
+          <button type="button" class="btn ghost ag-admin-del-horario" data-val="${escapeAttr(h)}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Eliminar</button>
+        </div>`).join('') : '<div class="resumen-empty">Sin horarios configurados.</div>';
+
+      cont.querySelectorAll('.ag-admin-del-horario').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          if(!confirm('¿Eliminar el horario ' + btn.dataset.val + '?')) return;
+          try{ await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'eliminar_horario', horario: btn.dataset.val }) }); } catch(e){}
+          const idx = agConfig.horarios.indexOf(btn.dataset.val);
+          if(idx!==-1) agConfig.horarios.splice(idx,1);
+          agRenderAdminHorarios(cont);
+        });
+      });
+    }
+    pintar();
+
+    document.getElementById('agAdminAgregarHorarioBtn').addEventListener('click', async ()=>{
+      const input = document.getElementById('agAdminNuevoHorario');
+      const valor = input.value.trim();
+      const msg = document.getElementById('agAdminMsg');
+      if(!valor || !/^\d{1,2}:\d{2}$/.test(valor)){ msg.style.color='var(--flag)'; msg.textContent='Formato de hora inválido (ej: 16:45).'; return; }
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'agregar_horario', horario: valor }) });
+        if(!agConfig.horarios.includes(valor)) agConfig.horarios.push(valor);
+        input.value = '';
+        msg.textContent = '';
+        agRenderAdminHorarios(cont);
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
+  }
+
+  function agRenderAdminBloqueos(cont){
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:4px;">Bloquear un horario puntual</h4>
+        <div class="sub" style="margin-bottom:10px;">Para cuando un bloque no puede usarse ese día (mantención, etc.).</div>
+        <div class="row-2">
+          <div class="field"><label>Fecha</label><input type="date" class="gemba-input" id="agBloqFecha"></div>
+          <div class="field"><label>Horario</label><select class="gemba-input" id="agBloqHorario">${agHorariosOrdenados().map(h=>`<option>${escapeAttr(h)}</option>`).join('')}</select></div>
+        </div>
+        <div class="field"><label>Motivo</label><input type="text" class="gemba-input" id="agBloqMotivo" placeholder="Ej: Mantención de andenes"></div>
+        <button type="button" class="btn primary" id="agBloquearBtn">Bloquear</button>
+        <div id="agAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;">Bloqueos activos</h4>
+        <div id="agBloqueosItems"></div>
+      </div>`;
+
+    function pintarBloqueos(){
+      const cont2 = document.getElementById('agBloqueosItems');
+      const ordenados = [...agConfig.bloqueos].sort((a,b)=> a.fecha.localeCompare(b.fecha) || agHorarioAMinutos(a.horario)-agHorarioAMinutos(b.horario));
+      cont2.innerHTML = ordenados.length ? ordenados.map(b=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;">
+          <div><strong>${escapeAttr(b.fecha)} · ${escapeAttr(b.horario)}</strong><div style="color:var(--ink-soft);">${escapeAttr(b.motivo)}</div></div>
+          <button type="button" class="btn ghost ag-admin-desbloquear" data-fecha="${escapeAttr(b.fecha)}" data-horario="${escapeAttr(b.horario)}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Quitar</button>
+        </div>`).join('') : '<div class="resumen-empty">Sin bloqueos activos.</div>';
+
+      cont2.querySelectorAll('.ag-admin-desbloquear').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          try{ await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'desbloquear', fecha: btn.dataset.fecha, horario: btn.dataset.horario }) }); } catch(e){}
+          await cargarCitas();
+          agRenderAdminBloqueos(cont);
+        });
+      });
+    }
+    pintarBloqueos();
+
+    document.getElementById('agBloquearBtn').addEventListener('click', async ()=>{
+      const msg = document.getElementById('agAdminMsg');
+      const fecha = document.getElementById('agBloqFecha').value;
+      const horario = document.getElementById('agBloqHorario').value;
+      const motivo = document.getElementById('agBloqMotivo').value.trim();
+      if(!fecha || !motivo){ msg.style.color='var(--flag)'; msg.textContent='Falta fecha o motivo.'; return; }
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'agenda', accion:'bloquear', fecha, horario, motivo, bloqueadoPor: tkNombreActor() }) });
+        await cargarCitas();
+        msg.style.color='var(--green)'; msg.textContent='✓ Bloqueado.';
+        agRenderAdminBloqueos(cont);
       } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
     });
   }
