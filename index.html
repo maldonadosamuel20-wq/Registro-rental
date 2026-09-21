@@ -4183,6 +4183,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   let tkConfig = { categorias: [], areasReporta: [], areasResponsable: [], analistas: [], flujos: [], cargosEscalamiento: [], sla: {} };
   let tkTicketsData = { tickets: [], comentarios: [], reasignaciones: [], historialEstados: [] };
   let tkEvidenciaNuevo = [];
+  let tkPedidosNuevo = [];
   let tkEvidenciaSeguimiento = [];
   let tkModuloIniciado = false;
   let tkTicketAbiertoId = null;
@@ -4507,7 +4508,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="tk-form-section-sub">A quién queda asignado el ticket y a qué flujo pertenece.</div>
 
         <div class="row-2">
-          <div class="field"><label>Analista</label><select class="gemba-input" id="tkAnalista">${tkOpcionesSelect(tkConfig.analistas)}</select></div>
+          <div class="field"><label>Analista</label><select class="gemba-input" id="tkAnalista">${tkOpcionesSelect(tkConfig.analistas, false)}</select></div>
           <div class="field"><label>Flujo</label><select class="gemba-input" id="tkFlujo">${tkOpcionesSelect(tkConfig.flujos)}</select></div>
         </div>
       </div>
@@ -4515,7 +4516,14 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       <div class="tk-form-section">
         <div class="tk-form-section-title"><span class="tk-form-section-num">3</span><h4>Información del Pedido</h4></div>
 
-        <div class="field"><label>N° de Pedido / Guía</label><input type="text" class="gemba-input" id="tkPedido" placeholder="Ej: PED-88213"></div>
+        <div class="field">
+          <label>N° de Pedido(s) / Guía(s)</label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" class="gemba-input" id="tkPedidoNuevo" placeholder="Ej: PED-88213" style="flex:1;">
+            <button type="button" class="btn ghost" id="tkAgregarPedidoBtn" style="flex-shrink:0;">+ Agregar</button>
+          </div>
+          <div id="tkPedidosChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+        </div>
 
         <div class="row-2">
           <div class="field"><label>Categoría del problema</label><select class="gemba-input" id="tkCategoria">${tkOpcionesSelect(tkConfig.categorias)}</select></div>
@@ -4547,7 +4555,6 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     // Selects editables (categoría, ambas áreas): opción "+ Agregar nueva opción..."
     tkConectarSelectEditable('tkCategoria', 'categoria', tkConfig.categorias);
     tkConectarSelectEditable('tkAreaReporta', 'area_reporta', tkConfig.areasReporta);
-    tkConectarSelectEditable('tkAnalista', 'analista', tkConfig.analistas);
     tkConectarSelectEditable('tkFlujo', 'flujo', tkConfig.flujos);
     if(tkUsuarioActual && tkUsuarioActual.area){
       document.getElementById('tkAreaReporta').value = tkUsuarioActual.area;
@@ -4563,6 +4570,33 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         c.classList.add('selected');
         prioridadSeleccionada = c.dataset.val;
       });
+    });
+
+    // Pedidos (chips): se pueden agregar varios
+    tkPedidosNuevo = [];
+    function tkPintarPedidosChips(){
+      const cont = document.getElementById('tkPedidosChips');
+      cont.innerHTML = tkPedidosNuevo.map((p,i)=>`
+        <span style="display:inline-flex;align-items:center;gap:5px;background:var(--lock-soft);border-radius:20px;padding:4px 6px 4px 12px;font-size:12px;">
+          ${escapeAttr(p)}
+          <button type="button" class="tk-pedido-quitar" data-idx="${i}" style="border:none;background:none;cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;padding:2px 6px;">×</button>
+        </span>`).join('');
+      cont.querySelectorAll('.tk-pedido-quitar').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ tkPedidosNuevo.splice(Number(btn.dataset.idx),1); tkPintarPedidosChips(); });
+      });
+    }
+    function tkAgregarPedido(){
+      const input = document.getElementById('tkPedidoNuevo');
+      const valor = input.value.trim();
+      if(!valor) return;
+      if(!tkPedidosNuevo.includes(valor)) tkPedidosNuevo.push(valor);
+      input.value = '';
+      tkPintarPedidosChips();
+      input.focus();
+    }
+    document.getElementById('tkAgregarPedidoBtn').addEventListener('click', tkAgregarPedido);
+    document.getElementById('tkPedidoNuevo').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); tkAgregarPedido(); }
     });
 
     // Evidencia
@@ -4638,6 +4672,8 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
 
   async function tkCrearTicket(getPrioridad){
     const msg = document.getElementById('tkCrearMsg');
+    const pedidoSuelto = document.getElementById('tkPedidoNuevo').value.trim();
+    if(pedidoSuelto && !tkPedidosNuevo.includes(pedidoSuelto)) tkPedidosNuevo.push(pedidoSuelto);
     const payload = {
       modulo: 'ticket', accion: 'crear',
       areaReporta: document.getElementById('tkAreaReporta').value,
@@ -4645,7 +4681,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       reportadoPorCorreo: document.getElementById('tkReportaCorreo').value.trim(),
       analista: document.getElementById('tkAnalista').value,
       flujo: document.getElementById('tkFlujo').value,
-      pedido: document.getElementById('tkPedido').value.trim(),
+      pedido: tkPedidosNuevo.join(', '),
       categoria: document.getElementById('tkCategoria').value,
       areaResponsable: document.getElementById('tkAreaResponsable').value,
       prioridad: getPrioridad(),
@@ -5011,7 +5047,7 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     if(tkAdminSubtabActual === 'categorias') return tkRenderAdminListaSimple(cont, 'Categorías de issue', 'categoria', tkConfig.categorias);
     if(tkAdminSubtabActual === 'areasReporta') return tkRenderAdminListaSimple(cont, 'Áreas que reportan', 'area_reporta', tkConfig.areasReporta);
     if(tkAdminSubtabActual === 'areasResponsable') return tkRenderAdminListaSimple(cont, 'Áreas responsables', 'area_responsable', tkConfig.areasResponsable);
-    if(tkAdminSubtabActual === 'analistas') return tkRenderAdminListaSimple(cont, 'Analistas', 'analista', tkConfig.analistas);
+    if(tkAdminSubtabActual === 'analistas') return tkRenderAdminAnalistas(cont);
     if(tkAdminSubtabActual === 'flujos') return tkRenderAdminListaSimple(cont, 'Flujos', 'flujo', tkConfig.flujos);
     if(tkAdminSubtabActual === 'cargos') return tkRenderAdminListaSimple(cont, 'Cargos de escalamiento', 'cargo_escalamiento', tkConfig.cargosEscalamiento);
     if(tkAdminSubtabActual === 'sla') return tkRenderAdminSLA(cont);
@@ -5215,6 +5251,106 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
         limpiarForm();
         await tkRenderAdminResponsables(cont);
+      } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+    });
+  }
+
+  // Analistas: ficha completa (Nombre, Correo, Cargo) — alta, edición y baja
+  let tkAnalistasCache = [];
+
+  async function tkRenderAdminAnalistas(cont){
+    cont.innerHTML = '<div class="section-card"><div class="resumen-empty">Cargando analistas…</div></div>';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=analistas');
+      const data = await res.json();
+      tkAnalistasCache = data.ok ? (data.analistas||[]) : [];
+    } catch(e){ tkAnalistasCache = []; }
+
+    cont.innerHTML = `
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:4px;">Analistas</h4>
+        <div class="sub" style="margin-bottom:10px;">Quién puede quedar asignado a un ticket. Si tiene correo cargado, le llega un aviso al crearse el ticket.</div>
+        <div id="tkAdminAnalistasItems"></div>
+      </div>
+      <div class="section-card">
+        <h4 style="font-size:15px;margin-bottom:10px;" id="tkAnalistaFormTitulo">Agregar analista</h4>
+        <div class="field"><label>Nombre</label><input type="text" class="gemba-input" id="tkAnalistaNombre" placeholder="Nombre completo"></div>
+        <div class="row-2">
+          <div class="field"><label>Correo</label><input type="email" class="gemba-input" id="tkAnalistaCorreo" placeholder="correo@empresa.cl"></div>
+          <div class="field"><label>Cargo</label><input type="text" class="gemba-input" id="tkAnalistaCargo" placeholder="Ej: Analista"></div>
+        </div>
+        <input type="hidden" id="tkAnalistaOriginal">
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn primary" id="tkGuardarAnalistaBtn">Guardar</button>
+          <button type="button" class="btn ghost" id="tkCancelarAnalistaBtn" style="display:none;">Cancelar edición</button>
+        </div>
+        <div id="tkAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>`;
+
+    function pintarTabla(){
+      const items = document.getElementById('tkAdminAnalistasItems');
+      if(!tkAnalistasCache.length){ items.innerHTML = '<div class="resumen-empty">Sin analistas cargados todavía.</div>'; return; }
+      items.innerHTML = tkAnalistasCache.map((a,i)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;">
+          <div>
+            <strong>${escapeAttr(a.nombre)}</strong>${a.cargo ? ' · ' + escapeAttr(a.cargo) : ''}
+            <div style="color:var(--ink-soft);">${a.correo ? escapeAttr(a.correo) : 'Sin correo — no recibirá avisos'}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button type="button" class="btn ghost tk-analista-edit" data-idx="${i}" style="font-size:11px;padding:4px 10px;">Editar</button>
+            <button type="button" class="btn ghost tk-analista-del" data-idx="${i}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Eliminar</button>
+          </div>
+        </div>`).join('');
+
+      items.querySelectorAll('.tk-analista-edit').forEach(btn=> btn.addEventListener('click', ()=>{
+        const a = tkAnalistasCache[Number(btn.dataset.idx)];
+        document.getElementById('tkAnalistaNombre').value = a.nombre;
+        document.getElementById('tkAnalistaCorreo').value = a.correo;
+        document.getElementById('tkAnalistaCargo').value = a.cargo;
+        document.getElementById('tkAnalistaOriginal').value = JSON.stringify({nombre:a.nombre});
+        document.getElementById('tkAnalistaFormTitulo').textContent = 'Editando analista';
+        document.getElementById('tkCancelarAnalistaBtn').style.display = 'inline-flex';
+        document.getElementById('tkAnalistaFormTitulo').scrollIntoView({behavior:'smooth', block:'center'});
+      }));
+      items.querySelectorAll('.tk-analista-del').forEach(btn=> btn.addEventListener('click', async ()=>{
+        const a = tkAnalistasCache[Number(btn.dataset.idx)];
+        if(!confirm('¿Eliminar a ' + a.nombre + '?')) return;
+        try{
+          await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'ticket', accion:'eliminar_analista', nombre:a.nombre }) });
+        } catch(e){ /* la quitamos igual de la vista local */ }
+        tkAnalistasCache.splice(Number(btn.dataset.idx), 1);
+        pintarTabla();
+      }));
+    }
+    pintarTabla();
+
+    function limpiarForm(){
+      ['tkAnalistaNombre','tkAnalistaCorreo','tkAnalistaCargo'].forEach(id=> document.getElementById(id).value = '');
+      document.getElementById('tkAnalistaOriginal').value = '';
+      document.getElementById('tkAnalistaFormTitulo').textContent = 'Agregar analista';
+      document.getElementById('tkCancelarAnalistaBtn').style.display = 'none';
+    }
+    document.getElementById('tkCancelarAnalistaBtn').addEventListener('click', limpiarForm);
+
+    document.getElementById('tkGuardarAnalistaBtn').addEventListener('click', async ()=>{
+      const msg = document.getElementById('tkAdminMsg');
+      const payload = {
+        modulo: 'ticket', accion: 'guardar_analista',
+        nombre: document.getElementById('tkAnalistaNombre').value.trim(),
+        correo: document.getElementById('tkAnalistaCorreo').value.trim(),
+        cargo: document.getElementById('tkAnalistaCargo').value.trim()
+      };
+      const originalRaw = document.getElementById('tkAnalistaOriginal').value;
+      if(originalRaw) payload.original = JSON.parse(originalRaw);
+      if(!payload.nombre){ msg.style.color='var(--flag)'; msg.textContent='Falta el nombre.'; return; }
+      msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+      try{
+        await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+        msg.style.color='var(--green)'; msg.textContent='✓ Guardado.';
+        limpiarForm();
+        // La lista de nombres para el select del formulario de ticket también se actualiza
+        if(!tkConfig.analistas.includes(payload.nombre)) tkConfig.analistas.push(payload.nombre);
+        await tkRenderAdminAnalistas(cont);
       } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
     });
   }
