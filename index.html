@@ -4517,12 +4517,34 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="tk-form-section-title"><span class="tk-form-section-num">3</span><h4>Información del Pedido</h4></div>
 
         <div class="field">
-          <label>N° de Pedido(s) / Guía(s)</label>
-          <div style="display:flex;gap:6px;">
-            <input type="text" class="gemba-input" id="tkPedidoNuevo" placeholder="Ej: PED-88213" style="flex:1;">
-            <button type="button" class="btn ghost" id="tkAgregarPedidoBtn" style="flex-shrink:0;">+ Agregar</button>
+          <div class="sku-section-head" style="margin-bottom:6px;">
+            <label style="margin:0;">N° de Pedido(s) / Guía(s)</label>
+            <div class="tk-tabs" id="tkModoCargaSwitch" style="margin:0;">
+              <button type="button" class="tk-subtab-btn active" data-tkmodo="individual" style="padding:5px 12px;font-size:11.5px;">Individual</button>
+              <button type="button" class="tk-subtab-btn" data-tkmodo="masiva" style="padding:5px 12px;font-size:11.5px;">Carga masiva</button>
+            </div>
           </div>
-          <div id="tkPedidosChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+
+          <div id="tkModoIndividual">
+            <div style="display:flex;gap:6px;">
+              <input type="text" class="gemba-input" id="tkPedidoNuevo" placeholder="Ej: PED-88213" style="flex:1;">
+              <button type="button" class="btn ghost" id="tkAgregarPedidoBtn" style="flex-shrink:0;">+ Agregar</button>
+            </div>
+            <div id="tkPedidosChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+          </div>
+
+          <div id="tkModoMasiva" style="display:none;">
+            <div class="sub" style="margin-bottom:6px;">Pega una línea por pedido — solo se usa el N° de pedido, el resto de las columnas (si las pegas) se ignora.</div>
+            <textarea class="gemba-input" id="tkTextoMasivo" rows="5" placeholder="400245, Ferretería Los Andes, +56912345678, contacto@losandes.cl
+400312, Comercial Rivas, +56987654321, ventas@rivas.cl
+
+o simplemente un pedido por línea:
+400245
+400312"></textarea>
+            <button type="button" class="btn ghost" id="tkProcesarMasivaBtn" style="font-size:12px;margin-top:8px;">Procesar texto</button>
+            <div id="tkMasivaMsg" style="margin-top:6px;font-size:12px;"></div>
+            <div id="tkMasivaPreview" style="margin-top:10px;"></div>
+          </div>
         </div>
 
         <div class="row-2">
@@ -4597,6 +4619,42 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     document.getElementById('tkAgregarPedidoBtn').addEventListener('click', tkAgregarPedido);
     document.getElementById('tkPedidoNuevo').addEventListener('keydown', (e)=>{
       if(e.key === 'Enter'){ e.preventDefault(); tkAgregarPedido(); }
+    });
+
+    // Selector Individual / Carga masiva
+    document.querySelectorAll('#tkModoCargaSwitch .tk-subtab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('#tkModoCargaSwitch .tk-subtab-btn').forEach(b=> b.classList.remove('active'));
+        btn.classList.add('active');
+        const esMasiva = btn.dataset.tkmodo === 'masiva';
+        document.getElementById('tkModoIndividual').style.display = esMasiva ? 'none' : 'block';
+        document.getElementById('tkModoMasiva').style.display = esMasiva ? 'block' : 'none';
+      });
+    });
+
+    // Carga masiva: pega uno o varios pedidos por línea — si pegan más columnas
+    // (cliente/teléfono/correo, como en Agenda) se ignoran, acá solo interesa el pedido.
+    document.getElementById('tkProcesarMasivaBtn').addEventListener('click', ()=>{
+      const msg = document.getElementById('tkMasivaMsg');
+      const texto = document.getElementById('tkTextoMasivo').value;
+      const lineas = texto.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      if(!lineas.length){ msg.style.color='var(--flag)'; msg.textContent='Pega al menos una línea de texto.'; return; }
+
+      const pedidos = [];
+      lineas.forEach(linea=>{
+        const partes = linea.includes('\t') ? linea.split('\t') : linea.split(',');
+        const pedido = (partes[0] || '').trim();
+        if(pedido && !pedidos.includes(pedido)) pedidos.push(pedido);
+      });
+
+      if(!pedidos.length){ msg.style.color='var(--flag)'; msg.textContent='No se pudo leer ningún pedido.'; return; }
+
+      tkPedidosNuevo = pedidos;
+      tkPintarPedidosChips();
+      msg.style.color='var(--green)'; msg.textContent = `✓ ${pedidos.length} pedido(s) cargado(s) — revisa la lista en "Individual".`;
+      document.getElementById('tkMasivaPreview').innerHTML = pedidos.map(p=>
+        `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--line);">${escapeAttr(p)}</div>`
+      ).join('');
     });
 
     // Evidencia
