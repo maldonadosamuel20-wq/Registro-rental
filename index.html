@@ -4423,6 +4423,19 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     return { clase: 'ok', texto: 'Vence en ' + (dias>0 ? dias+'d ' : '') + horasResto + 'h — ' + (ticket.areaResponsable||'') };
   }
 
+  // Semáforo de la PRIMERA RESPUESTA (3h) — este es el que dispara el escalamiento
+  // a Supervisor/Jefe/Subgerente si nadie responde a tiempo.
+  function tkSlaRespuestaSemaforo(ticket){
+    if(ticket.fechaRespuesta) return { clase: 'ok', texto: 'Respondido: ' + ticket.fechaRespuesta };
+    const limite = tkParseFecha(ticket.slaRespuesta);
+    if(!limite) return { clase: 'ok', texto: 'Sin SLA calculado' };
+    const diffMs = limite - new Date();
+    const horas = diffMs / 3600000;
+    if(diffMs < 0) return { clase: 'vencido', texto: 'Vencido — ' + Math.ceil(-horas) + 'h sin respuesta' };
+    if(horas < 1) return { clase: 'pronto', texto: 'Vence en menos de 1h' };
+    return { clase: horas < 2 ? 'pronto' : 'ok', texto: 'Vence en ' + Math.ceil(horas) + 'h' };
+  }
+
   // Extrae el número correlativo de un ID de ticket, ej. 'TCK-00042' -> 42
   function tkNumeroId(id){
     const m = String(id||'').match(/(\d+)/);
@@ -4790,6 +4803,7 @@ o simplemente un pedido por línea:
     if(!t){ cont.innerHTML = '<div class="resumen-empty">Ticket no encontrado.</div>'; return; }
 
     const sla = tkSlaSemaforo(t);
+    const slaResp = tkSlaRespuestaSemaforo(t);
     const esFinal = t.estado === 'Resuelto' || t.estado === 'Cerrado';
 
     // Arma la bitácora cronológica: creación + comentarios + reasignaciones + cambios de estado
@@ -4839,6 +4853,7 @@ o simplemente un pedido por línea:
         <div><span class="k">Prioridad:</span> <span class="v" style="color:var(--flag);">${escapeAttr(t.prioridad)}</span></div>
         <div><span class="k">Área responsable:</span> <span class="v">${escapeAttr(t.areaResponsable)}</span></div>
         <div><span class="k">Creado:</span> <span class="v">${escapeAttr(t.fechaCreacion)}</span></div>
+        <div><span class="k">Vence 1ra respuesta:</span> <span class="v" style="color:${slaResp.clase==='vencido'?'var(--flag)':slaResp.clase==='pronto'?'#8A5D14':'var(--green)'};">${escapeAttr(t.fechaRespuesta ? 'Respondido: ' + t.fechaRespuesta : t.slaRespuesta)}</span></div>
         <div><span class="k">Vence resolución:</span> <span class="v" style="color:${sla.clase==='vencido'?'var(--flag)':sla.clase==='pronto'?'#8A5D14':'var(--green)'};">${escapeAttr(t.slaResolucion)}</span></div>
       </div>
       <div style="font-size:12.5px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:10px;margin-bottom:14px;">
