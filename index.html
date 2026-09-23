@@ -1348,10 +1348,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="field"><label>Patente</label><input type="text" class="gemba-input" id="rrPatente" placeholder="Ej: ABCD-12"></div>
         <div class="field"><label>Conductor</label><input type="text" class="gemba-input" id="rrConductor" placeholder="Nombre del conductor"></div>
       </div>
-      <div class="field">
+      <div class="field" style="position:relative;">
         <label>Transportista</label>
-        <input type="text" class="gemba-input" id="rrTransportista" list="rrTransportistasList" placeholder="Escribe para buscar, o uno nuevo para agregarlo" autocomplete="off">
-        <datalist id="rrTransportistasList"></datalist>
+        <input type="text" class="gemba-input" id="rrTransportista" placeholder="Escribe para buscar, o uno nuevo para agregarlo" autocomplete="off">
+        <div id="rrTransportistaSugerencias" style="display:none;position:absolute;z-index:20;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:4px;margin-top:2px;max-height:180px;overflow-y:auto;box-shadow:0 4px 10px rgba(0,0,0,.12);"></div>
       </div>
 
       <label>Registro fotográfico</label>
@@ -6766,6 +6766,13 @@ o simplemente un pedido por línea:
         if(e.target.id === 'rrDetalleModal') document.getElementById('rrDetalleModal').classList.remove('open');
       });
 
+      const rrTransportistaInput = document.getElementById('rrTransportista');
+      rrTransportistaInput.addEventListener('input', ()=> rrMostrarSugerenciasTransportista(rrTransportistaInput.value));
+      rrTransportistaInput.addEventListener('focus', ()=> rrMostrarSugerenciasTransportista(rrTransportistaInput.value));
+      rrTransportistaInput.addEventListener('blur', ()=>{
+        setTimeout(()=>{ document.getElementById('rrTransportistaSugerencias').style.display = 'none'; }, 150);
+      });
+
       document.getElementById('rrToggleAdminBtn').addEventListener('click', ()=>{
         const area = document.getElementById('rrAdminArea');
         const visible = area.style.display !== 'none';
@@ -6802,9 +6809,32 @@ o simplemente un pedido por línea:
     el.innerHTML = '📅 Fecha y hora: se agrega sola al guardar — ahora mismo sería <strong>'+escapeAttr(texto)+'</strong>';
   }
 
+  // Sugerencias propias del Transportista (los <datalist> nativos funcionan mal en
+  // celulares, sobre todo iOS) — se arma a mano, con toques directos sobre cada opción.
   function rrPintarTransportistasDatalist(){
-    document.getElementById('rrTransportistasList').innerHTML =
-      rrTransportistasCache.map(t=> `<option value="${escapeAttr(t)}">`).join('');
+    // ya no llena ningún datalist; queda como no-op para no tener que tocar cada llamada existente
+  }
+
+  function rrMostrarSugerenciasTransportista(filtro){
+    const cont = document.getElementById('rrTransportistaSugerencias');
+    const texto = (filtro || '').trim().toLowerCase();
+    const opciones = texto
+      ? rrTransportistasCache.filter(t=> t.toLowerCase().includes(texto))
+      : rrTransportistasCache;
+    if(!opciones.length){ cont.style.display = 'none'; cont.innerHTML = ''; return; }
+    cont.innerHTML = opciones.slice(0,8).map(t=>`
+      <div class="rr-sugerencia-item" data-val="${escapeAttr(t)}" style="padding:11px 12px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--line);">${escapeAttr(t)}</div>
+    `).join('');
+    cont.style.display = 'block';
+    cont.querySelectorAll('.rr-sugerencia-item').forEach(item=>{
+      // mousedown (no click) para que dispare ANTES de que el input pierda el foco — así
+      // funciona confiable también al tocar en pantallas táctiles.
+      item.addEventListener('mousedown', (e)=>{
+        e.preventDefault();
+        document.getElementById('rrTransportista').value = item.dataset.val;
+        cont.style.display = 'none';
+      });
+    });
   }
 
   function rrPintarTransportistasAdmin(){
