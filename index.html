@@ -838,6 +838,11 @@
       <span class="app-nav-label">Agenda de Retiros</span>
       <span class="app-nav-desc">Horarios y coordinación con clientes</span>
     </button>
+    <button class="app-nav-card" id="navRegistroRutaBtn" type="button">
+      <span class="app-nav-icon">🚚</span>
+      <span class="app-nav-label">Registro Ruta</span>
+      <span class="app-nav-desc">Evidencia fotográfica por ruta</span>
+    </button>
   </nav>
 
   <div id="viewRental" style="display:none;">
@@ -1330,6 +1335,37 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
       <div id="agAdminArea"></div>
     </div>
   </div><!-- fin #viewAgenda -->
+
+  <div id="viewRegistroRuta" style="display:none;">
+    <div class="section-card">
+      <h3 style="margin-bottom:2px;">Registro Ruta</h3>
+      <div class="sub">Deja la evidencia fotográfica de lo que se entrega en cada ruta — un formulario, un registro.</div>
+
+      <div id="rrFechaAuto" class="resumen-empty" style="background:var(--green-soft);color:var(--green);border-radius:4px;padding:10px 12px;margin:14px 0 4px;font-weight:600;"></div>
+
+      <div class="field"><label>N° de Ruta</label><input type="text" class="gemba-input" id="rrNumeroRuta" placeholder="Ej: R-014"></div>
+      <div class="row-2">
+        <div class="field"><label>Patente</label><input type="text" class="gemba-input" id="rrPatente" placeholder="Ej: ABCD-12"></div>
+        <div class="field"><label>Conductor</label><input type="text" class="gemba-input" id="rrConductor" placeholder="Nombre del conductor"></div>
+      </div>
+
+      <label>Registro fotográfico</label>
+      <div class="photobox" id="rrPhotobox" style="min-height:100px;"></div>
+      <input type="file" id="rrPhotoInput" accept="image/*" capture="environment" multiple style="display:none;">
+
+      <div style="margin-top:18px;">
+        <button type="button" class="btn primary" id="rrGuardarBtn">Guardar registro</button>
+      </div>
+      <div id="rrMsg" style="margin-top:10px;font-size:12.5px;"></div>
+    </div>
+
+    <div class="section-card">
+      <h4 style="font-size:15px;margin-bottom:2px;">Historial</h4>
+      <div class="sub" style="margin-bottom:10px;">Solo consulta — lo último registrado primero.</div>
+      <input type="text" class="gemba-input" id="rrBuscarHistorial" placeholder="🔍 Buscar por N° de Ruta, Patente o Conductor" style="margin-bottom:12px;">
+      <div id="rrHistorial"><div class="resumen-empty">Cargando…</div></div>
+    </div>
+  </div><!-- fin #viewRegistroRuta -->
 
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
@@ -2806,15 +2842,18 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   const viewGembas = document.getElementById('viewGembas');
   const viewTickets = document.getElementById('viewTickets');
   const viewAgenda = document.getElementById('viewAgenda');
+  const viewRegistroRuta = document.getElementById('viewRegistroRuta');
   function mostrarVista(nombre){
     viewRental.style.display = nombre === 'rental' ? 'block' : 'none';
     viewGembas.style.display = nombre === 'gembas' ? 'block' : 'none';
     viewTickets.style.display = nombre === 'tickets' ? 'block' : 'none';
     viewAgenda.style.display = nombre === 'agenda' ? 'block' : 'none';
+    viewRegistroRuta.style.display = nombre === 'registroRuta' ? 'block' : 'none';
     document.getElementById('navRentalBtn').classList.toggle('active', nombre === 'rental');
     document.getElementById('navGembaBtn').classList.toggle('active', nombre === 'gembas');
     document.getElementById('navTicketsBtn').classList.toggle('active', nombre === 'tickets');
     document.getElementById('navAgendaBtn').classList.toggle('active', nombre === 'agenda');
+    document.getElementById('navRegistroRutaBtn').classList.toggle('active', nombre === 'registroRuta');
   }
   document.getElementById('navRentalBtn').addEventListener('click', ()=> mostrarVista('rental'));
   document.getElementById('navGembaBtn').addEventListener('click', ()=>{
@@ -2829,6 +2868,10 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
   document.getElementById('navAgendaBtn').addEventListener('click', ()=>{
     mostrarVista('agenda');
     inicializarModuloAgenda();
+  });
+  document.getElementById('navRegistroRutaBtn').addEventListener('click', ()=>{
+    mostrarVista('registroRuta');
+    inicializarModuloRegistroRuta();
   });
 
   /* =====================================================================
@@ -6659,6 +6702,121 @@ o simplemente un pedido por línea:
         await agRenderAdminNotificaciones(cont);
       } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
     });
+  }
+
+  /* =====================================================================
+     MÓDULO: Registro Ruta (copia simplificada de Registro Rental —
+     un solo paso, fecha automática, evidencia fotográfica)
+  ===================================================================== */
+  let rrModuloIniciado = false;
+  let rrFotosNuevo = [];
+  let rrRegistrosCache = [];
+
+  async function inicializarModuloRegistroRuta(){
+    if(!rrModuloIniciado){
+      rrModuloIniciado = true;
+      document.getElementById('rrGuardarBtn').addEventListener('click', rrGuardarRegistro);
+      document.getElementById('rrPhotoInput').addEventListener('change', async (e)=>{
+        const files = Array.from(e.target.files || []);
+        for(const file of files){
+          const dataUrl = await new Promise(res=>{
+            const reader = new FileReader();
+            reader.onload = ()=> res(reader.result);
+            reader.readAsDataURL(file);
+          });
+          rrFotosNuevo.push(await compressImage(dataUrl));
+        }
+        tkRenderPhotobox(rrFotosNuevo, 'rrPhotobox', 'rrPhotoInput');
+        e.target.value = '';
+      });
+      document.getElementById('rrBuscarHistorial').addEventListener('input', rrPintarHistorial);
+    }
+    rrActualizarFechaAuto();
+    tkRenderPhotobox(rrFotosNuevo, 'rrPhotobox', 'rrPhotoInput');
+    await rrCargarHistorial();
+  }
+
+  function rrActualizarFechaAuto(){
+    const el = document.getElementById('rrFechaAuto');
+    const ahora = new Date();
+    const pad = n=> String(n).padStart(2,'0');
+    const texto = pad(ahora.getDate())+'-'+pad(ahora.getMonth()+1)+'-'+ahora.getFullYear()+' '+pad(ahora.getHours())+':'+pad(ahora.getMinutes());
+    el.innerHTML = '📅 Fecha y hora: se agrega sola al guardar — ahora mismo sería <strong>'+escapeAttr(texto)+'</strong>';
+  }
+
+  async function rrCargarHistorial(){
+    const cont = document.getElementById('rrHistorial');
+    try{
+      const res = await fetch(APPS_SCRIPT_URL + '?action=registro_ruta');
+      const data = await res.json();
+      rrRegistrosCache = data.ok ? (data.registros||[]) : [];
+      rrPintarHistorial();
+    } catch(e){
+      rrRegistrosCache = [];
+      cont.innerHTML = '<div class="resumen-empty">No se pudo cargar el historial.</div>';
+    }
+  }
+
+  function rrPintarHistorial(){
+    const cont = document.getElementById('rrHistorial');
+    const busqueda = document.getElementById('rrBuscarHistorial').value.trim().toLowerCase();
+
+    let registros = rrRegistrosCache;
+    if(busqueda){
+      registros = registros.filter(r=>
+        String(r.numeroRuta||'').toLowerCase().includes(busqueda) ||
+        String(r.patente||'').toLowerCase().includes(busqueda) ||
+        String(r.conductor||'').toLowerCase().includes(busqueda)
+      );
+    }
+
+    if(!rrRegistrosCache.length){ cont.innerHTML = '<div class="resumen-empty">Sin registros todavía.</div>'; return; }
+    if(!registros.length){ cont.innerHTML = '<div class="resumen-empty">Sin resultados para "'+escapeAttr(document.getElementById('rrBuscarHistorial').value.trim())+'".</div>'; return; }
+
+    cont.innerHTML = registros.slice(0,30).map(r=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;">
+        <div>
+          <div><strong>${escapeAttr(r.numeroRuta||'-')}</strong> · ${escapeAttr(r.patente||'-')} · ${escapeAttr(r.conductor||'-')}</div>
+          <div style="color:var(--ink-soft);font-size:11.5px;margin-top:2px;">${escapeAttr(r.fecha)} · ${r.fotos.length} foto${r.fotos.length===1?'':'s'}</div>
+        </div>
+        ${r.fotos.length ? `<a href="${escapeAttr(r.fotos[0])}" target="_blank" rel="noopener" style="text-decoration:none;font-size:18px;">📷</a>` : ''}
+      </div>`).join('');
+    if(registros.length > 30 && !busqueda){
+      cont.innerHTML += '<div class="sub" style="margin-top:8px;">Mostrando los 30 más recientes — usa el buscador para encontrar uno más antiguo.</div>';
+    }
+  }
+
+  async function rrGuardarRegistro(){
+    const msg = document.getElementById('rrMsg');
+    const payload = {
+      modulo: 'registro_ruta', accion: 'crear',
+      numeroRuta: document.getElementById('rrNumeroRuta').value.trim(),
+      patente: document.getElementById('rrPatente').value.trim(),
+      conductor: document.getElementById('rrConductor').value.trim(),
+      fotos: rrFotosNuevo
+    };
+    if(!payload.numeroRuta){ msg.style.color='var(--flag)'; msg.textContent='Falta el N° de Ruta.'; return; }
+
+    msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+    try{
+      const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify(payload) });
+      const data = await res.json();
+      if(data.ok){
+        msg.style.color='var(--green)'; msg.textContent='✓ Registro ' + data.idRegistro + ' guardado.';
+        document.getElementById('rrNumeroRuta').value = '';
+        document.getElementById('rrPatente').value = '';
+        document.getElementById('rrConductor').value = '';
+        rrFotosNuevo = [];
+        tkRenderPhotobox(rrFotosNuevo, 'rrPhotobox', 'rrPhotoInput');
+        rrActualizarFechaAuto();
+        await rrCargarHistorial();
+        setTimeout(()=>{ if(msg.textContent.indexOf('guardado') !== -1) msg.textContent=''; }, 5000);
+      } else {
+        msg.style.color='var(--flag)'; msg.textContent = data.error || 'No se pudo guardar.';
+      }
+    } catch(e){
+      msg.style.color='var(--flag)'; msg.textContent = '⚠️ No se pudo conectar con el servidor.';
+    }
   }
 </script>
 </body>
