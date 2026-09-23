@@ -1348,6 +1348,11 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
         <div class="field"><label>Patente</label><input type="text" class="gemba-input" id="rrPatente" placeholder="Ej: ABCD-12"></div>
         <div class="field"><label>Conductor</label><input type="text" class="gemba-input" id="rrConductor" placeholder="Nombre del conductor"></div>
       </div>
+      <div class="field">
+        <label>Transportista</label>
+        <input type="text" class="gemba-input" id="rrTransportista" list="rrTransportistasList" placeholder="Escribe para buscar, o uno nuevo para agregarlo" autocomplete="off">
+        <datalist id="rrTransportistasList"></datalist>
+      </div>
 
       <label>Registro fotográfico</label>
       <div class="photobox" id="rrPhotobox" style="min-height:100px;"></div>
@@ -1362,8 +1367,20 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     <div class="section-card">
       <h4 style="font-size:15px;margin-bottom:2px;">Historial</h4>
       <div class="sub" style="margin-bottom:10px;">Solo consulta — lo último registrado primero.</div>
-      <input type="text" class="gemba-input" id="rrBuscarHistorial" placeholder="🔍 Buscar por N° de Ruta, Patente o Conductor" style="margin-bottom:12px;">
+      <input type="text" class="gemba-input" id="rrBuscarHistorial" placeholder="🔍 Buscar por N° de Ruta, Patente, Conductor o Transportista" style="margin-bottom:12px;">
       <div id="rrHistorial"><div class="resumen-empty">Cargando…</div></div>
+    </div>
+
+    <div class="section-card">
+      <button type="button" class="btn ghost" id="rrToggleAdminBtn">⚙️ Administrar Transportistas</button>
+      <div id="rrAdminArea" style="display:none;margin-top:14px;">
+        <div id="rrTransportistasItems"></div>
+        <div class="row-2" style="margin-top:12px;align-items:end;">
+          <div class="field" style="margin-bottom:0;"><label>Nuevo transportista</label><input type="text" class="gemba-input" id="rrNuevoTransportista" placeholder="Nombre"></div>
+          <div><button type="button" class="btn primary" id="rrAgregarTransportistaBtn" style="width:100%;">+ Agregar</button></div>
+        </div>
+        <div id="rrAdminMsg" style="margin-top:8px;font-size:12.5px;"></div>
+      </div>
     </div>
   </div><!-- fin #viewRegistroRuta -->
 
@@ -6711,6 +6728,7 @@ o simplemente un pedido por línea:
   let rrModuloIniciado = false;
   let rrFotosNuevo = [];
   let rrRegistrosCache = [];
+  let rrTransportistasCache = [];
 
   async function inicializarModuloRegistroRuta(){
     if(!rrModuloIniciado){
@@ -6730,6 +6748,29 @@ o simplemente un pedido por línea:
         e.target.value = '';
       });
       document.getElementById('rrBuscarHistorial').addEventListener('input', rrPintarHistorial);
+
+      document.getElementById('rrToggleAdminBtn').addEventListener('click', ()=>{
+        const area = document.getElementById('rrAdminArea');
+        const visible = area.style.display !== 'none';
+        area.style.display = visible ? 'none' : 'block';
+        document.getElementById('rrToggleAdminBtn').textContent = visible ? '⚙️ Administrar Transportistas' : '✕ Cerrar administración';
+      });
+
+      document.getElementById('rrAgregarTransportistaBtn').addEventListener('click', async ()=>{
+        const input = document.getElementById('rrNuevoTransportista');
+        const msg = document.getElementById('rrAdminMsg');
+        const valor = input.value.trim();
+        if(!valor){ msg.style.color='var(--flag)'; msg.textContent='Escribe un nombre.'; return; }
+        msg.style.color='var(--ink-soft)'; msg.textContent='Guardando…';
+        try{
+          await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'registro_ruta', accion:'agregar_transportista', transportista: valor }) });
+          if(!rrTransportistasCache.includes(valor)) rrTransportistasCache.push(valor);
+          input.value = '';
+          msg.textContent = '';
+          rrPintarTransportistasDatalist();
+          rrPintarTransportistasAdmin();
+        } catch(e){ msg.style.color='var(--flag)'; msg.textContent='No se pudo guardar.'; }
+      });
     }
     rrActualizarFechaAuto();
     tkRenderPhotobox(rrFotosNuevo, 'rrPhotobox', 'rrPhotoInput');
@@ -6744,13 +6785,43 @@ o simplemente un pedido por línea:
     el.innerHTML = '📅 Fecha y hora: se agrega sola al guardar — ahora mismo sería <strong>'+escapeAttr(texto)+'</strong>';
   }
 
+  function rrPintarTransportistasDatalist(){
+    document.getElementById('rrTransportistasList').innerHTML =
+      rrTransportistasCache.map(t=> `<option value="${escapeAttr(t)}">`).join('');
+  }
+
+  function rrPintarTransportistasAdmin(){
+    const cont = document.getElementById('rrTransportistasItems');
+    if(!rrTransportistasCache.length){ cont.innerHTML = '<div class="resumen-empty">Sin transportistas cargados todavía.</div>'; return; }
+    cont.innerHTML = rrTransportistasCache.map(t=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;">
+        <span>${escapeAttr(t)}</span>
+        <button type="button" class="btn ghost rr-del-transportista" data-val="${escapeAttr(t)}" style="font-size:11px;padding:4px 10px;color:var(--flag);">Eliminar</button>
+      </div>`).join('');
+    cont.querySelectorAll('.rr-del-transportista').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(!confirm('¿Eliminar "' + btn.dataset.val + '" de la lista?')) return;
+        try{
+          await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'registro_ruta', accion:'eliminar_transportista', transportista: btn.dataset.val }) });
+        } catch(e){ /* la quitamos igual de la vista local */ }
+        const idx = rrTransportistasCache.indexOf(btn.dataset.val);
+        if(idx !== -1) rrTransportistasCache.splice(idx, 1);
+        rrPintarTransportistasDatalist();
+        rrPintarTransportistasAdmin();
+      });
+    });
+  }
+
   async function rrCargarHistorial(){
     const cont = document.getElementById('rrHistorial');
     try{
       const res = await fetch(APPS_SCRIPT_URL + '?action=registro_ruta');
       const data = await res.json();
       rrRegistrosCache = data.ok ? (data.registros||[]) : [];
+      rrTransportistasCache = data.ok ? (data.transportistas||[]) : [];
       rrPintarHistorial();
+      rrPintarTransportistasDatalist();
+      rrPintarTransportistasAdmin();
     } catch(e){
       rrRegistrosCache = [];
       cont.innerHTML = '<div class="resumen-empty">No se pudo cargar el historial.</div>';
@@ -6766,7 +6837,8 @@ o simplemente un pedido por línea:
       registros = registros.filter(r=>
         String(r.numeroRuta||'').toLowerCase().includes(busqueda) ||
         String(r.patente||'').toLowerCase().includes(busqueda) ||
-        String(r.conductor||'').toLowerCase().includes(busqueda)
+        String(r.conductor||'').toLowerCase().includes(busqueda) ||
+        String(r.transportista||'').toLowerCase().includes(busqueda)
       );
     }
 
@@ -6777,7 +6849,7 @@ o simplemente un pedido por línea:
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;">
         <div>
           <div><strong>${escapeAttr(r.numeroRuta||'-')}</strong> · ${escapeAttr(r.patente||'-')} · ${escapeAttr(r.conductor||'-')}</div>
-          <div style="color:var(--ink-soft);font-size:11.5px;margin-top:2px;">${escapeAttr(r.fecha)} · ${r.fotos.length} foto${r.fotos.length===1?'':'s'}</div>
+          <div style="color:var(--ink-soft);font-size:11.5px;margin-top:2px;">${escapeAttr(r.fecha)}${r.transportista ? ' · ' + escapeAttr(r.transportista) : ''} · ${r.fotos.length} foto${r.fotos.length===1?'':'s'}</div>
         </div>
         ${r.fotos.length ? `<a href="${escapeAttr(r.fotos[0])}" target="_blank" rel="noopener" style="text-decoration:none;font-size:18px;">📷</a>` : ''}
       </div>`).join('');
@@ -6793,6 +6865,7 @@ o simplemente un pedido por línea:
       numeroRuta: document.getElementById('rrNumeroRuta').value.trim(),
       patente: document.getElementById('rrPatente').value.trim(),
       conductor: document.getElementById('rrConductor').value.trim(),
+      transportista: document.getElementById('rrTransportista').value.trim(),
       fotos: rrFotosNuevo
     };
     if(!payload.numeroRuta){ msg.style.color='var(--flag)'; msg.textContent='Falta el N° de Ruta.'; return; }
@@ -6806,6 +6879,7 @@ o simplemente un pedido por línea:
         document.getElementById('rrNumeroRuta').value = '';
         document.getElementById('rrPatente').value = '';
         document.getElementById('rrConductor').value = '';
+        document.getElementById('rrTransportista').value = '';
         rrFotosNuevo = [];
         tkRenderPhotobox(rrFotosNuevo, 'rrPhotobox', 'rrPhotoInput');
         rrActualizarFechaAuto();
