@@ -6815,7 +6815,7 @@ o simplemente un pedido por línea:
   async function rrCargarHistorial(){
     const cont = document.getElementById('rrHistorial');
     try{
-      const res = await fetch(APPS_SCRIPT_URL + '?action=registro_ruta');
+      const res = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({ modulo:'registro_ruta', accion:'listar' }) });
       const data = await res.json();
       rrRegistrosCache = data.ok ? (data.registros||[]) : [];
       rrTransportistasCache = data.ok ? (data.transportistas||[]) : [];
