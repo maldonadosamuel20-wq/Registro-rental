@@ -1384,6 +1384,16 @@ G-10245, RNT-00311, Torre de iluminación, Cliente Ejemplo SPA, Av. Siempre Viva
     </div>
   </div><!-- fin #viewRegistroRuta -->
 
+  <div id="rrDetalleModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:520px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 id="rrDetalleTitulo" style="margin:0;">Detalle del registro</h3>
+        <button type="button" id="rrCerrarDetalleBtn" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink-soft);line-height:1;">×</button>
+      </div>
+      <div id="rrDetalleCuerpo"></div>
+    </div>
+  </div>
+
   <footer class="foot">Formato de referencia — estructura pensada para replicar en Power Apps + SharePoint</footer>
 </div>
 
@@ -6749,6 +6759,13 @@ o simplemente un pedido por línea:
       });
       document.getElementById('rrBuscarHistorial').addEventListener('input', rrPintarHistorial);
 
+      document.getElementById('rrCerrarDetalleBtn').addEventListener('click', ()=>{
+        document.getElementById('rrDetalleModal').classList.remove('open');
+      });
+      document.getElementById('rrDetalleModal').addEventListener('click', (e)=>{
+        if(e.target.id === 'rrDetalleModal') document.getElementById('rrDetalleModal').classList.remove('open');
+      });
+
       document.getElementById('rrToggleAdminBtn').addEventListener('click', ()=>{
         const area = document.getElementById('rrAdminArea');
         const visible = area.style.display !== 'none';
@@ -6846,16 +6863,55 @@ o simplemente un pedido por línea:
     if(!registros.length){ cont.innerHTML = '<div class="resumen-empty">Sin resultados para "'+escapeAttr(document.getElementById('rrBuscarHistorial').value.trim())+'".</div>'; return; }
 
     cont.innerHTML = registros.slice(0,30).map(r=>`
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;">
+      <div class="rr-fila-historial" data-id="${escapeAttr(r.id)}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;">
         <div>
           <div><strong>${escapeAttr(r.numeroRuta||'-')}</strong> · ${escapeAttr(r.patente||'-')} · ${escapeAttr(r.conductor||'-')}</div>
           <div style="color:var(--ink-soft);font-size:11.5px;margin-top:2px;">${escapeAttr(r.fecha)}${r.transportista ? ' · ' + escapeAttr(r.transportista) : ''} · ${r.fotos.length} foto${r.fotos.length===1?'':'s'}</div>
         </div>
-        ${r.fotos.length ? `<a href="${escapeAttr(r.fotos[0])}" target="_blank" rel="noopener" style="text-decoration:none;font-size:18px;">📷</a>` : ''}
+        ${r.fotos.length ? `<span style="font-size:18px;">📷</span>` : `<span style="color:var(--ink-soft);font-size:11px;">Ver</span>`}
       </div>`).join('');
     if(registros.length > 30 && !busqueda){
       cont.innerHTML += '<div class="sub" style="margin-top:8px;">Mostrando los 30 más recientes — usa el buscador para encontrar uno más antiguo.</div>';
     }
+    cont.querySelectorAll('.rr-fila-historial').forEach(fila=>{
+      fila.addEventListener('click', ()=> rrAbrirDetalle(fila.dataset.id));
+    });
+  }
+
+  // Convierte el link de Drive guardado (.../file/d/ID/view...) en una URL de miniatura
+  // real que sí se puede mostrar como <img>, en vez de solo un link para abrir aparte.
+  function rrDriveThumbnail(url, tam){
+    const match = String(url||'').match(/\/d\/([^/]+)/);
+    if(!match) return url;
+    return 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w' + (tam||500);
+  }
+
+  function rrAbrirDetalle(id){
+    const r = rrRegistrosCache.find(x=> x.id === id);
+    if(!r) return;
+    document.getElementById('rrDetalleTitulo').textContent = r.numeroRuta || 'Detalle del registro';
+    document.getElementById('rrDetalleCuerpo').innerHTML = `
+      <div class="ag-detalle-grid" style="margin-top:0;">
+        <div><span class="k">Fecha:</span> <span class="v">${escapeAttr(r.fecha)}</span></div>
+        <div><span class="k">N° de Ruta:</span> <span class="v">${escapeAttr(r.numeroRuta||'-')}</span></div>
+        <div><span class="k">Patente:</span> <span class="v">${escapeAttr(r.patente||'-')}</span></div>
+        <div><span class="k">Conductor:</span> <span class="v">${escapeAttr(r.conductor||'-')}</span></div>
+        <div><span class="k">Transportista:</span> <span class="v">${escapeAttr(r.transportista||'-')}</span></div>
+      </div>
+      <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:6px;">
+        <h4 style="font-size:14px;margin-bottom:10px;">Fotos (${r.fotos.length})</h4>
+        ${r.fotos.length ? `
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+            ${r.fotos.map(url=>`
+              <a href="${escapeAttr(url)}" target="_blank" rel="noopener" style="display:block;border:1px solid var(--line);border-radius:4px;overflow:hidden;aspect-ratio:1;background:#F4F4EF;">
+                <img src="${escapeAttr(rrDriveThumbnail(url, 300))}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;" alt="Foto del registro">
+              </a>`).join('')}
+          </div>
+          <div class="sub" style="margin-top:8px;">Toca una foto para verla completa en Drive.</div>
+        ` : '<div class="resumen-empty">Sin fotos en este registro.</div>'}
+      </div>
+    `;
+    document.getElementById('rrDetalleModal').classList.add('open');
   }
 
   async function rrGuardarRegistro(){
